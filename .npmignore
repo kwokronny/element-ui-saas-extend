@@ -1,0 +1,5 @@
+node_modules
+.github
+docs
+.gitignore
+LICENSE

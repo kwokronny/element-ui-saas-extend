@@ -1,0 +1,54 @@
+.component-page .page {
+	.theme-default-content, .page-nav {
+		max-width: none;
+	}
+}
+
+tr{
+	line-height: 1.5em;
+}
+
+.el-table {
+	table {
+		border-collapse: separate;
+		margin: auto;
+		display: table;
+		overflow-x: initial;
+	}
+
+	tr {
+		border-top: none;
+	}
+
+	th, td {
+		border-left: none;
+		border-right: none;
+		border-top: none;
+	}
+
+	&.el-table--border {
+		td, th {
+			border-right: 1px solid #EBEEF5;
+		}
+	}
+}
+
+.el-date-table {
+	border-collapse: separate;
+	margin: auto;
+	display: table;
+	overflow-x: initial;
+
+	td, tr {
+		border: none;
+	}
+
+	th {
+		border: none;
+		border-bottom: solid 1px #EBEEF5;
+	}
+
+	tr:nth-child(2n) {
+		background: none;
+	}
+}

@@ -1,0 +1,60 @@
+{
+  "name": "element-ui-saas-extend",
+  "version": "1.0.0-beta",
+  "main": "lib/element-ui-saas-extend.common.js",
+  "typings": "types/index.d.ts",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "test:unit": "vue-cli-service test:unit",
+    "lint": "vue-cli-service lint",
+    "doc": "vuepress dev docs",
+    "build": "vue-cli-service build --target lib --dest lib --name element-ui-saas-extend ./packages/index.ts",
+    "build:theme": "gulp build --f packages/theme-chalk/gulpfile.js && cp-cli packages/theme-chalk/lib lib/theme-chalk",
+    "build:doc": "vuepress build docs"
+  },
+  "peerDependencies": {
+    "element-ui": "^2.15.3",
+    "vue": "^2.6.14"
+  },
+  "dependencies": {
+    "async-validator": "1.11.5",
+    "core-js": "3.6.5",
+    "element-ui-el-table-draggable": "^1.2.10",
+    "lodash": "^4.17.21",
+    "vue-class-component": "^7.2.3",
+    "vue-property-decorator": "^9.1.2"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.11",
+    "@types/lodash": "^4.14.170",
+    "@types/mocha": "^5.2.4",
+    "@types/mockjs": "^1.0.3",
+    "@types/numeral": "^2.0.1",
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.18.0",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-plugin-typescript": "~4.5.0",
+    "@vue/cli-plugin-unit-mocha": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "@vue/test-utils": "^1.0.3",
+    "axios": "^0.21.1",
+    "chai": "^4.1.2",
+    "cp-cli": "^2.0.0",
+    "dayjs": "^1.10.5",
+    "eslint": "^6.7.2",
+    "eslint-plugin-vue": "^6.2.2",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^8.0.0",
+    "gulp-cssmin": "^0.2.0",
+    "gulp-sass": "3.1.0",
+    "mockjs": "^1.1.0",
+    "numeral": "^2.0.6",
+    "typescript": "^4.3.2",
+    "vue-template-compiler": "^2.6.11",
+    "vuepress": "^1.8.2",
+    "vuepress-plugin-demo-container": "^0.2.0"
+  }
+}

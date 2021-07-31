@@ -1,0 +1,22 @@
+.el-table-page {
+  .el-table-page_header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .el-table-page_pagination {
+    margin-top: 15px;
+    text-align: center;
+  }
+  .el-table-page_header-selected-text {
+    font-size: 14px;
+    margin-right: 10px;
+  }
+  .el-table-page__search-card {
+    margin-bottom: 15px;
+  }
+  /*.el-table-page_copy-icon {
+		line-height: 28px;
+		cursor: pointer;
+	} */
+}
