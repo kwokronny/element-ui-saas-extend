@@ -2,7 +2,8 @@ module.exports = {
   title: "Element SaaS 扩展",
   description: "基于 Element UI 对 SaaS 平台常见交互开发的预设组件",
   plugins: ["demo-container"],
-  // base: "/document/element-ui-saas-extend/",
+  base: "/document/element-ui-saas-extend/",
+  dest: "./document/element-ui-saas-extend/",
   themeConfig: {
     repo: "kwokronny/element-ui-saas-extend",
     repoLabel: "GitHub",

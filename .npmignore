@@ -2,6 +2,7 @@ node_modules
 .github
 docs
 .gitignore
+document
 LICENSE
 
 .eslintrc.js

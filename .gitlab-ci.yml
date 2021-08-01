@@ -22,9 +22,9 @@ generate:
   script:
     - echo "开始部署"
     - yarn install
-    - yarn add element-ui@2.15.3 element-ui-saas-extend -S
+    - yarn add element-ui@2.15.3 -S
     - yarn build:doc
-    - cd docs/.vuepress/dist
+    - cd document/element-ui-saas-extend
     - tar -zcvf "$tar_name" ./*
     - eval `ssh-agent -s`
     - ssh-add <(echo "$SERVER_KEY")
