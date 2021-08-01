@@ -13,11 +13,9 @@
     "build:theme": "gulp build --f packages/theme-chalk/gulpfile.js && cp-cli packages/theme-chalk/lib lib/theme-chalk",
     "build:doc": "vuepress build docs"
   },
-  "peerDependencies": {
-    "element-ui": "^2.15.3",
-    "vue": "^2.6.11"
-  },
   "dependencies": {
+    "element-ui": "^2.15.3",
+    "vue": "^2.6.11",
     "async-validator": "1.11.5",
     "core-js": "3.6.5",
     "element-ui-el-table-draggable": "^1.2.10",
