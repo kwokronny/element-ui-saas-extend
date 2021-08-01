@@ -1,8 +1,24 @@
 {
   "name": "element-ui-saas-extend",
+  "description": "基于 Element UI 对 SaaS 平台常见交互开发的预设组件",
   "version": "1.0.0-beta",
   "main": "lib/element-ui-saas-extend.common.js",
   "typings": "types/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kwokronny/element-ui-saas-extend"
+  },
+  "keywords": [
+    "elemement",
+    "vue",
+    "components",
+    "saas"
+  ],
+  "homepage": "https://kwokronny.top/document/element-ui-saas-extend",
+  "style": "lib/theme-chalk/index.css",
+  "bugs": {
+    "url": "https://github.com/kwokronny/element-ui-saas-extend/issues"
+  },
   "scripts": {
     "serve": "vue-cli-service serve",
     "test:unit": "vue-cli-service test:unit",
