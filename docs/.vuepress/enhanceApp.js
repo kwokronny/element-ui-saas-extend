@@ -1,7 +1,7 @@
 import ElementUI from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
-import ElementUISaaSExtend from "/packages/index.ts";
-import "/packages/theme-chalk/lib/index.css";
+import ElementUISaaSExtend from "../../packages/index.ts";
+import "../../packages/theme-chalk/lib/index.css";
 
 import axios from "axios";
 
@@ -103,7 +103,7 @@ export default ({
     },
   };
   if (!isServer) {
-    import("/packages/index.ts").then((module) => {
+    import("../../packages/index.ts").then((module) => {
       Vue.use(ElementUISaaSExtend);
     });
     import("./components/UserSelector.vue").then((module) => {
