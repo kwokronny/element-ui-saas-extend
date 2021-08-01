@@ -22,7 +22,7 @@ generate:
   script:
     - echo "开始部署"
     - yarn install
-    - yarn add element-ui@2.15.3
+    - yarn add element-ui@2.15.3 element-ui-saas-extend -S
     - yarn build:doc
     - cd docs/.vuepress/dist
     - tar -zcvf "$tar_name" ./*
