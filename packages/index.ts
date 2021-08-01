@@ -1,14 +1,17 @@
 import TablePage from "./TablePage/index";
 import FormAuto from "./FormAuto/index";
 import NumberRange from "./NumberRange/index";
+import { VueConstructor } from "vue/types/umd";
 
-const API: any = {
-  install(Vue: any, options: any = {}) {
-    Vue.component(NumberRange.name, NumberRange);
-    Vue.component(FormAuto.name, FormAuto);
-    Vue.component(TablePage.name, TablePage);
-    Vue.prototype.$ELEMENT = Object.assign(Vue.prototype.$ELEMENT, options);
-  },
+const install = (Vue: VueConstructor, options: any = {}) => {
+  Vue.prototype.$ELEMENT = Object.assign({}, Vue.prototype.$ELEMENT, options);
+  Vue.component("ElNumberRange", NumberRange);
+  Vue.component("ElFormAuto", FormAuto);
+  Vue.component("ElTablePage", TablePage);
 };
-export { TablePage, FormAuto, NumberRange };
-export default API;
+
+if (typeof window !== "undefined" && window.Vue) {
+  install(window.Vue);
+}
+
+export default { install, TablePage, FormAuto, NumberRange };

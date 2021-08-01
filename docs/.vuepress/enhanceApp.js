@@ -1,7 +1,7 @@
 import ElementUI from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
-import ElementUISaaSExtend from "element-ui-saas-extend";
-import "element-ui-saas-extend/lib/theme-chalk/index.css";
+import ElementUISaaSExtend from "../../packages/index.ts";
+import "../../packages/theme-chalk/lib/index.css";
 
 import axios from "axios";
 
@@ -41,7 +41,7 @@ export default ({
     return `${value} 元`;
   });
 
-  Vue.use(ElementUISaaSExtend, {
+  Vue.prototype.$ELEMENT = {
     pickerOptions: {
       date: {
         shortcuts: [
@@ -101,8 +101,11 @@ export default ({
         ],
       },
     },
-  });
+  };
   if (!isServer) {
+    import("../../packages/index.ts").then((module) => {
+      Vue.use(ElementUISaaSExtend);
+    });
     import("./components/UserSelector.vue").then((module) => {
       Vue.component(module.name, module);
     });
