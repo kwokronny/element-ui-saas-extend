@@ -22,7 +22,6 @@ generate:
   script:
     - echo "开始部署"
     - yarn install
-    - yarn add element-ui@2.15.3 -S
     - yarn build:doc
     - cd document/element-ui-saas-extend
     - tar -zcvf "$tar_name" ./*
