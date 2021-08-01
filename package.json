@@ -3,7 +3,6 @@
   "version": "1.0.0-beta",
   "main": "lib/element-ui-saas-extend.common.js",
   "typings": "types/index.d.ts",
-  "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "test:unit": "vue-cli-service test:unit",
