@@ -1,6 +1,7 @@
 ---
 pageClass: component-page
 ---
+
 # 表单 FormAuto
 
 因 Vue2.0 的编写风格，编写表单页面时，时常切换于 HTML 与逻辑编写之间，且配置复杂度，重复性工作多，布局复杂。通过整合组件，梳理表单重复点，尽可能少的配置完成表单编写，同时也提供动态插槽解决特殊情况下的表单编写，话不多话，我们看示例
@@ -189,7 +190,7 @@ export default {
         date: {
           col: 12,
           label: "日期",
-          type: "date",
+          type: "week",
           required: true,
           style: "width:100%",
         },
@@ -533,7 +534,7 @@ export default {
         },
         email: {
           col: 12,
-          label: "手机",
+          label: "邮箱",
           type: "plain",
         },
         color1: {
@@ -572,42 +573,42 @@ export default {
 
 ### Props
 
-| 参数            | 描述                       | 类型                                                      | 可选值 | 默认值 |
-| :-------------- | :------------------------- | :-------------------------------------------------------- | :----- | ------ |
-| v-model         | 表单数据对象               | `object`                                                  | -      | {}     |
-| data            | 表单项配置                 | [Record<name:string,FormAutoField>](#prop-data-attribute) | -      | {}     |
-| gutter          | &lt;el-row&gt; 属性 gutter | `number`                                                  | -      | 15     |
-| label-hidden    | 所有表单项标签是否隐藏     | `boolean`                                                 | -      | false  |
-| `[prop:string]` | 继承 el-form 所有 Prop     | `any`                                                     | -      | -      |
+| 参数            | 描述                       | 类型                                                            | 可选值 | 默认值 |
+| :-------------- | :------------------------- | :-------------------------------------------------------------- | :----- | ------ |
+| v-model         | 表单数据对象               | `object`                                                        | -      | {}     |
+| data            | 表单项配置                 | [Record&lt;name:string,FormAutoField&gt;](#prop-data-attribute) | -      | {}     |
+| gutter          | &lt;el-row&gt; 属性 gutter | `number`                                                        | -      | 15     |
+| label-hidden    | 所有表单项标签是否隐藏     | `boolean`                                                       | -      | false  |
+| `[prop:string]` | 继承 el-form 所有 Prop     | `any`                                                           | -      | -      |
 
 ### FormAutoField
 
-| 参数            | 描述                                                                                         | 类型                            | 默认值 |
-| :-------------- | :------------------------------------------------------------------------------------------- | :------------------------------ | :----- |
-| 标签相关设置    |                                                                                              |                                 |        |
-| label           | 标签名                                                                                       | `string`                        | -      |
-| labelHidden     | 是否隐藏标签                                                                                 | `boolean`                       | false  |
-| labelTooltip    | 表单项提示                                                                                   | `string` / `boolean`            | false  |
-| labelWidth      | 标签宽度                                                                                     | `string`                        | -      |
-| value           | 字段默认值                                                                                   | `any`                           | -      |
-| 控件相关设置    |                                                                                              |                                 |        |
-| type            | 必填，控件类型                                                                               | [参照 type Enum 表](#type-enum) | -      |
-| slot            | 自定义动态插槽，设为 true 时，slot 为 name，详情可参考 [自定义动态插槽示例](#自定义动态插槽) | `string` / `boolean`            | false  |
-| component       | 组件名称，type 为 `component` 时有效                                                         | `string`                        | -      |
-| `[prop:string]` | 可直接追加 type 对应组件的 prop                                                              | `any`                           | -      |
-| disabled        | 是否禁用字段                                                                                 | `boolean`                       | false  |
-| placeholder     | 占位符                                                                                       | `array`                         | -      |
-| on              | 设置 type 对应组件的事件                                                                     | `object`                        | {}     |
-| rangeName       | 日期范围名 type 为 daterange/timerange/datetimerange/numberrange 选填                        | `array<string>`                 | false  |
-| options         | 控件选项，type 为 check/radio/select 必填                                                    | `object` / `array` / `Function` | []     |
-| remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                       | false  |
-| notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                       | false  |
-| 表单相关设置    |                                                                                              |                                 |        |
-| col             | 占用栅格                                                                                     | `number`                        | 24     |
-| required        | 是否必填                                                                                     | `boolean`                       | false  |
-| notSubmit       | 是否                                                                                         | `boolean`                       | false  |
-| bindShow        | 绑定显示                                                                                     | `(model)=>boolean`              | -      |
-| addRules        | 追加验证规则                                                                                 | `array`                         | -      |
+| 参数            | 描述                                                                                         | 类型                                    | 默认值 |
+| :-------------- | :------------------------------------------------------------------------------------------- | :-------------------------------------- | :----- |
+| 标签相关设置    |                                                                                              |                                         |        |
+| label           | 标签名                                                                                       | `string`                                | -      |
+| labelHidden     | 是否隐藏标签                                                                                 | `boolean`                               | false  |
+| labelTooltip    | 表单项提示                                                                                   | `string` / `boolean`                    | false  |
+| labelWidth      | 标签宽度                                                                                     | `string`                                | -      |
+| value           | 字段默认值                                                                                   | `any`                                   | -      |
+| 控件相关设置    |                                                                                              |                                         |        |
+| type            | 必填，控件类型                                                                               | [参照 type Enum 表](#type-enum)         | -      |
+| slot            | 自定义动态插槽，设为 true 时，slot 为 name，详情可参考 [自定义动态插槽示例](#自定义动态插槽) | `string` / `boolean`                    | false  |
+| component       | 组件名称，type 为 `component` 时有效                                                         | `string`                                | -      |
+| `[prop:string]` | 可直接追加 type 对应组件的 prop                                                              | `any`                                   | -      |
+| disabled        | 是否禁用字段                                                                                 | `boolean`                               | false  |
+| placeholder     | 占位符                                                                                       | `array`                                 | -      |
+| on              | 设置 type 对应组件的事件                                                                     | `object`                                | {}     |
+| rangeName       | 日期范围名 type 为 daterange/timerange/datetimerange/numberrange 选填                        | `array<string>`                         | false  |
+| options         | 控件选项，type 为 check/radio/select 必填                                                    | `object` / `array` / `Function`         | []     |
+| remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                               | false  |
+| notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                               | false  |
+| 表单相关设置    |                                                                                              |                                         |        |
+| col             | 占用栅格                                                                                     | `number`                                | 24     |
+| required        | 是否必填                                                                                     | `boolean`                               | false  |
+| notSubmit       | 是否                                                                                         | `boolean`                               | false  |
+| bindShow        | 绑定显示                                                                                     | `(model)=>boolean`                      | -      |
+| addRules        | 追加验证规则                                                                                 | `array`                                 | -      |
 
 ### type Enum
 
@@ -618,10 +619,15 @@ export default {
 | numberrange   | &lt;el-number-range&gt;                       | 数值范围         |
 | password      | &lt;el-input&gt;                              | 密码输入框       |
 | textarea      | &lt;el-input&gt;                              | 文本域           |
-| date          | &lt;el-data-picker type="date"&gt;            | 日期选择         |
-| datetime      | &lt;el-data-picker type="datetime"&gt;        | 日期时间选择     |
-| daterange     | &lt;el-data-picker type="daterange"&gt;       | 日期范围选择     |
-| datetimerange | &lt;el-data-picker type="datetimerange" /&gt; | 日期时间范围选择 |
+| date          | &lt;el-date-picker type="date"&gt;            | 日期选择         |
+| year          | &lt;el-date-picker type="year"&gt;            | 日期选择         |
+| month         | &lt;el-date-picker type="month"&gt;            | 日期选择         |
+| week          | &lt;el-date-picker type="week"&gt;            | 日期选择         |
+| dates         | &lt;el-date-picker type="dates"&gt;            | 日期选择         |
+| datetime      | &lt;el-date-picker type="datetime"&gt;        | 日期时间选择     |
+| daterange     | &lt;el-date-picker type="daterange"&gt;       | 日期范围选择     |
+| monthrange    | &lt;el-date-picker type="date"&gt;            | 日期选择         |
+| datetimerange | &lt;el-date-picker type="datetimerange"&gt; | 日期时间范围选择 |
 | time          | &lt;el-time-picker&gt;                        | 时间选择         |
 | timerange     | &lt;el-time-picker is-range&gt;               | 时间范围选择     |
 | radio         | &lt;el-radio&gt;                              | 单选框           |
@@ -634,12 +640,12 @@ export default {
 
 ### Method
 
-| 方法名     | 描述                                     | 参数                                     |
-| :--------- | :--------------------------------------- | :--------------------------------------- |
-| reset()    | 重置表单                                 | -                                        |
-| validate() | 对整个表单进行校验的方法                 | `Promise<boolean>`                       |
-| getModel() | 获取表单所有参数                         | name                                       |
-| setModel() | 设置表单对应参数，表单项不存在的将被无视 | name,value |
+| 方法名     | 描述                                     | 参数               |
+| :--------- | :--------------------------------------- | :----------------- |
+| reset()    | 重置表单                                 | -                  |
+| validate() | 对整个表单进行校验的方法                 | `Promise<boolean>` |
+| getModel() | 获取表单所有参数                         | name               |
+| setModel() | 设置表单对应参数，表单项不存在的将被无视 | name,value         |
 
 ### Slot
 

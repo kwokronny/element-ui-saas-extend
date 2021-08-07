@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DatePickerOptions, InstallationOptions } from "element-ui";
-import Vue from "vue";
+import Vue, { PluginObject } from 'vue'
 
 import { ElFormAuto } from "./form-auto";
 import { ElTablePage } from "./table-page";
@@ -22,6 +22,8 @@ export declare type ElAutoMixinOptions = Record<string | number, string | number
 export interface SaaSInstallationOptions extends InstallationOptions {
   pickerOptions?: Record<"date" | "range", DatePickerOptions>;
 }
+
+export function install (vue: typeof Vue, options: SaaSInstallationOptions): void
 
 declare module "vue/types/vue" {
   interface Vue {

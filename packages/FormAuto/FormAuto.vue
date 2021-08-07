@@ -81,7 +81,7 @@
 							</template>
 							<template
 								v-else-if="
-                  /date|datetime|daterange|datetimerange/.test(item.type)
+                  /year|month|week|date|dates|datetime|daterange|monthrange|datetimerange/.test(item.type)
                 "
 							>
 								<el-date-picker

@@ -1,6 +1,32 @@
 import { ElAutoMixinOptions } from "./saas-extend";
 import { ElForm } from "element-ui/types/form";
-export declare type ElFormAutoFieldType = "hidden" | "numberrange" | "component" | "text" | "password" | "number" | "textarea" | "plain" | "date" | "slider" | "switch" | "datetime" | "time" | "timerange" | "daterange" | "datetimerange" | "radio" | "check" | "select" | "cascader" | "rate";
+export declare type ElFormAutoFieldType =
+  | "hidden"
+  | "plain"
+  | "text"
+  | "numberrange"
+  | "component"
+  | "password"
+  | "number"
+  | "textarea"
+  | "slider"
+  | "switch"
+  | "year"
+  | "month"
+  | "week"
+  | "date"
+  | "dates"
+  | "time"
+  | "datetime"
+  | "timerange"
+  | "monthrange"
+  | "daterange"
+  | "datetimerange"
+  | "radio"
+  | "check"
+  | "select"
+  | "cascader"
+  | "rate";
 
 export declare interface ElFormAutoField {
   /**
