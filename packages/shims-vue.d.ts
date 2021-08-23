@@ -5,4 +5,3 @@ declare module "*.vue" {
 
 declare module "numeral";
 declare module "element-ui-el-table-draggable";
-declare module "mockjs";

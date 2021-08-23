@@ -4,9 +4,10 @@ sidebarDepth: 0
 
 # 更新日志
 
-
-
-
+## 1.0.1 <small>2021-08-23</small>
+- #### 修复
+	- types 修复 table-page 组件声明问题
+	- types 优化 vue 后缀声明module
 
 ## 1.0.0 <small>2021-08-07</small>
 - #### 新增
