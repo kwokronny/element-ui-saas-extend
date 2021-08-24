@@ -1,6 +1,11 @@
 <template>
 	<div class="el-table-page" ref="MainElement">
-		<el-card shadow="never" v-if="hasSearchCard" class="el-table-page__search-card">
+		<component
+			:is="wrapComponment"
+			shadow="never"
+			v-if="hasSearchCard"
+			class="el-table-page__search-card"
+		>
 			<slot name="search_prepend"></slot>
 			<el-form-auto
 				ref="SearchForm"
@@ -20,21 +25,14 @@
 					></dynamic-slot>
 				</template>
 				<slot name="search_button">
-					<el-button
-						type="primary"
-						plain
-						round
-						icon="el-icon-search"
-						@click="search(1)"
-						:loading="loading"
-					>搜索</el-button>
-					<el-button type="default" plain round @click="resetSearch">重置</el-button>
+					<el-button type="primary" icon="el-icon-search" @click="search(1)" :loading="loading">搜索</el-button>
+					<el-button type="default" @click="resetSearch">重置</el-button>
 				</slot>
 			</el-form-auto>
 			<slot name="search_append"></slot>
-		</el-card>
+		</component>
 		<slot name="middle"></slot>
-		<el-card shadow="never">
+		<component :is="wrapComponment" shadow="never" class="el-table-page__table-card">
 			<slot name="table_prepend"></slot>
 			<div class="el-table-page_header">
 				<div>
@@ -129,8 +127,8 @@
 				></el-pagination>
 				<slot name="page_append"></slot>
 			</div>
-		</el-card>
-		<el-dialog v-if="customColumns" :visible.sync="customColumnsDialog" title="自定义列" width="40%">
+		</component>
+		<el-dialog v-if="customColumns" width="600px" :visible.sync="customColumnsDialog" title="自定义列">
 			<el-button type="text" @click="handleClickResetCustomColumns">重置列</el-button>
 			<el-table-draggable>
 				<el-table :data="columnsSort" border height="300px">
@@ -198,6 +196,13 @@ export default class ElTablePage extends Vue {
 
 	@Prop({ type: Object, default: () => { return {} } }) searchProps!: Record<string, any>;
 
+
+	@Prop({ type: Object, default: () => { return {} } }) buttonStyle!: Record<string, any>;
+
+	@Prop({ type: String, validator: (value: string) => { return (new RegExp("card|default")).test(value) }, default: "default" }) layoutType!: string
+	get wrapComponment(): string {
+		return this.layoutType == "card" ? "el-card" : "div"
+	}
 
 	// # region 列相关
 	@Prop(Array) columns!: ElTablePageColumn[];
@@ -276,7 +281,13 @@ export default class ElTablePage extends Vue {
 
 	// #endregion
 	// #region 搜索
+	// @PropSync("params", { type: Object, default: Object.assign({}) }) filter!: Record<string, any>;
 	private filter: Record<string, any> = {}
+
+	public getParams(): Record<string, any> {
+		return this.filter;
+	}
+
 	private searchForm: Record<string, ElFormAutoField> = {}
 	private loading: boolean = false;
 	@Prop(Function) request!: ((page: number, search?: Record<string, any>, pageSize?: number, from?: string) => Promise<Record<ElTablePageDataMap, any>>)

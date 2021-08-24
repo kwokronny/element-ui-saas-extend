@@ -97,7 +97,7 @@ export default {
 let defaultOption = [
   {
     label: "选项1",
-    value: 1,
+    value: 0,
   },
   {
     label: "带图标选项3",
@@ -236,6 +236,13 @@ export default {
           type: "radio",
           required: true,
           options: defaultOption,
+        },
+        radiobutton: {
+          label: "单选按钮",
+          type: "radiobutton",
+          options: defaultOption,
+          size: "small",
+          required: true,
         },
         check: {
           label: "复选框",
@@ -583,60 +590,60 @@ export default {
 
 ### FormAutoField
 
-| 参数            | 描述                                                                                         | 类型                                    | 默认值 |
-| :-------------- | :------------------------------------------------------------------------------------------- | :-------------------------------------- | :----- |
-| 标签相关设置    |                                                                                              |                                         |        |
-| label           | 标签名                                                                                       | `string`                                | -      |
-| labelHidden     | 是否隐藏标签                                                                                 | `boolean`                               | false  |
-| labelTooltip    | 表单项提示                                                                                   | `string` / `boolean`                    | false  |
-| labelWidth      | 标签宽度                                                                                     | `string`                                | -      |
-| value           | 字段默认值                                                                                   | `any`                                   | -      |
-| 控件相关设置    |                                                                                              |                                         |        |
-| type            | 必填，控件类型                                                                               | [参照 type Enum 表](#type-enum)         | -      |
-| slot            | 自定义动态插槽，设为 true 时，slot 为 name，详情可参考 [自定义动态插槽示例](#自定义动态插槽) | `string` / `boolean`                    | false  |
-| component       | 组件名称，type 为 `component` 时有效                                                         | `string`                                | -      |
-| `[prop:string]` | 可直接追加 type 对应组件的 prop                                                              | `any`                                   | -      |
-| disabled        | 是否禁用字段                                                                                 | `boolean`                               | false  |
-| placeholder     | 占位符                                                                                       | `array`                                 | -      |
-| on              | 设置 type 对应组件的事件                                                                     | `object`                                | {}     |
-| rangeName       | 日期范围名 type 为 daterange/timerange/datetimerange/numberrange 选填                        | `array<string>`                         | false  |
-| options         | 控件选项，type 为 check/radio/select 必填                                                    | `object` / `array` / `Function`         | []     |
-| remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                               | false  |
-| notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                               | false  |
-| 表单相关设置    |                                                                                              |                                         |        |
-| col             | 占用栅格                                                                                     | `number`                                | 24     |
-| required        | 是否必填                                                                                     | `boolean`                               | false  |
-| notSubmit       | 是否                                                                                         | `boolean`                               | false  |
-| bindShow        | 绑定显示                                                                                     | `(model)=>boolean`                      | -      |
-| addRules        | 追加验证规则                                                                                 | `array`                                 | -      |
+| 参数            | 描述                                                                                         | 类型                            | 默认值 |
+| :-------------- | :------------------------------------------------------------------------------------------- | :------------------------------ | :----- |
+| 标签相关设置    |                                                                                              |                                 |        |
+| label           | 标签名                                                                                       | `string`                        | -      |
+| labelHidden     | 是否隐藏标签                                                                                 | `boolean`                       | false  |
+| labelTooltip    | 表单项提示                                                                                   | `string` / `boolean`            | false  |
+| labelWidth      | 标签宽度                                                                                     | `string`                        | -      |
+| value           | 字段默认值                                                                                   | `any`                           | -      |
+| 控件相关设置    |                                                                                              |                                 |        |
+| type            | 必填，控件类型                                                                               | [参照 type Enum 表](#type-enum) | -      |
+| slot            | 自定义动态插槽，设为 true 时，slot 为 name，详情可参考 [自定义动态插槽示例](#自定义动态插槽) | `string` / `boolean`            | false  |
+| component       | 组件名称，type 为 `component` 时有效                                                         | `string`                        | -      |
+| `[prop:string]` | 可直接追加 type 对应组件的 prop                                                              | `any`                           | -      |
+| disabled        | 是否禁用字段                                                                                 | `boolean`                       | false  |
+| placeholder     | 占位符                                                                                       | `array`                         | -      |
+| on              | 设置 type 对应组件的事件                                                                     | `object`                        | {}     |
+| rangeName       | 日期范围名 type 为 daterange/timerange/datetimerange/numberrange 选填                        | `array<string>`                 | false  |
+| options         | 控件选项，type 为 check/radio/select 必填                                                    | `object` / `array` / `Function` | []     |
+| remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                       | false  |
+| notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                       | false  |
+| 表单相关设置    |                                                                                              |                                 |        |
+| col             | 占用栅格                                                                                     | `number`                        | 24     |
+| required        | 是否必填                                                                                     | `boolean`                       | false  |
+| notSubmit       | 是否                                                                                         | `boolean`                       | false  |
+| bindShow        | 绑定显示                                                                                     | `(model)=>boolean`              | -      |
+| addRules        | 追加验证规则                                                                                 | `array`                         | -      |
 
 ### type Enum
 
-| 值            | 对应组件                                      | 描述             |
-| :------------ | :-------------------------------------------- | :--------------- |
-| text          | &lt;el-input&gt;                              | 文本输入框       |
-| number        | &lt;el-input-number&gt;                       | 计数器           |
-| numberrange   | &lt;el-number-range&gt;                       | 数值范围         |
-| password      | &lt;el-input&gt;                              | 密码输入框       |
-| textarea      | &lt;el-input&gt;                              | 文本域           |
-| date          | &lt;el-date-picker type="date"&gt;            | 日期选择         |
-| year          | &lt;el-date-picker type="year"&gt;            | 日期选择         |
-| month         | &lt;el-date-picker type="month"&gt;            | 日期选择         |
-| week          | &lt;el-date-picker type="week"&gt;            | 日期选择         |
-| dates         | &lt;el-date-picker type="dates"&gt;            | 日期选择         |
-| datetime      | &lt;el-date-picker type="datetime"&gt;        | 日期时间选择     |
-| daterange     | &lt;el-date-picker type="daterange"&gt;       | 日期范围选择     |
-| monthrange    | &lt;el-date-picker type="date"&gt;            | 日期选择         |
+| 值            | 对应组件                                    | 描述             |
+| :------------ | :------------------------------------------ | :--------------- |
+| text          | &lt;el-input&gt;                            | 文本输入框       |
+| number        | &lt;el-input-number&gt;                     | 计数器           |
+| numberrange   | &lt;el-number-range&gt;                     | 数值范围         |
+| password      | &lt;el-input&gt;                            | 密码输入框       |
+| textarea      | &lt;el-input&gt;                            | 文本域           |
+| date          | &lt;el-date-picker type="date"&gt;          | 日期选择         |
+| year          | &lt;el-date-picker type="year"&gt;          | 日期选择         |
+| month         | &lt;el-date-picker type="month"&gt;         | 日期选择         |
+| week          | &lt;el-date-picker type="week"&gt;          | 日期选择         |
+| dates         | &lt;el-date-picker type="dates"&gt;         | 日期选择         |
+| datetime      | &lt;el-date-picker type="datetime"&gt;      | 日期时间选择     |
+| daterange     | &lt;el-date-picker type="daterange"&gt;     | 日期范围选择     |
+| monthrange    | &lt;el-date-picker type="date"&gt;          | 日期选择         |
 | datetimerange | &lt;el-date-picker type="datetimerange"&gt; | 日期时间范围选择 |
-| time          | &lt;el-time-picker&gt;                        | 时间选择         |
-| timerange     | &lt;el-time-picker is-range&gt;               | 时间范围选择     |
-| radio         | &lt;el-radio&gt;                              | 单选框           |
-| check         | &lt;el-checkbox&gt;                           | 复选框           |
-| select        | &lt;el-select&gt;                             | 选择框           |
-| slider        | &lt;el-slider&gt;                             | 滑动选择框       |
-| switch        | &lt;el-switch&gt;                             | 开关             |
-| cascader      | &lt;el-cascader&gt;                           | 多级选择框       |
-| rate          | &lt;el-rate&gt;                               | 评分             |
+| time          | &lt;el-time-picker&gt;                      | 时间选择         |
+| timerange     | &lt;el-time-picker is-range&gt;             | 时间范围选择     |
+| radio         | &lt;el-radio&gt;                            | 单选框           |
+| check         | &lt;el-checkbox&gt;                         | 复选框           |
+| select        | &lt;el-select&gt;                           | 选择框           |
+| slider        | &lt;el-slider&gt;                           | 滑动选择框       |
+| switch        | &lt;el-switch&gt;                           | 开关             |
+| cascader      | &lt;el-cascader&gt;                         | 多级选择框       |
+| rate          | &lt;el-rate&gt;                             | 评分             |
 
 ### Method
 

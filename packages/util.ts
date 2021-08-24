@@ -12,7 +12,7 @@ export async function transformOptions(options: ElAutoMixinOptions | ((query?: s
     if (item) {
       arr.push({
         label: item.label || item,
-        value: isArray ? item.value || item : key,
+        value: isArray ? (item.value === undefined ? item : item.value) : key,
         disabled: item.disabled || false,
         icon: item.icon || false,
       });

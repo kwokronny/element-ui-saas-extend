@@ -4,6 +4,15 @@ sidebarDepth: 0
 
 # 更新日志
 
+## 1.0.2 <small>2021-08-24</small>
+- #### 新增
+	- TablePage 组件增加 prop 属性 `layout-type` 和 `button-type` 增加一定的主题定制自由度
+	- TablePage 组件增加 getParams 函数以获取搜索项参数
+	- FormAuto 组件增加 `radiobutton` 单选框按钮的输入类型
+
+- #### 修复
+	- FormAuto 与 TablePage 对 `options` 或 `enum` 适配转换问题
+
 ## 1.0.1 <small>2021-08-23</small>
 - #### 修复
 	- types 修复 table-page 组件声明问题

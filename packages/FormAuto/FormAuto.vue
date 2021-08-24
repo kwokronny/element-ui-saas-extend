@@ -101,9 +101,10 @@
 									v-on="item.on"
 								></el-time-picker>
 							</template>
-							<template v-else-if="item.type == 'radio'">
+							<template v-else-if="/radio|radiobutton/.test(item.type)">
 								<el-radio-group v-model="model[name]" v-bind="item.props" v-on="item.on">
-									<el-radio
+									<component
+										:is="item.type=='radio'?'el-radio':'el-radio-button'"
 										v-for="(option, key) in item.options"
 										:key="`${name}_${key}`"
 										:label="`${option.value}`"
@@ -111,7 +112,7 @@
 									>
 										<i v-if="option.icon" :class="option.icon"></i>
 										<span>{{ option.label }}</span>
-									</el-radio>
+									</component>
 								</el-radio-group>
 							</template>
 							<template v-else-if="item.type == 'check'">

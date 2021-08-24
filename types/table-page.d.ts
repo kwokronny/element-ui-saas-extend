@@ -9,6 +9,8 @@ export declare class ElTablePage extends ElTable {
   pageSize: number;
   pageLayout: string;
   pageSizes: number[];
+  layoutType: "default" | "card";
+  buttonStyle: Record<"plain" | "round", boolean>;
   selectable: (row: Record<string, any>, index: number) => boolean;
   selection: any[];
   customColumns: string;
@@ -18,6 +20,7 @@ export declare class ElTablePage extends ElTable {
   resetSearch(): void;
   openCustomColumnDialog(): void;
   clearSelection(): void;
+  getParams(): Record<string, any>;
 }
 
 export declare type ElTablePageDataMap = "page" | "pageSize" | "total" | "record";
