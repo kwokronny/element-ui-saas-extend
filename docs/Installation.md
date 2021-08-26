@@ -2,7 +2,7 @@
 
 ## 安装
 ```shell
-yarn add element-ui-saas-extend -S
+yarn add element-ui-saas-extend
 // or
 npm install element-ui-saas-extend -S
 ```
@@ -30,8 +30,24 @@ Vue.use(ElementSaaSExtend);
   - **range** 为 type 为 `daterange`、`datetimerange` 的控件类型项添加配置 options
   - **date** 为 type 为 `date`、`datetime` 的控件类型项添加配置 options
 
+- **buttonStyle** 为 TablePage 组件提供默认的按钮样式 
+- **pageLayout** 为 TablePage 组件提供默认的分页布局
+
+```ts
+export interface SaaSInstallationOptions extends InstallationOptions {
+  pickerOptions?: Record<"date" | "range", DatePickerOptions>;
+  buttonStyle: Record<"plain" | "round" | "size" | "style" | "class", string | boolean>;
+  pageLayout?: string;
+}
+```
+
+
 ```js static
 Vue.prototype.$ELEMENT = {
+  buttonStyle:{
+    round: true //统一圆角,
+  }
+  pageLayout: "total, pager", //分页布局
   pickerOptions: {
     date: {
       shortcuts: [

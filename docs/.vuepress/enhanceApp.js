@@ -42,6 +42,9 @@ export default ({
   });
 
   Vue.prototype.$ELEMENT = {
+    buttonType: {
+      plain: true,
+    },
     pickerOptions: {
       date: {
         shortcuts: [

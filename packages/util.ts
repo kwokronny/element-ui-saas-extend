@@ -5,9 +5,8 @@ export async function transformOptions(options: ElAutoMixinOptions | ((query?: s
     options = (await options("")) as ElAutoMixinOptions;
   }
   const arr: ElAutoOption[] = [];
-  let key: string;
   const isArray: boolean = Array.isArray(options);
-  for (key in options) {
+  for (let key in options) {
     const item: any = options[key];
     if (item) {
       arr.push({

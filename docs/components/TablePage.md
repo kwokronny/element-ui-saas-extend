@@ -201,7 +201,7 @@ export default {
 
 ```vue
 <template>
-  <el-table-page :columns="columns" :request="getList" custom-columns="table_test1"></el-table-page>
+  <el-table-page layout-type="card" :columns="columns" :request="getList" custom-columns="table_test1" ></el-table-page>
 </template>
 <script>
 export default {
@@ -212,6 +212,9 @@ export default {
           label: "姓名",
           prop: "name",
           fixed: "left",
+          search: {
+            type: "text",
+          },
         },
         {
           label: "手机",
@@ -468,7 +471,7 @@ Vue.filter("yuan", function(value) {
 
 ```vue
 <template>
-  <el-table-page ref="TablePage" :columns="columns" :request="getList" border></el-table-page>
+  <el-table-page layout-type="card" ref="TablePage" :columns="columns" :request="getList" border></el-table-page>
 </template>
 <script>
 export default {
@@ -567,8 +570,8 @@ export default {
 <template>
   <el-table-page ref="TablePage" border stripe :columns="columns" :request="getList" row-key="id" :selection.sync="selection" custom-columns="table_test2">
     <template slot="option" slot-scope="{ row, column, index }">
-      <el-button type="primary" size="mini">编辑</el-button>
-      <el-button type="danger" size="mini">删除</el-button>
+      <el-button type="primary" round size="mini">编辑</el-button>
+      <el-button type="danger" round size="mini">删除</el-button>
     </template>
     <template slot="search-name" slot-scope="{ item, model, name }">
       <el-input suffix-icon="el-icon-help" v-model="model[name]"></el-input>
@@ -756,7 +759,7 @@ export default {
 | 自定义列相关    |                                                                                                         |                                                                                                                                                      |        |        |
 | custom-columns  | 开启自定义列，该值将按 `ElTablePage_${custom-columns}` 为键名在 `localStorage` 保存自定义列的结果       | `string`                                                                                                                                             | -      | false  |
 | layout-type     | 表格页主题                                                                                              | `default` / `card`                                                                                                                                   | -      | -      |
-| button-style    | 默认按钮样式简易自定义                                                                                  | `Record<"plain"|"round",boolean>`                                                                                                                    | -      | -      |
+| button-style    | 默认按钮样式简易自定义                                                                                  | `Record<"plain"|"round|"class"|"size"|"style",boolean|string>`                                                                                                                    | -      | -      |
 
 ### Prop: columns Attribute
 

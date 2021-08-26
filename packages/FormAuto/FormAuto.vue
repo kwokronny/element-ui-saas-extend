@@ -280,7 +280,6 @@ export default class ElFormAuto extends Vue {
 		for (let key in this.check) {
 			this.check[key] = false;
 		}
-		// forEach(t
 	}
 
 	/**
@@ -327,7 +326,19 @@ export default class ElFormAuto extends Vue {
 		let _model = Object.assign({}, model);
 		for (let name in _model) {
 			if (Object.keys(this.model).includes(name)) {
-				this.model[name] = _model[name];
+				let value = _model[name];
+				let field = this.fields[name];
+				if (/radio|select|check/.test(field.type)) {
+					// 	debugger
+					if ((field.type == "check" || (field.type == "select" && field.multiple)) && Array.isArray(value)) {
+						value.forEach((val: string | number,idx:number) => {
+							value[idx] = `${val}`
+						})
+					} else {
+						value = `${value}`;
+					}
+				}
+				this.model[name] = value
 			}
 		}
 	}

@@ -10,7 +10,7 @@ export declare class ElTablePage extends ElTable {
   pageLayout: string;
   pageSizes: number[];
   layoutType: "default" | "card";
-  buttonStyle: Record<"plain" | "round", boolean>;
+  buttonStyle: Record<"plain" | "round" | "size" | "style" | "class", string | boolean>;
   selectable: (row: Record<string, any>, index: number) => boolean;
   selection: any[];
   customColumns: string;

@@ -10,7 +10,6 @@
 			<el-form-auto
 				ref="SearchForm"
 				v-model="filter"
-				size="small"
 				:data="searchForm"
 				inline
 				:show-messeage="false"
@@ -25,8 +24,14 @@
 					></dynamic-slot>
 				</template>
 				<slot name="search_button">
-					<el-button type="primary" icon="el-icon-search" @click="search(1)" :loading="loading">搜索</el-button>
-					<el-button type="default" @click="resetSearch">重置</el-button>
+					<el-button
+						type="primary"
+						icon="el-icon-search"
+						@click="search(1)"
+						:loading="loading"
+						v-bind="defaultButtonStyle"
+					>搜索</el-button>
+					<el-button type="default" @click="resetSearch" v-bind="defaultButtonStyle">重置</el-button>
 				</slot>
 			</el-form-auto>
 			<slot name="search_append"></slot>
@@ -49,10 +54,9 @@
 					<slot name="custom_column_button">
 						<el-button
 							v-if="customColumns"
-							type="text"
-							size="small"
 							icon="el-icon-setting"
 							@click="openCustomColumnDialog"
+							v-bind="defaultButtonStyle"
 						>自定义列</el-button>
 					</slot>
 					<slot name="table_button"></slot>
@@ -122,14 +126,14 @@
 					:page-size.sync="limit"
 					:page-sizes="pageSizes"
 					:total="total"
-					:layout="pageLayout"
+					:layout="defaultPageLayout"
 					@current-change="handlePageChange"
 				></el-pagination>
 				<slot name="page_append"></slot>
 			</div>
 		</component>
 		<el-dialog v-if="customColumns" width="600px" :visible.sync="customColumnsDialog" title="自定义列">
-			<el-button type="text" @click="handleClickResetCustomColumns">重置列</el-button>
+			<el-button type="text" @click="handleClickReset">重置列</el-button>
 			<el-table-draggable>
 				<el-table :data="columnsSort" border height="300px">
 					<el-table-column label="排序" width="70px">
@@ -153,8 +157,8 @@
 				</el-table>
 			</el-table-draggable>
 			<div slot="footer">
-				<el-button type="text" round @click="handleClickCloseCustomColumnsDialog">取消</el-button>
-				<el-button type="primary" round @click="handleClickSaveCustomColumns">保存</el-button>
+				<el-button type="text" v-bind="defaultButtonStyle" @click="handleClickClose">取消</el-button>
+				<el-button type="primary" v-bind="defaultButtonStyle" @click="handleClickSave">保存</el-button>
 			</div>
 		</el-dialog>
 	</div>
@@ -196,8 +200,16 @@ export default class ElTablePage extends Vue {
 
 	@Prop({ type: Object, default: () => { return {} } }) searchProps!: Record<string, any>;
 
+	@Prop({
+		type: Object,
+		validator: (value: Record<string, boolean | string>) => {
+			return Object.keys(value).findIndex((val: string) => !/size|plain|round/.test(val)) > -1
+		}
+	}) buttonStyle!: Record<string, any>;
 
-	@Prop({ type: Object, default: () => { return {} } }) buttonStyle!: Record<string, any>;
+	get defaultButtonStyle(): Record<"size" | "plain" | "round", string | boolean> {
+		return this.buttonStyle || (this.$ELEMENT && this.$ELEMENT.buttonStyle) || {}
+	}
 
 	@Prop({ type: String, validator: (value: string) => { return (new RegExp("card|default")).test(value) }, default: "default" }) layoutType!: string
 	get wrapComponment(): string {
@@ -216,6 +228,7 @@ export default class ElTablePage extends Vue {
 			if (column.search && !this.searchForm[column.prop]) {
 				let defaultForm: ElFormAutoField = {
 					label: column.label,
+					type: "text"
 				}
 				if (column.search.slot) {
 					let name = column.search.slot == true ? column.prop : column.search.slot
@@ -300,8 +313,12 @@ export default class ElTablePage extends Vue {
 	private page: number = 1
 	private total: number = 0
 	@PropSync("pageSize", { type: Number, default: 15 }) limit!: number;
-	@Prop({ type: String, default: "total, sizes, prev, pager, next, jumper" }) pageLayout!: string;
+	@Prop(String) pageLayout!: string;
 	@Prop({ type: Array, default: () => [10, 15, 30, 50, 100] }) pageSizes!: number[];
+
+	get defaultPageLayout(): string {
+		return this.pageLayout || (this.$ELEMENT && this.$ELEMENT.pageLayout) || "total, sizes, prev, pager, next, jumper"
+	}
 
 	@Watch("request", { immediate: true })
 	private handleRequestChange() {
@@ -312,21 +329,18 @@ export default class ElTablePage extends Vue {
 
 	public resetSearch(): void {
 		this.SearchForm.reset();
+		this.search();
 	}
 
 	public async search(page: number = 1, from: string = "search"): Promise<void> {
-		try {
-			this.loading = true;
-			let data: Record<ElTablePageDataMap, any> = await this.request(page, this.filter, this.limit, from)
-			this.loading = false;
-			this.record = data.record
-			// this.prehandleRecord();
-			this.page = data.page
-			this.limit = data.pageSize
-			this.total = data.total
-		} catch (e) {
-			console.error(e);
-		}
+		this.loading = true;
+		let data: Record<ElTablePageDataMap, any> = await this.request(page, this.filter, this.limit, from)
+		this.loading = false;
+		this.record = data.record
+		// this.prehandleRecord();
+		this.page = data.page
+		this.limit = data.pageSize
+		this.total = data.total
 	}
 
 	private handlePageChange(page: number) {
@@ -362,7 +376,7 @@ export default class ElTablePage extends Vue {
 		this.customColumnsDialog = true;
 	}
 
-	private async handleClickResetCustomColumns() {
+	private async handleClickReset() {
 		if (this.customColumns == false) return
 		window.localStorage.removeItem("ElTablePage_" + this.customColumns)
 		this.columnsSort = []
@@ -370,7 +384,7 @@ export default class ElTablePage extends Vue {
 		this.openCustomColumnDialog()
 	}
 
-	private handleClickSaveCustomColumns() {
+	private handleClickSave() {
 		if (this.customColumns == false) return
 		window.localStorage.setItem("ElTablePage_" + this.customColumns, JSON.stringify(this.columnsSort))
 		this.$emit("saved-custom-columns", JSON.stringify(this.columnsSort))
@@ -405,7 +419,7 @@ export default class ElTablePage extends Vue {
 		})
 	}
 
-	private handleClickCloseCustomColumnsDialog() {
+	private handleClickClose() {
 		this.customColumnsDialog = false;
 	}
 }

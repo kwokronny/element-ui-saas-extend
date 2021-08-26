@@ -102,7 +102,7 @@ let defaultOption = [
   {
     label: "带图标选项3",
     icon: "el-icon-help",
-    value: 4,
+    value: 3,
   },
   {
     label: "选项禁用2",
@@ -277,9 +277,10 @@ export default {
         datetimeRange: ["2021-01-10 11:11:00", "2021-01-12 13:11:00"],
         time: "11:11:00",
         timeRange: ["11:11:00", "23:12:00"],
-        select: "1",
-        check: ["3"],
-        radio: "3",
+        select: 0,
+        check: [3],
+        radiobutton: 0,
+        radio: 3,
         cascader: [2, 6],
         rate: 5,
       };
@@ -638,6 +639,7 @@ export default {
 | time          | &lt;el-time-picker&gt;                      | 时间选择         |
 | timerange     | &lt;el-time-picker is-range&gt;             | 时间范围选择     |
 | radio         | &lt;el-radio&gt;                            | 单选框           |
+| radiobutton   | &lt;el-radio-button&gt;                     | 单选框           |
 | check         | &lt;el-checkbox&gt;                         | 复选框           |
 | select        | &lt;el-select&gt;                           | 选择框           |
 | slider        | &lt;el-slider&gt;                           | 滑动选择框       |

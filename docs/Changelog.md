@@ -4,9 +4,17 @@ sidebarDepth: 0
 
 # 更新日志
 
+## 1.0.3 <small>2021-08-25</small>
+- #### 新增
+	- TablePage 组件增加 prop 属性 `button-style` 为组件默认按钮样式提供一定的定制自由度
+	- 组件全局 options 增加属性 `button-style` 和 `page-layout` 增加一定的主题定制自由度
+
+- #### 修复
+	- FormAuto 组件因 select等 输入框支持 number 值但async-validator无法正常验证，组件转换了类型导致的编辑 v-model 时值未对应选项问题。
+
 ## 1.0.2 <small>2021-08-24</small>
 - #### 新增
-	- TablePage 组件增加 prop 属性 `layout-type` 和 `button-type` 增加一定的主题定制自由度
+	- TablePage 组件增加 prop 属性 `layout-type` 增加一定的主题定制自由度
 	- TablePage 组件增加 getParams 函数以获取搜索项参数
 	- FormAuto 组件增加 `radiobutton` 单选框按钮的输入类型
 

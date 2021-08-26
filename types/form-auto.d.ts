@@ -23,6 +23,7 @@ export declare type ElFormAutoFieldType =
   | "daterange"
   | "datetimerange"
   | "radio"
+  | "radiobutton"
   | "check"
   | "select"
   | "cascader"
@@ -44,7 +45,7 @@ export declare interface ElFormAutoField {
   /**
    * 字段类型，根据字段类型使用不同的组件
    */
-  type?: ElFormAutoFieldType;
+  type: ElFormAutoFieldType;
   /**
    * 是否隐藏标签
    * @default false
@@ -100,10 +101,15 @@ export declare interface ElFormAutoField {
   /**
    * type为check时
    * 去除 全选复选框
-   * model为表单所有字段值
    * @default true
    */
   checkAll?: boolean;
+  /**
+   * type为select时
+   * select可多选
+   * @default true
+   */
+  multiple?: boolean;
   /**
    * type为 datetimerange,timerange,daterange,slider,numberrange 时 必填
    * 范围选择时返回的范围 值和会按顺序返回rangeName中的值
