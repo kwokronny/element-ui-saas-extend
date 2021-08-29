@@ -395,7 +395,7 @@ options 单独编写示例是为说明 options 在选项表单中有相对的复
 ```vue
 <template>
   <el-form-auto :data="form" ref="EditForm" v-model="model" label-width="70px">
-    <div>{{ model }}</div>
+    <el-button type="primary" @click="editOptionReshow">远程搜索选项回显</el-button>
   </el-form-auto>
 </template>
 <script>
@@ -410,7 +410,7 @@ export default {
           type: "select",
           style: "width:100%",
           options: () => {
-            return this.$axios.get("https://yapi.baidu.com/mock/13114/options").then((res) => {
+            return this.$axios.get("http://yapi.smart-xwork.cn/mock/90460/options").then((res) => {
               return res.data;
             });
           },
@@ -420,9 +420,10 @@ export default {
           label: "远程搜索",
           type: "select",
           style: "width:100%",
+          multiple:true,
           remote: true,
           options: (query) => {
-            return this.$axios.get("https://yapi.baidu.com/mock/13114/options?q=" + query).then((res) => {
+            return this.$axios.get("http://yapi.smart-xwork.cn/mock/90460/options?q=" + query).then((res) => {
               return res.data;
             });
           },
@@ -474,6 +475,12 @@ export default {
         },
       },
     };
+  },
+  methods: {
+    editOptionReshow() {
+      this.model.asyncSelect = { label: "测试", value: "123" };
+      this.model.remote = [{ label: "测试", value: "123" },{ label: "测试2", value: "1233" }];
+    },
   },
 };
 </script>

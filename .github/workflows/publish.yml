@@ -19,7 +19,13 @@ jobs:
     - run: yarn build
     - run: yarn build:theme
     - run: yarn remove element-ui vue -D
-    - run: yarn add element-ui@2.15.3 vue@2.6.11 -P
-    - run: npm publish --access public
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+    - run: yarn add element-ui vue -P
+    - name: Set Env
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+    - name: Publish Package 
+      run: |
+        npm version $RELEASE_VERSION
+        cat package.json
+    # - run: npm publish --access public
+    #   env:
+    #     NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}

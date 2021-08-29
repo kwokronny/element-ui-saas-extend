@@ -4,6 +4,14 @@ sidebarDepth: 0
 
 # 更新日志
 
+## 1.0.4 <small>2021-08-29</small>
+- #### 新增
+	- FormAuto 针对远程检索获取选项的 select 组件在编辑时的已选回显
+
+- #### 修复
+	- FormAuto 组件正则兼容问题导致 safari 无法打开
+
+
 ## 1.0.3 <small>2021-08-25</small>
 - #### 新增
 	- TablePage 组件增加 prop 属性 `button-style` 为组件默认按钮样式提供一定的定制自由度

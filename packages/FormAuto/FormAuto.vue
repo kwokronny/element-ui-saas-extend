@@ -328,12 +328,26 @@ export default class ElFormAuto extends Vue {
 			if (Object.keys(this.model).includes(name)) {
 				let value = _model[name];
 				let field = this.fields[name];
-				if (/radio|select|check/.test(field.type)) {
-					// 	debugger
+				if (/radio|select|check/.test(field.type) && Array.isArray(field.options)) {
+					// 远程获取选项框选项回显功能
+					if (value.label && value.value) {
+						if (field.options.findIndex((option: any) => option.value == value.value) == -1) {
+							field.options.splice(0, 0, value)
+						}
+						value = value.value;
+					}
 					if ((field.type == "check" || (field.type == "select" && field.multiple)) && Array.isArray(value)) {
-						value.forEach((val: string | number,idx:number) => {
-							value[idx] = `${val}`
-						})
+						for (let idx = 0; idx < value.length; idx++) {
+							let val = value[idx];
+							if (val.label && val.value) {
+								if (field.options.findIndex((option: any) => option.value == val.value) == -1) {
+									field.options.splice(0, 0, val)
+								}
+								value[idx] = val.value;
+							} else {
+								value[idx] = `${val}`
+							}
+						}
 					} else {
 						value = `${value}`;
 					}
@@ -401,9 +415,7 @@ export default class ElFormAuto extends Vue {
 			}
 
 			// 根据字段 type 设置表单占位字符串
-			if (/(date|time|rate|select)+(?<!range)$/g.test(item.type)) {
-				item.props.placeholder = item.props.placeholder || `请选择${item.label}`;
-			} else if (/range/g.test(item.type)) {
+			if (/range/g.test(item.type)) {
 				if (item.type == "numberrange") {
 					item.props.startPlaceholder = item.props.startPlaceholder || `最小${item.label}`;
 					item.props.endPlaceholder = item.props.endPlaceholder || `最大${item.label}`;
@@ -411,6 +423,8 @@ export default class ElFormAuto extends Vue {
 					item.props.startPlaceholder = item.props.startPlaceholder || `起始${item.label}`;
 					item.props.endPlaceholder = item.props.endPlaceholder || `结束${item.label}`;
 				}
+			} if (/date|time|datetime|select|week|year|month|dates/g.test(item.type)) {
+				item.props.placeholder = item.props.placeholder || `请选择${item.label}`;
 			} else {
 				item.props.placeholder = item.props.placeholder || `请输入${item.label}`;
 			}
