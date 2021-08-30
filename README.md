@@ -6,7 +6,7 @@
 
 由于近期工作主要偏向 SaaS 业务开发，开发内容在表单交互及表格上等开发重复性也很高，基于项目大多应用element套件开发，所以就萌发了整理个针对 saas业务 的element组件库saas扩展。
 
-- [扩展文档](https://kwokronny.top/document/element-ui-saas-extend)
+- [扩展文档](https://kwokronny.github.io/element-ui-saas-extend/)
 - [作者博客](https://kwokronny.top/)
 
 ## 特性
