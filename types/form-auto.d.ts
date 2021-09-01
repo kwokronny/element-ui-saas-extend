@@ -145,6 +145,6 @@ export declare class ElFormAuto extends ElForm {
   /** 所有表单项标签是否隐藏 */
   labelHidden: boolean;
   reset(): void;
-  getModel(name: string): any;
-  setModel(name: string, value: any): void;
+  getModel(): Record<string, any>;
+  setModel(model: Record<string, any>): void;
 }

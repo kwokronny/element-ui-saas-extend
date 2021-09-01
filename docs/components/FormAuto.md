@@ -269,6 +269,7 @@ export default {
     },
     setModel() {
       this.model = {
+        id: "123",
         text: "文本框",
         password: "password123456",
         date: "2021-01-10",
@@ -394,8 +395,9 @@ options 单独编写示例是为说明 options 在选项表单中有相对的复
 
 ```vue
 <template>
-  <el-form-auto :data="form" ref="EditForm" v-model="model" label-width="70px">
+  <el-form-auto :data="form" ref="EditForm" v-model="model" label-width="90px">
     <el-button type="primary" @click="editOptionReshow">远程搜索选项回显</el-button>
+    <el-button type="primary" @click="reset">重置</el-button>
   </el-form-auto>
 </template>
 <script>
@@ -420,7 +422,8 @@ export default {
           label: "远程搜索",
           type: "select",
           style: "width:100%",
-          multiple:true,
+          multiple: true,
+          required: true,
           remote: true,
           options: (query) => {
             return this.$axios.get("http://yapi.smart-xwork.cn/mock/90460/options?q=" + query).then((res) => {
@@ -479,8 +482,26 @@ export default {
   methods: {
     editOptionReshow() {
       this.model.asyncSelect = { label: "测试", value: "123" };
-      this.model.remote = [{ label: "测试", value: "123" },{ label: "测试2", value: "1233" }];
+      this.model.remote = [
+        { label: "测试", value: "123" },
+        { label: "测试2", value: "1233" },
+      ];
     },
+    reset(){
+      this.$refs["EditForm"].reset()
+      this.model.asyncSelect = { label: "测试", value: "123" };
+      this.model.remote = [
+        { label: "测试2", value: "123" },
+        { label: "测试3", value: "1233" },
+      ];
+    }
+  },
+  mounted() {
+    this.model.asyncSelect = { label: "测试", value: "123" };
+    this.model.remote = [
+      { label: "测试", value: "123" },
+      { label: "测试2", value: "1233" },
+    ];
   },
 };
 </script>
