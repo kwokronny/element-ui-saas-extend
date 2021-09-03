@@ -14,8 +14,12 @@ jobs:
       with:
         node-version: '14.16.1'
         registry-url: 'https://registry.npmjs.org'
-    - run: yarn install
-    - run: yarn build:theme
-    - run: yarn build:doc
-    - run: git push origin --delete gh-pages
-    - run: git subtree push --prefix=dist origin gh-pages
+      run: |
+        yarn install
+        yarn build:theme
+        yarn build:doc
+    - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@4.1.5
+        with:
+          branch: gh-pages
+          folder: dist
