@@ -14,12 +14,13 @@ jobs:
       with:
         node-version: '14.16.1'
         registry-url: 'https://registry.npmjs.org'
+    - name: Install and Build
       run: |
         yarn install
         yarn build:theme
         yarn build:doc
-    - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@4.1.5
-        with:
-          branch: gh-pages
-          folder: dist
+    - name: Deploy
+      uses: JamesIves/github-pages-deploy-action@4.1.5
+      with:
+        branch: gh-pages
+        folder: dist
