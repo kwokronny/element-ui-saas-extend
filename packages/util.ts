@@ -1,3 +1,4 @@
+import {omit} from "lodash";
 import { ElAutoMixinOptions, ElAutoOption } from "types/saas-extend";
 
 export async function transformOptions(options: ElAutoMixinOptions | ((query?: string) => any)): Promise<ElAutoOption[]> {
@@ -8,12 +9,14 @@ export async function transformOptions(options: ElAutoMixinOptions | ((query?: s
   const isArray: boolean = Array.isArray(options);
   for (const key in options) {
     const item: any = options[key];
+    let props = omit(item, ["label", "value", "disabled", "icon"])
     if (item) {
       arr.push({
         label: item.label || item,
         value: isArray ? (item.value === undefined ? item : item.value) : key,
         disabled: item.disabled || false,
         icon: item.icon || false,
+        props,
       });
     }
   }

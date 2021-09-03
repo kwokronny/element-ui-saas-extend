@@ -4,13 +4,23 @@ sidebarDepth: 0
 
 # 更新日志
 
+## 1.0.6 <small>2021-09-03</small>
+- #### 优化	
+	- TablePage 自定义列及重置逻辑
+	- TablePage enum 属性赋值方式优化，与 FormAuto 保持一致
+
+- #### 修复
+	- FormAuto 组件clearable无法设置为false问题
+	- FormAuto 组件部分验证规则问题
+	- types 修复 TablePage 声明
+	
 ## 1.0.5 <small>2021-09-01</small>
 - #### 优化
 	- FormAuto 组件初始化回显问题，及重置未重置options请求
 - #### 修复
 	- FormAuto 组件 reset 重置表单不彻底
 	- FormAuto 组件部分验证规则问题
-	- types 优化 vue 后缀声明module
+	- types 优化 FormAuto 声明
 
 ## 1.0.4 <small>2021-08-29</small>
 - #### 新增

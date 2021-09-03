@@ -17,4 +17,5 @@ jobs:
     - run: yarn install
     - run: yarn build:theme
     - run: yarn build:doc
+    - run: git push origin --delete gh-pages
     - run: git subtree push --prefix=dist origin gh-pages
