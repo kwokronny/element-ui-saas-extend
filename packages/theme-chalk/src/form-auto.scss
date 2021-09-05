@@ -1,3 +1,7 @@
 .el-form-auto div.el-form-auto-row {
   flex-flow: row wrap;
+
+  .el-form-item_hidden{
+    display: none;
+  }
 }

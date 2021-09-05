@@ -13,9 +13,11 @@ export class NumberRange extends ElNumberRange {}
 export declare interface ElAutoOption {
   icon?: string;
   label: string;
+  type?: "primary" | "warning" | "info" | "danger";
   value: string | number;
   disabled?: boolean;
   children?: ElAutoOption[];
+  props?: Record<string, any>;
 }
 export declare type ElAutoMixinOptions = Record<string | number, string | number> | Array<string | ElAutoOption>;
 
@@ -23,6 +25,7 @@ export interface SaaSInstallationOptions extends InstallationOptions {
   pickerOptions?: Record<"date" | "range", DatePickerOptions>;
   buttonStyle?: Record<"plain" | "round" | "size" | "style" | "class", string | boolean>;
   pageLayout?: string;
+  cacheStorage?: string;
 }
 
 export function install(vue: typeof Vue, options: SaaSInstallationOptions): void;

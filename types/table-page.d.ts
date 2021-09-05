@@ -34,7 +34,7 @@ export declare interface ElTablePageColumn {
   hide?: boolean;
   filters?: string | Array<string | any[]>;
   filtersFunc?: (value: string) => string;
-  enum?: Record<string | number, string>;
+  enum?: ElAutoMixinOptions | ((query?: string) => Promise<ElAutoMixinOptions>);
   splitChar?: string;
   search?: ElFormAutoField;
   addSearch?: Record<string, ElFormAutoField>;

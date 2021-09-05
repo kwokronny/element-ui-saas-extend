@@ -97,7 +97,7 @@ export declare interface ElFormAutoField {
    * 选项数组，支持Promise
    * @default false
    */
-  options?: ElAutoMixinOptions | ((query?: string) => any);
+  options?: ElAutoMixinOptions | ((query?: string) => Promise<ElAutoMixinOptions>);
   /**
    * type为check时
    * 去除 全选复选框
@@ -145,6 +145,6 @@ export declare class ElFormAuto extends ElForm {
   /** 所有表单项标签是否隐藏 */
   labelHidden: boolean;
   reset(): void;
-  getModel(name: string): any;
-  setModel(name: string, value: any): void;
+  getModel(): Record<string, any>;
+  setModel(model: Record<string, any>): void;
 }

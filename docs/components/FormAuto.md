@@ -35,6 +35,7 @@ export default {
         status: {
           label: "选择框",
           type: "select",
+          clearable: false,
           options: [
             {
               label: "选项1",
@@ -269,6 +270,7 @@ export default {
     },
     setModel() {
       this.model = {
+        id: "123",
         text: "文本框",
         password: "password123456",
         date: "2021-01-10",
@@ -387,15 +389,15 @@ options 单独编写示例是为说明 options 在选项表单中有相对的复
 1. `options` 值为 `["苹果", ...]` 文本数组时，`label` 与 `value` 皆为 "苹果"<br/>
 2. `options` 值为 `[{label: "苹果", value: "apple", icon:"el-icon-apple" }, ...]` 规范对象数组时，`label` 与 `value` 如规范对象指定一致<br/>
 3. `options` 值为 `{apple: "苹果", banana: "香蕉", ...}` 对象时，`label` 为值 `苹果`， `value` 为对你的键值 `apple`<br/>
-4. `options` 值为 `(query)=>{ return options }` 函数时，query 参数是当表单项 `remote: true` 时应用于远程搜索的，否则无视 query 参数，会在表单生成前或搜索时执行此函数，返回 `options` 的 `label`与`value`关系支持上面 3 项 格式<br/>
-5. `options` 值为 `async (query)=>{ return await $axios.get("options") }` 函数时，基本与第 4 项一致，仅是支持 Promise 返回 <br/>
+4. `options` 值为 `async (query?)=>{ return await $axios.get("options") }` 函数时，query 参数是当表单项 `remote: true` 时应用于远程搜索的，否则无视 query 参数，会在表单生成前或搜索时执行此函数，返回 `options` 的 `label`与`value`关系支持上面 3 项 格式 <br/>
 
 ::: demo
 
 ```vue
 <template>
-  <el-form-auto :data="form" ref="EditForm" v-model="model" label-width="70px">
+  <el-form-auto :data="form" ref="EditForm" v-model="model" label-width="90px">
     <el-button type="primary" @click="editOptionReshow">远程搜索选项回显</el-button>
+    <el-button type="primary" @click="reset">重置</el-button>
   </el-form-auto>
 </template>
 <script>
@@ -420,7 +422,8 @@ export default {
           label: "远程搜索",
           type: "select",
           style: "width:100%",
-          multiple:true,
+          multiple: true,
+          required: true,
           remote: true,
           options: (query) => {
             return this.$axios.get("http://yapi.smart-xwork.cn/mock/90460/options?q=" + query).then((res) => {
@@ -479,8 +482,26 @@ export default {
   methods: {
     editOptionReshow() {
       this.model.asyncSelect = { label: "测试", value: "123" };
-      this.model.remote = [{ label: "测试", value: "123" },{ label: "测试2", value: "1233" }];
+      this.model.remote = [
+        { label: "测试", value: "123" },
+        { label: "测试2", value: "1233" },
+      ];
     },
+    reset(){
+      this.$refs["EditForm"].reset()
+      this.model.asyncSelect = { label: "测试", value: "123" };
+      this.model.remote = [
+        { label: "测试2", value: "123" },
+        { label: "测试3", value: "1233" },
+      ];
+    }
+  },
+  mounted() {
+    this.model.asyncSelect = { label: "测试", value: "123" };
+    this.model.remote = [
+      { label: "测试", value: "123" },
+      { label: "测试2", value: "1233" },
+    ];
   },
 };
 </script>
@@ -536,21 +557,25 @@ export default {
           col: 12,
           label: "用户ID",
           type: "plain",
+          value:"未选择"
         },
         name: {
           col: 12,
           label: "姓名",
           type: "plain",
+          value:"未选择"
         },
         phone: {
           col: 12,
           label: "手机",
           type: "plain",
+          value:"未选择"
         },
         email: {
           col: 12,
           label: "邮箱",
           type: "plain",
+          value:"未选择"
         },
         color1: {
           col: 12,
@@ -615,7 +640,7 @@ export default {
 | placeholder     | 占位符                                                                                       | `array`                         | -      |
 | on              | 设置 type 对应组件的事件                                                                     | `object`                        | {}     |
 | rangeName       | 日期范围名 type 为 daterange/timerange/datetimerange/numberrange 选填                        | `array<string>`                 | false  |
-| options         | 控件选项，type 为 check/radio/select 必填                                                    | `object` / `array` / `Function` | []     |
+| options         | 控件选项，type 为 check/radio/select 必填，详情可参考 [options 设置](#options-设置)          | `object` / `array` / `Promise` | []     |
 | remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                       | false  |
 | notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                       | false  |
 | 表单相关设置    |                                                                                              |                                 |        |
@@ -629,11 +654,11 @@ export default {
 
 | 值            | 对应组件                                    | 描述             |
 | :------------ | :------------------------------------------ | :--------------- |
-| text          | &lt;el-input&gt;                            | 文本输入框       |
+| text          | &lt;el-input type="text"&gt;                            | 文本输入框       |
+| password      | &lt;el-input type="password"&gt;                            | 密码输入框       |
+| textarea      | &lt;el-input type="textarea"&gt;                            | 文本域           |
 | number        | &lt;el-input-number&gt;                     | 计数器           |
 | numberrange   | &lt;el-number-range&gt;                     | 数值范围         |
-| password      | &lt;el-input&gt;                            | 密码输入框       |
-| textarea      | &lt;el-input&gt;                            | 文本域           |
 | date          | &lt;el-date-picker type="date"&gt;          | 日期选择         |
 | year          | &lt;el-date-picker type="year"&gt;          | 日期选择         |
 | month         | &lt;el-date-picker type="month"&gt;         | 日期选择         |

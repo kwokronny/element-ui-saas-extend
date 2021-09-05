@@ -56,7 +56,12 @@ const webpackConfig = {
     minimizer: [
       new TerserPlugin({
         parallel: true,
-        cache: true
+        cache: true,
+        terserOptions: {
+          compress: {
+            drop_console: true,
+          },
+        },
       }),
     ],
   },
@@ -82,11 +87,11 @@ const webpackConfig = {
         use: [
           {
             loader: "babel-loader",
-						options: {
-							babelrc: false,
-							configFile: false,
-							presets: ["@vue/cli-plugin-babel/preset"],
-						},
+            options: {
+              babelrc: false,
+              configFile: false,
+              presets: ["@vue/cli-plugin-babel/preset"],
+            },
           },
           {
             loader: "ts-loader",
