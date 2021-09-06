@@ -4,6 +4,11 @@ sidebarDepth: 0
 
 # 更新日志
 
+## 1.0.7 <small>2021-09-06</small>
+
+- #### 修复
+	- 解决 TablePage enum 异常参数报错问题
+
 ## 1.0.6 <small>2021-09-03</small>
 - #### 优化	
 	- TablePage 自定义列及重置逻辑
@@ -28,7 +33,6 @@ sidebarDepth: 0
 
 - #### 修复
 	- FormAuto 组件正则兼容问题导致 safari 无法打开
-
 
 ## 1.0.3 <small>2021-08-25</small>
 - #### 新增

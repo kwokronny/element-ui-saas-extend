@@ -94,26 +94,31 @@
 							<dynamic-slot v-if="column.slot" :name="column.slot" :data="{row, column, index: $index}"></dynamic-slot>
 							<template v-else-if="column.enum">
 								<template v-if="Array.isArray(row[column.prop])">
-									<component
-										:is="column.enumTag||'span'"
-										style="margin-right: 5px;"
-										v-for="v in row[column.prop]"
-										:key="`column_${column.prop}_${v}`"
-										v-bind="column.enum[v].props"
-									>{{ column.enum[v].label }}</component>
+									<template v-for="v in row[column.prop]">
+										<component
+											:is="column.enumTag||'span'"
+											style="margin-right: 5px;"
+											:key="`column_${column.prop}_${v}`"
+											v-if="column.enum[v]"
+											v-bind="column.enum[v].props"
+										>{{ column.enum[v].label }}</component>
+									</template>
 								</template>
 								<template v-else-if="column.splitChar">
-									<component
-										:is="column.enumTag||'span'"
-										style="margin-right: 5px;"
-										v-for="v in row[column.prop].split(column.splitChar)"
-										:key="`column_${column.prop}_${v}`"
-										v-bind="column.enum[v].props"
-									>{{ column.enum[v].label }}</component>
+									<template v-for="v in row[column.prop].split(column.splitChar)">
+										<component
+											:is="column.enumTag||'span'"
+											style="margin-right: 5px;"
+											v-if="column.enum[v]"
+											:key="`column_${column.prop}_${v}`"
+											v-bind="column.enum[v].props"
+										>{{ column.enum[v].label }}</component>
+									</template>
 								</template>
 								<template v-else>
 									<component
 										:is="column.enumTag||'span'"
+										v-if="column.enum[row[column.prop]]"
 										v-bind="column.enum[row[column.prop]].props"
 									>{{ column.enum[row[column.prop]].label }}</component>
 								</template>

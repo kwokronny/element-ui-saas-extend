@@ -1,4 +1,4 @@
-import {omit} from "lodash";
+import { omit } from "lodash";
 import { ElAutoMixinOptions, ElAutoOption } from "types/saas-extend";
 
 export async function transformOptions(options: ElAutoMixinOptions | ((query?: string) => any)): Promise<ElAutoOption[]> {
@@ -9,7 +9,8 @@ export async function transformOptions(options: ElAutoMixinOptions | ((query?: s
   const isArray: boolean = Array.isArray(options);
   for (const key in options) {
     const item: any = options[key];
-    let props = omit(item, ["label", "value", "disabled", "icon"])
+    let props = {};
+    if (typeof item == "object") props = omit(item, ["label", "value", "disabled", "icon"]);
     if (item) {
       arr.push({
         label: item.label || item,
@@ -23,7 +24,7 @@ export async function transformOptions(options: ElAutoMixinOptions | ((query?: s
   return arr;
 }
 
-export function arrayToRecord(arr: any[], { key, value }: { key: string; value: string }): Record<string, any> {
+export function arrayToRecord(arr: any[], { key, value }: { key: string|"__index"; value: string }): Record<string, any> {
   const map: Record<string, any> = {};
   arr.forEach((item) => {
     map[`${item[key]}`] = Object.assign({ label: `${item[value]}` }, item);
