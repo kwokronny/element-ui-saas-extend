@@ -675,10 +675,7 @@ export default {
         {
           label: "状态",
           prop: "status",
-          enum: [
-            { label: "正常", value: "1", type: "primary" },
-            { label: "失效", value: "2", type: "warning" },
-          ],
+          enum: ["正常","失效"],
         },
         {
           label: "操作",
@@ -771,13 +768,13 @@ export default {
 | splitChar       | 仅 `enum` 值且数据值为序列化字符串时，设置列值分隔符 split 数据值                                                                                              | `string`                                                     | -      |
 | search          | 为此字段添加搜索项，参考 [添加搜索项](#添加搜索项)                                                                                                             | [FormAutoField](FormAuto.html#formautofield)                 | -      |
 | addSearch       | 为此字段后添加更多搜索项，参考 [添加搜索项](#添加搜索项)                                                                                                       | [Record<string, FormAutoField>](FormAuto.html#formautofield) | -      |
-| `[prop:string]` | 可直接追加 &lt;el-table-column&gt; 组件的 prop，参考 [&lt;el-table&gt;属性](https://element.eleme.io/#/zh-CN/component/table#table-attributes)                                                                                                                | `any`                                                        | -      |
+| `[prop:string]` | 可直接追加 &lt;el-table-column&gt; 组件的 prop，参考 [&lt;el-table&gt;属性](https://element.eleme.io/#/zh-CN/component/table#table-attributes)                 | `any`                                                        | -      |
 
 ### Event
 
-| 事件名称             | 说明                                                                                                 | 回调参数  |
-| :------------------- | :--------------------------------------------------------------------------------------------------- | :-------- |
-| saved-custom-columns | 保存自定义列设置                                                                                     | `setting` |
+| 事件名称             | 说明                                                                                             | 回调参数  |
+| :------------------- | :----------------------------------------------------------------------------------------------- | :-------- |
+| saved-custom-columns | 保存自定义列设置                                                                                 | `setting` |
 | `[event:name]`       | 可直接追加 [&lt;el-table&gt;事件](https://element.eleme.io/#/zh-CN/component/table#table-events) | -         |
 
 ### Method
