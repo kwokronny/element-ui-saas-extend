@@ -4,6 +4,11 @@ sidebarDepth: 0
 
 # 更新日志
 
+## 1.0.9 <small>2021-09-11</small>
+
+- #### 修复
+	- 解决 FormAuto 组件中 bindShow 时 布局 `<el-col>` 未跟着隐藏问题😭
+
 ## 1.0.8 <small>2021-09-11</small>
 
 - #### 优化

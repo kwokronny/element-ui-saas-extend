@@ -11,22 +11,23 @@
 		v-on="$listeners"
 	>
 		<slot name="prepend"></slot>
-		<component :is="inline ? 'span' : 'el-row'" class="el-form-auto-row" type="flex" :gutter="gutter">
+		<component
+			v-if="fields"
+			:is="inline ? 'span' : 'el-row'"
+			class="el-form-auto-row"
+			type="flex"
+			:gutter="gutter"
+		>
 			<!--  @slot 表单内首部插槽-->
-			<template v-if="fields">
+			<template v-for="(item, name) in fields">
 				<component
-					v-for="(item, name) in fields"
 					:is="inline ? 'span' : 'el-col'"
 					:span="item.col || 24"
+					v-if="!item.bindShow || item.bindShow(model)"
 					:class="{'el-form-item_hidden':item.type=='hidden'}"
 					:key="`col_${name}`"
 				>
-					<el-form-item
-						v-if="!item.bindShow || item.bindShow(model)"
-						:prop="name"
-						:label-width="item.labelWidth"
-						:key="`formItem_${name}`"
-					>
+					<el-form-item :prop="name" :label-width="item.labelWidth" :key="`formItem_${name}`">
 						<span slot="label" v-if="!labelHidden && !item.labelHidden">
 							{{ item.label || "" }}
 							<el-tooltip v-if="item.labelTooltip" :content="item.labelTooltip">
