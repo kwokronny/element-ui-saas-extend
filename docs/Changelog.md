@@ -4,6 +4,14 @@ sidebarDepth: 0
 
 # 更新日志
 
+## 1.0.8 <small>2021-09-11</small>
+
+- #### 优化
+	- NumberRange 组件clearable清空后，按element-ui设计，值为空
+
+- #### 修复
+	- 解决 FormAuto 组件中 范围 相关的输入框被清空后，按element-ui设计，将rangeName对应值设为`Null`，以便后端接收置空
+
 ## 1.0.7 <small>2021-09-06</small>
 
 - #### 修复

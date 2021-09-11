@@ -172,7 +172,7 @@ export default class ElNumberRange extends Vue {
 		this.showClose = false;
 		this.minValue = ""
 		this.maxValue = ""
-		this.$emit("input", [])
+		this.$emit("input", null)
 	}
 }
 </script>

@@ -27,15 +27,23 @@ export default {
           label: "文本框",
           type: "text",
         },
+        date: {
+          label: "日期",
+          type: "date",
+        },
         dateRange: {
           label: "日期范围",
           type: "daterange",
           rangeName: ["startDate", "endDate"],
         },
+        numberrange:{
+          label: "金额范围",
+          type: "numberrange",
+          rangeName: ["min", "max"],
+        },
         status: {
           label: "选择框",
           type: "select",
-          clearable: false,
           options: [
             {
               label: "选项1",
@@ -120,7 +128,6 @@ export default {
         id: {
           label: "id",
           type: "hidden",
-          numberType: true,
         },
         switch: {
           col: 4,
@@ -487,14 +494,14 @@ export default {
         { label: "测试2", value: "1233" },
       ];
     },
-    reset(){
-      this.$refs["EditForm"].reset()
+    reset() {
+      this.$refs["EditForm"].reset();
       this.model.asyncSelect = { label: "测试", value: "123" };
       this.model.remote = [
         { label: "测试2", value: "123" },
         { label: "测试3", value: "1233" },
       ];
-    }
+    },
   },
   mounted() {
     this.model.asyncSelect = { label: "测试", value: "123" };
@@ -557,25 +564,25 @@ export default {
           col: 12,
           label: "用户ID",
           type: "plain",
-          value:"未选择"
+          value: "未选择",
         },
         name: {
           col: 12,
           label: "姓名",
           type: "plain",
-          value:"未选择"
+          value: "未选择",
         },
         phone: {
           col: 12,
           label: "手机",
           type: "plain",
-          value:"未选择"
+          value: "未选择",
         },
         email: {
           col: 12,
           label: "邮箱",
           type: "plain",
-          value:"未选择"
+          value: "未选择",
         },
         color1: {
           col: 12,
@@ -640,7 +647,8 @@ export default {
 | placeholder     | 占位符                                                                                       | `array`                         | -      |
 | on              | 设置 type 对应组件的事件                                                                     | `object`                        | {}     |
 | rangeName       | 日期范围名 type 为 daterange/timerange/datetimerange/numberrange 选填                        | `array<string>`                 | false  |
-| options         | 控件选项，type 为 check/radio/select 必填，详情可参考 [options 设置](#options-设置)          | `object` / `array` / `Promise` | []     |
+| suffixTime      | type 为 daterange 选填，为日期范围增加 00:00:00 - 23:59:59 文本                              | `boolean`                       | false  |
+| options         | 控件选项，type 为 check/radio/select 必填，详情可参考 [options 设置](#options-设置)          | `object` / `array` / `Promise`  | []     |
 | remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                       | false  |
 | notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                       | false  |
 | 表单相关设置    |                                                                                              |                                 |        |
@@ -654,9 +662,9 @@ export default {
 
 | 值            | 对应组件                                    | 描述             |
 | :------------ | :------------------------------------------ | :--------------- |
-| text          | &lt;el-input type="text"&gt;                            | 文本输入框       |
-| password      | &lt;el-input type="password"&gt;                            | 密码输入框       |
-| textarea      | &lt;el-input type="textarea"&gt;                            | 文本域           |
+| text          | &lt;el-input type="text"&gt;                | 文本输入框       |
+| password      | &lt;el-input type="password"&gt;            | 密码输入框       |
+| textarea      | &lt;el-input type="textarea"&gt;            | 文本域           |
 | number        | &lt;el-input-number&gt;                     | 计数器           |
 | numberrange   | &lt;el-number-range&gt;                     | 数值范围         |
 | date          | &lt;el-date-picker type="date"&gt;          | 日期选择         |

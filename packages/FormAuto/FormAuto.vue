@@ -296,10 +296,10 @@ export default class ElFormAuto extends Vue {
 		let data: Record<string, any> = {},
 			model = this.model;
 		forEach(this.fields, (item: ElFormAutoField, name: string) => {
-			if (!item.notSubmit && model[name] != undefined) {
+			if (!item.notSubmit) {
 				if (item.rangeName && item.type && (/range$/g.test(item.type) || (item.type == "slider" && item.props?.range == true))) {
-					let [sn, en] = item.rangeName,
-						[sd, ed] = model[name];
+					let [sn, en] = item.rangeName;
+					let [sd, ed] = model[name] || [null, null];
 					data[sn] = sd;
 					data[en] = ed;
 					if (item.type == "daterange" && item.suffixTime == true) {
@@ -424,7 +424,7 @@ export default class ElFormAuto extends Vue {
 					item.props.startPlaceholder = item.props.startPlaceholder || `起始${item.label}`;
 					item.props.endPlaceholder = item.props.endPlaceholder || `结束${item.label}`;
 				}
-			} if (/date|time|datetime|select|week|year|month|dates/g.test(item.type)) {
+			} if (/date|time|datetime|select|week|year|month|dates|cascader/g.test(item.type)) {
 				item.props.placeholder = item.props.placeholder || `请选择${item.label}`;
 			} else {
 				item.props.placeholder = item.props.placeholder || `请输入${item.label}`;
