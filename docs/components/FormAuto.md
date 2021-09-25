@@ -36,7 +36,7 @@ export default {
           type: "daterange",
           rangeName: ["startDate", "endDate"],
         },
-        numberrange:{
+        numberrange: {
           label: "金额范围",
           type: "numberrange",
           rangeName: ["min", "max"],
@@ -396,7 +396,7 @@ options 单独编写示例是为说明 options 在选项表单中有相对的复
 1. `options` 值为 `["苹果", ...]` 文本数组时，`label` 与 `value` 皆为 "苹果"<br/>
 2. `options` 值为 `[{label: "苹果", value: "apple", icon:"el-icon-apple" }, ...]` 规范对象数组时，`label` 与 `value` 如规范对象指定一致<br/>
 3. `options` 值为 `{apple: "苹果", banana: "香蕉", ...}` 对象时，`label` 为值 `苹果`， `value` 为对你的键值 `apple`<br/>
-4. `options` 值为 `async (query?)=>{ return await $axios.get("options") }` 函数时，query 参数是当表单项 `remote: true` 时应用于远程搜索的，否则无视 query 参数，会在表单生成前或搜索时执行此函数，返回 `options` 的 `label`与`value`关系支持上面 3 项 格式 <br/>
+4. `options` 值为 `async (query?)=>{ return await $axios.get("options") }` 函数时，query 参数是当表单项为选择框时 且属性 `remote: true` 时应用于远程搜索的，否则无视 query 参数，会在表单生成前或搜索时执行此函数，除 cascader 组件的 options 仅支持第 2 项格式外，其余组件 options 返回的 `label`与`value`关系支持上面 3 项 格式 <br/>
 
 ::: demo
 
@@ -461,6 +461,17 @@ export default {
             },
             { label: "节点3", value: 3 },
           ],
+          style: "width:100%",
+        },
+        remoteCascader: {
+          col: 12,
+          label: "级联框",
+          type: "cascader",
+          options: () => {
+            return this.$axios.get("http://yapi.smart-xwork.cn/mock/90460/cascader").then((res) => {
+              return res.data;
+            });
+          },
           style: "width:100%",
         },
         radio: {

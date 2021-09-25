@@ -10,13 +10,14 @@ export async function transformOptions(options: ElAutoMixinOptions | ((query?: s
   for (const key in options) {
     const item: any = options[key];
     let props = {};
-    if (typeof item == "object") props = omit(item, ["label", "value", "disabled", "icon"]);
+    if (typeof item == "object") props = omit(item, ["label", "value", "disabled", "icon", "children"]);
     if (item) {
       arr.push({
         label: item.label || item,
         value: isArray ? (item.value === undefined ? item : item.value) : key,
         disabled: item.disabled || false,
         icon: item.icon || false,
+        children: item.children || [],
         props,
       });
     }
@@ -24,7 +25,7 @@ export async function transformOptions(options: ElAutoMixinOptions | ((query?: s
   return arr;
 }
 
-export function arrayToRecord(arr: any[], { key, value }: { key: string|"__index"; value: string }): Record<string, any> {
+export function arrayToRecord(arr: any[], { key, value }: { key: string | "__index"; value: string }): Record<string, any> {
   const map: Record<string, any> = {};
   arr.forEach((item) => {
     map[`${item[key]}`] = Object.assign({ label: `${item[value]}` }, item);

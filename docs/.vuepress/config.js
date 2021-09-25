@@ -7,6 +7,7 @@ module.exports = {
   themeConfig: {
     repo: "kwokronny/element-ui-saas-extend",
     repoLabel: "GitHub",
+    lastUpdated: '最近更新',
     sidebar: [
       "/Changelog",
       "/Installation",
@@ -16,6 +17,10 @@ module.exports = {
       },
       "/Donate",
     ],
+    nav: [
+      { text: '作者', link: 'https://kwokronny.top'},
+      { text: 'Gitee', link: 'https://gitee.com/kwokronny/element-ui-saas-extend' },
+    ]
   },
   configureWebpack: {
     resolve: {

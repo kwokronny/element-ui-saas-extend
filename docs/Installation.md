@@ -1,13 +1,11 @@
-# 快速上手
+# 安装
 
-## 安装
+## npm 安装
 ```shell
-yarn add element-ui-saas-extend
+yarn add element-ui-saas-extend -S
 // or
 npm install element-ui-saas-extend -S
 ```
-
-## 应用
 
 ```js static
 import Vue from "vue";
@@ -15,9 +13,18 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 Vue.use(ElementUI);
 
-import ElementSaaSExtend from "element-ui-saas-extend";
+import ElementUISaaSExtend from "element-ui-saas-extend";
 import 'element-ui-saas-extend/lib/theme-chalk/index.css';
-Vue.use(ElementSaaSExtend);
+Vue.use(ElementUISaaSExtend);
+```
+
+## CDN 引入
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.15.6/lib/theme-chalk/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui-saas-extend@latest/lib/theme-chalk/index.css">
+
+<script src="https://cdn.jsdelivr.net/npm/element-ui@2.15.6/lib/element-ui.common.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/element-ui-saas-extend@latest/lib/element-ui-saas-extend.min.js"></script>
 ```
 
 ## 全局配置

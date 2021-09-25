@@ -4,6 +4,11 @@ sidebarDepth: 0
 
 # 更新日志
 
+## 1.0.10 <small>2021-09-11</small>
+
+- #### 修复
+	- 解决 FormAuto 组件中 `<el-cascader>` 属性 options 无法支持异步获取
+
 ## 1.0.9 <small>2021-09-11</small>
 
 - #### 修复

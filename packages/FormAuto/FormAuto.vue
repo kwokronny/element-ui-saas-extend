@@ -44,10 +44,16 @@
 							<div v-bind="item.props">{{ model[name] }}</div>
 						</template>
 						<template v-else-if="/text|password|textarea/g.test(item.type)">
-							<el-input v-model="model[name]" :type="item.type" v-bind="item.props" v-on="item.on"></el-input>
+							<el-input
+								:name="name"
+								v-model="model[name]"
+								:type="item.type"
+								v-bind="item.props"
+								v-on="item.on"
+							></el-input>
 						</template>
 						<template v-else-if="item.type=='hidden'">
-							<el-input v-model="model[name]" type="hidden" v-bind="item.props"></el-input>
+							<el-input :name="name" v-model="model[name]" type="hidden" v-bind="item.props"></el-input>
 						</template>
 						<template v-else-if="item.type=='numberrange'">
 							<el-number-range v-model="model[name]" v-bind="item.props" v-on="item.on"></el-number-range>
@@ -154,7 +160,7 @@
 						<template v-else-if="item.type == 'cascader'">
 							<el-cascader
 								v-model="model[name]"
-								:options="item.options"
+								:options="Array.isArray(item.options) ? item.options : []"
 								v-bind="item.props"
 								v-on="item.on"
 							></el-cascader>
@@ -459,7 +465,7 @@ export default class ElFormAuto extends Vue {
 				item.props.clearable = item.props.clearable == false ? false : true
 			}
 
-			if (/select|radio|check/.test(item.type)) {
+			if (/select|radio|check|cascader/.test(item.type)) {
 				this.asyncOptions.push(item)
 			}
 
