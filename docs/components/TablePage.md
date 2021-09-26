@@ -16,7 +16,7 @@ pageClass: component-page
 
 ```vue
 <template>
-  <el-table-page ref="TablePage" border stripe :columns="columns" :page-size="10" row-key="id" :page-sizes="[10, 20, 30]" custom-columns="search_demo" :request="getList"></el-table-page>
+  <el-table-page ref="TablePage" border stripe :columns="columns" row-key="id" custom-columns="search_demo" :request="getList"></el-table-page>
 </template>
 <script>
 export default {
@@ -141,7 +141,7 @@ export default {
         this.$msgbox({
           title: "请求值",
           dangerouslyUseHTMLString: true,
-          message: `<pre>${JSON.stringify(search, undefined, 3)}</pre>`,
+          message: `<pre>${pageSize}${JSON.stringify(search, undefined, 3)}</pre>`,
         });
       }
       let Mock = this.$mock;
@@ -741,7 +741,6 @@ export default {
 | `[prop:string]` | 可追加 &lt;el-table&gt; 的 [属性](https://element.eleme.io/#/zh-CN/component/table#table-attributes)    | `any`                                                                                                                                           | -      |
 | 请求相关        |                                                                                                         |                                                                                                                                                 |        |        |
 | request         | 请求方法，参考 [添加搜索项](#添加搜索项)                                                                | `(page:number, searchField:Record<string,any>, pageSize:number, from:"page_change"|"request_change"|"search")=>{page, pageSize, total, record}` | -      | -      |
-| page-size       | 默认每页显示页数                                                                                        | `number`                                                                                                                                        | -      | -      |
 | page-layout     | 分页组件布局，参考 [文档 layout 属性](https://element.eleme.io/#/zh-CN/component/pagination#attributes) | `string`                                                                                                                                        | -      | -      |
 | page-sizes      | 分页组件每页显示个数选择器的选项设置                                                                    | `number[]`                                                                                                                                      | -      | -      |
 | 多选相关        | 参考 [示例](#多选批量操作)                                                                              |                                                                                                                                                 |        |        |

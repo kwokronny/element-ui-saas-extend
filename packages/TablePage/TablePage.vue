@@ -143,6 +143,7 @@
 					:page-sizes="pageSizes"
 					:total="total"
 					:layout="defaultPageLayout"
+					@size-change="handlePageChange"
 					@current-change="handlePageChange"
 				></el-pagination>
 				<slot name="page_append"></slot>
@@ -331,9 +332,9 @@ export default class ElTablePage extends Vue {
 	private record: Record<string, any>[] = []
 	private page: number = 1
 	private total: number = 0
-	@PropSync("pageSize", { type: Number, default: 15 }) limit!: number;
+	private limit: number =15;
 	@Prop(String) pageLayout!: string;
-	@Prop({ type: Array, default: () => [10, 15, 30, 50, 100] }) pageSizes!: number[];
+	@Prop({ type: Array, default: () => [15, 30, 50, 100] }) pageSizes!: number[];
 
 	get defaultPageLayout(): string {
 		return this.pageLayout || (this.$ELEMENT && this.$ELEMENT.pageLayout) || "total, sizes, prev, pager, next, jumper"
