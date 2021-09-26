@@ -1,7 +1,7 @@
 {
   "name": "element-ui-saas-extend",
   "description": "基于 Element UI 对 SaaS 平台常见交互开发的预设组件",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "main": "lib/element-ui-saas-extend.js",
   "typings": "types/index.d.ts",
   "license": "MIT",
