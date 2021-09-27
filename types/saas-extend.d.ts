@@ -23,9 +23,10 @@ export declare type ElAutoMixinOptions = Record<string | number, string | number
 
 export interface SaaSInstallationOptions extends InstallationOptions {
   pickerOptions?: Record<"date" | "range", DatePickerOptions>;
-  buttonStyle?: Record<"plain" | "round" | "size" | "style" | "class", string | boolean>;
-  pageLayout?: string;
-  cacheStorage?: string;
+  tablePage?: {
+    buttonStyle?: Record<"plain" | "round" | "size" | "style" | "class", string | boolean>;
+    pageLayout?: string;
+  };
 }
 
 export function install(vue: typeof Vue, options: SaaSInstallationOptions): void;

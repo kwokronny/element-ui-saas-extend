@@ -62,79 +62,81 @@
 					<slot name="table_button"></slot>
 				</div>
 			</div>
-			<el-table
-				ref="TablePage"
-				v-if="refresh"
-				:data="record"
-				@selection-change="handleSelectionChange"
-				v-bind="$attrs"
-				v-on="$listeners"
-				v-loading="loading"
-			>
-				<el-table-column
-					v-if="$attrs['row-key']"
-					:selectable="selectable"
-					type="selection"
-					reserve-selection
-				></el-table-column>
-				<template v-for="column in headers">
+			<div class="el-table-page_body">
+				<el-table
+					ref="TablePage"
+					v-if="refresh"
+					:data="record"
+					@selection-change="handleSelectionChange"
+					v-bind="$attrs"
+					v-on="$listeners"
+					v-loading="loading"
+				>
 					<el-table-column
-						v-if="!column.hide"
-						:fixed="column.fixed"
-						:key="`column_${column.prop}`"
-						v-bind="column.props"
-					>
-						<template slot="header" slot-scope="scope">
-							{{scope.column.label || " "}}
-							<el-tooltip v-if="column.labelTooltip" :content="column.labelTooltip">
-								<i class="el-icon-question"></i>
-							</el-tooltip>
-						</template>
-						<template slot-scope="{row, $index}">
-							<dynamic-slot v-if="column.slot" :name="column.slot" :data="{row, column, index: $index}"></dynamic-slot>
-							<template v-else-if="column.enum">
-								<template v-if="Array.isArray(row[column.prop])">
-									<template v-for="v in row[column.prop]">
-										<component
-											:is="column.enumTag||'span'"
-											style="margin-right: 5px;"
-											:key="`column_${column.prop}_${v}`"
-											v-if="column.enum[v]"
-											v-bind="column.enum[v].props"
-										>{{ column.enum[v].label }}</component>
-									</template>
-								</template>
-								<template v-else-if="column.splitChar">
-									<template v-for="v in row[column.prop].split(column.splitChar)">
-										<component
-											:is="column.enumTag||'span'"
-											style="margin-right: 5px;"
-											v-if="column.enum[v]"
-											:key="`column_${column.prop}_${v}`"
-											v-bind="column.enum[v].props"
-										>{{ column.enum[v].label }}</component>
-									</template>
-								</template>
-								<template v-else>
-									<component
-										:is="column.enumTag||'span'"
-										v-if="column.enum[row[column.prop]]"
-										v-bind="column.enum[row[column.prop]].props"
-									>{{ column.enum[row[column.prop]].label }}</component>
-								</template>
+						v-if="$attrs['row-key']"
+						:selectable="selectable"
+						type="selection"
+						reserve-selection
+					></el-table-column>
+					<template v-for="column in headers">
+						<el-table-column
+							v-if="!column.hide"
+							:fixed="column.fixed"
+							:key="`column_${column.prop}`"
+							v-bind="column.props"
+						>
+							<template slot="header" slot-scope="scope">
+								{{scope.column.label || " "}}
+								<el-tooltip v-if="column.labelTooltip" :content="column.labelTooltip">
+									<i class="el-icon-question"></i>
+								</el-tooltip>
 							</template>
-							<template v-else-if="column.filtersFunc">{{ column.filtersFunc(row[column.prop]) }}</template>
-							<template
-								v-else-if="column.formatter"
-							>{{ column.formatter(row,column,row[column.prop],$index) }}</template>
-							<template v-else>{{ row[column.prop] }}</template>
-							<!-- <template v-if="column.copy && !column.slot">
+							<template slot-scope="{row, $index}">
+								<dynamic-slot v-if="column.slot" :name="column.slot" :data="{row, column, index: $index}"></dynamic-slot>
+								<template v-else-if="column.enum">
+									<template v-if="Array.isArray(row[column.prop])">
+										<template v-for="v in row[column.prop]">
+											<component
+												:is="column.enumTag||'span'"
+												style="margin-right: 5px;"
+												:key="`column_${column.prop}_${v}`"
+												v-if="column.enum[v]"
+												v-bind="column.enum[v].props"
+											>{{ column.enum[v].label }}</component>
+										</template>
+									</template>
+									<template v-else-if="column.splitChar">
+										<template v-for="v in row[column.prop].split(column.splitChar)">
+											<component
+												:is="column.enumTag||'span'"
+												style="margin-right: 5px;"
+												v-if="column.enum[v]"
+												:key="`column_${column.prop}_${v}`"
+												v-bind="column.enum[v].props"
+											>{{ column.enum[v].label }}</component>
+										</template>
+									</template>
+									<template v-else>
+										<component
+											:is="column.enumTag||'span'"
+											v-if="column.enum[row[column.prop]]"
+											v-bind="column.enum[row[column.prop]].props"
+										>{{ column.enum[row[column.prop]].label }}</component>
+									</template>
+								</template>
+								<template v-else-if="column.filtersFunc">{{ column.filtersFunc(row[column.prop]) }}</template>
+								<template
+									v-else-if="column.formatter"
+								>{{ column.formatter(row,column,row[column.prop],$index) }}</template>
+								<template v-else>{{ row[column.prop] }}</template>
+								<!-- <template v-if="column.copy && !column.slot">
 								<i class="el-table-page_copy-icon el-icon-copy-document" title="复制"></i>
-							</template>-->
-						</template>
-					</el-table-column>
-				</template>
-			</el-table>
+								</template>-->
+							</template>
+						</el-table-column>
+					</template>
+				</el-table>
+			</div>
 			<slot name="table_append"></slot>
 			<div class="el-table-page_pagination">
 				<el-pagination
@@ -225,7 +227,7 @@ export default class ElTablePage extends Vue {
 	}) buttonStyle!: Record<string, any>;
 
 	get defaultButtonStyle(): Record<"size" | "plain" | "round", string | boolean> {
-		return this.buttonStyle || (this.$ELEMENT && this.$ELEMENT.buttonStyle) || {}
+		return this.buttonStyle || (this.$ELEMENT && this.$ELEMENT.tablePage?.buttonStyle) || {}
 	}
 
 	@Prop({ type: String, validator: (value: string) => { return (new RegExp("card|default")).test(value) }, default: "default" }) layoutType!: string
@@ -332,12 +334,12 @@ export default class ElTablePage extends Vue {
 	private record: Record<string, any>[] = []
 	private page: number = 1
 	private total: number = 0
-	private limit: number =15;
+	private limit: number = 15;
 	@Prop(String) pageLayout!: string;
 	@Prop({ type: Array, default: () => [15, 30, 50, 100] }) pageSizes!: number[];
 
 	get defaultPageLayout(): string {
-		return this.pageLayout || (this.$ELEMENT && this.$ELEMENT.pageLayout) || "total, sizes, prev, pager, next, jumper"
+		return this.pageLayout || (this.$ELEMENT && this.$ELEMENT.tablePage?.pageLayout) || "total, sizes, prev, pager, next, jumper"
 	}
 
 	@Watch("request", { immediate: true })
