@@ -4,6 +4,7 @@ sidebarDepth: 0
 
 # 更新日志
 
+## 1.0.13 <small>2021-09-27</small>
 ## 1.0.12 <small>2021-09-27</small>
 - #### 修复
 	- TablePage 切换页数问题

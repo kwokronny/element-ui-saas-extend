@@ -145,7 +145,7 @@
 					:page-sizes="pageSizes"
 					:total="total"
 					:layout="defaultPageLayout"
-					@size-change="search"
+					@size-change="search()"
 					@current-change="handlePageChange"
 				></el-pagination>
 				<slot name="page_append"></slot>

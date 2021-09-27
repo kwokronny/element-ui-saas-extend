@@ -141,7 +141,7 @@ export default {
         this.$msgbox({
           title: "请求值",
           dangerouslyUseHTMLString: true,
-          message: `<pre>${pageSize}${JSON.stringify(search, undefined, 3)}</pre>`,
+          message: `<pre>${page}${pageSize}${JSON.stringify(search, undefined, 3)}</pre>`,
         });
       }
       let Mock = this.$mock;
