@@ -1,6 +1,7 @@
-# 安装
+# Installation
 
-## npm 安装
+## NPM Installation
+
 ```shell
 yarn add element-ui-saas-extend -S
 # or
@@ -9,39 +10,39 @@ npm install element-ui-saas-extend -S
 
 ```js static
 import Vue from "vue";
-import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
+import ElementUI from "element-ui";
+import "element-ui/lib/theme-chalk/index.css";
 Vue.use(ElementUI);
 
 import ElementUISaaSExtend from "element-ui-saas-extend";
-import 'element-ui-saas-extend/lib/theme-chalk/index.css';
+import "element-ui-saas-extend/lib/theme-chalk/index.css";
 Vue.use(ElementUISaaSExtend);
 ```
 
-## CDN 引入
+## CDN Include
+
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.15.6/lib/theme-chalk/index.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui-saas-extend@latest/lib/theme-chalk/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.15.6/lib/theme-chalk/index.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui-saas-extend@latest/lib/theme-chalk/index.css" />
 
 <script src="https://cdn.jsdelivr.net/npm/element-ui@2.15.6/lib/element-ui.common.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/element-ui-saas-extend@latest/lib/element-ui-saas-extend.min.js"></script>
 ```
 
-## 全局配置
-> 1.0.11 版本结构调整
+## Global config
 
-用法同 Element UI 设置一致 [点击查看](https://element.eleme.io/#/zh-CN/component/quickstart#quan-ju-pei-zhi)
+> modify structure version 1.0.11
 
-组件会优先使用 props 设置的属性，如果未设置，再使用全局配置。
+Same of Element UI global config usage, [link](https://element.eleme.io/#/en-US/component/quickstart#quan-ju-pei-zhi)
 
-- **pickerOptions** 使用 FormAuto 及 TablePage 组件时，为 type 为 date 类的表单项设置默认配置 [点击查看](https://element.eleme.io/#/zh-CN/component/date-picker)，同 date-picker 组件中 `picker-options` 属性用法一致
-  - **range** 为 type 为 `daterange`、`datetimerange` 的控件类型项添加配置 options
-  - **date** 为 type 为 `date`、`datetime` 的控件类型项添加配置 options
-- **tablePage** 为 TablePage 组件提供默认样式
-  - **buttonStyle** 为 TablePage 组件提供默认的按钮样式 
-  - **pageLayout** 为 TablePage 组件提供默认的分页布局
+| attribute             | description                                                                                                          |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------- |
+| pickerOptions.range   | setting default pickerOptions for FormAuto component,when attribute `type` values is `daterange` or `datetimerange`. |
+| pickerOptions.date    | setting default pickerOptions for FormAuto component,when attribute `type` values is `date` or `datetime`.           |
+| tablePage.buttonStyle | setting default button style prop for TablePage within all `<el-button>`.                                            |
+| tablePage.pageLayout  | setting default attribute `paeg-layout` for TablePage within `<el-pagination>`.                                      |
 
-```ts
+```ts declare
 export interface SaaSInstallationOptions extends InstallationOptions {
   pickerOptions?: Record<"date" | "range", DatePickerOptions>;
   tablePage?: {
@@ -51,26 +52,26 @@ export interface SaaSInstallationOptions extends InstallationOptions {
 }
 ```
 
-
 ```js static
 Vue.prototype.$ELEMENT = {
   tablePage:{
     buttonStyle:{
-      round: true //统一圆角,
+      round: true,
+      plain: true,
     }
-    pageLayout: "total, pager", //分页布局
+    pageLayout: "total, pager",
   }
   pickerOptions: {
     date: {
       shortcuts: [
         {
-          text: "今天",
+          text: "Today",
           onClick(picker) {
             picker.$emit("pick", new Date());
           },
         },
         {
-          text: "昨天",
+          text: "Yesterday",
           onClick(picker) {
             const date = new Date();
             date.setTime(date.getTime() - 3600 * 1000 * 24);
@@ -78,7 +79,7 @@ Vue.prototype.$ELEMENT = {
           },
         },
         {
-          text: "一周前",
+          text: "Last week",
           onClick(picker) {
             const date = new Date();
             date.setTime(date.getTime() - 3600 * 1000 * 24 * 7);
@@ -90,7 +91,7 @@ Vue.prototype.$ELEMENT = {
     range: {
       shortcuts: [
         {
-          text: "近1周",
+          text: "Weeks",
           onClick(picker) {
             const end = new Date();
             const start = new Date();
@@ -99,7 +100,7 @@ Vue.prototype.$ELEMENT = {
           },
         },
         {
-          text: "近1月",
+          text: "Months",
           onClick(picker) {
             const end = new Date();
             const start = new Date();
@@ -108,7 +109,7 @@ Vue.prototype.$ELEMENT = {
           },
         },
         {
-          text: "近3月",
+          text: "3 Months",
           onClick(picker) {
             const end = new Date();
             const start = new Date();

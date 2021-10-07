@@ -193,7 +193,8 @@ import { Vue, Component, Prop, Ref, Watch, PropSync } from "vue-property-decorat
 import { transformOptions, arrayToRecord } from "../util"
 import { ElAutoOption } from "types/saas-extend.js"
 import ElFormAuto from "../FormAuto";
-import { cloneDeep, omit } from "lodash"
+import omit from "lodash/omit"
+import cloneDeep from "lodash/cloneDeep"
 
 interface ElTablePageColumnSort {
 	prop: string,
@@ -345,7 +346,7 @@ export default class ElTablePage extends Vue {
 	@Watch("request", { immediate: true })
 	private handleRequestChange() {
 		if (this.request instanceof Function) {
-			this.search(1, "request_change")
+			this.search(1)
 		}
 	}
 
@@ -354,9 +355,9 @@ export default class ElTablePage extends Vue {
 		this.search();
 	}
 
-	public async search(page: number = 1, from: string = "search"): Promise<void> {
+	public async search(page: number = 1): Promise<void> {
 		this.loading = true;
-		let data: Record<ElTablePageDataMap, any> = await this.request(page, this.filter, this.limit, from)
+		let data: Record<ElTablePageDataMap, any> = await this.request(page, this.filter, this.limit)
 		this.loading = false;
 		this.record = data.record
 		// this.prehandleRecord();
@@ -366,7 +367,7 @@ export default class ElTablePage extends Vue {
 	}
 
 	private handlePageChange(page: number) {
-		this.search(page, "page_change")
+		this.search(page)
 	}
 	// #endregion
 

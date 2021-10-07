@@ -4,6 +4,7 @@ import ElementUISaaSExtend from "../../packages/index.ts";
 import "../../packages/theme-chalk/lib/index.css";
 
 import axios from "axios";
+import locale from "element-ui/lib/locale/lang/en";
 
 import numeral from "numeral";
 import dayjs from "dayjs";
@@ -17,7 +18,7 @@ export default ({
   siteData, // 站点元数据
   isServer, // 当前应用配置是处于 服务端渲染 或 客户端
 }) => {
-  Vue.use(ElementUI);
+  Vue.use(ElementUI, { locale });
   Vue.prototype.$axios = axios;
   Vue.prototype.$mock = Mock;
 

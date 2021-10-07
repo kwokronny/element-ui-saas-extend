@@ -1,4 +1,4 @@
-import { omit } from "lodash";
+import omit from "lodash/omit";
 import { ElAutoMixinOptions, ElAutoOption } from "types/saas-extend";
 
 export async function transformOptions(options: ElAutoMixinOptions | ((query?: string) => any)): Promise<ElAutoOption[]> {

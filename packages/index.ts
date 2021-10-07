@@ -5,6 +5,8 @@ import { VueConstructor } from "vue/types/umd";
 
 const install = (Vue: VueConstructor, options: any = {}) => {
   Vue.prototype.$ELEMENT = Object.assign({}, Vue.prototype.$ELEMENT, options);
+  //@ts-ignore
+  // console.log(window.ELEMENT.local)
   Vue.component("ElNumberRange", NumberRange);
   Vue.component("ElFormAuto", FormAuto);
   Vue.component("ElTablePage", TablePage);

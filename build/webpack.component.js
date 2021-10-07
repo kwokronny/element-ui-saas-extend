@@ -2,6 +2,7 @@
 const path = require("path");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+const LodashModuleReplacementPlugin = require("lodash-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 
 const Components = {
@@ -91,6 +92,7 @@ const webpackConfig = {
               babelrc: false,
               configFile: false,
               presets: ["@vue/cli-plugin-babel/preset"],
+              plugins: ["lodash"],
             },
           },
           {
@@ -104,7 +106,7 @@ const webpackConfig = {
       },
     ],
   },
-  plugins: [new VueLoaderPlugin()],
+  plugins: [new VueLoaderPlugin(), new LodashModuleReplacementPlugin()],
 };
 if (process.env.IS_REPORT) {
   webpackConfig.plugins.push(

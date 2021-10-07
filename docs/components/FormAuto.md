@@ -4,14 +4,13 @@ pageClass: component-page
 
 # 表单 FormAuto
 
-因 Vue2.0 的编写风格，编写表单页面时，时常切换于 HTML 与逻辑编写之间，且配置复杂度，重复性工作多，布局复杂。通过整合组件，梳理表单重复点，尽可能少的配置完成表单编写，同时也提供动态插槽解决特殊情况下的表单编写，话不多话，我们看示例
+解决表单交互中开发重复性高、配置复杂等问题。
 
-## 基础内联表单
+## 内联表单
 
-支持多种常用输入控件、选项类控件提供多种赋值方式及表单项设置占用栅格数
+内联表单常用于搜索筛选交互
 
 ::: demo
-
 ```vue
 <template>
   <el-form-auto :data="form" :show-message="false" ref="FilterForm" v-model="model" label-width="70px" inline>
@@ -84,19 +83,15 @@ export default {
 ## 基础栅格表单
 
 非内联模式下，应用了 `<el-row>` 可对表单项进行布局，仅需为表单项配置 col 值
-::: tip
-表单项默认为 `required:true` 的表单项添加必填规则，可通过 addRule 增加更丰富的规则，同时推荐 VS Code 的插件 [any-rule](https://marketplace.visualstudio.com/items?itemName=russell.any-rule) ，方便快速完成正则验证。
-:::
 
 ::: demo
-
 ```vue
 <template>
+  <el-button type="primary" round @click="setModel">编辑</el-button>
+  <el-button type="primary" round @click="changeRule">改变规则</el-button>
   <el-form-auto :data="form" ref="EditForm" v-model="model" label-width="120px">
     <template>
-      <el-button type="primary" round @click="changeRule">改变规则</el-button>
-      <el-button type="primary" round @click="setModel">编辑</el-button>
-      <el-button type="primary" round @click="getValidModel">验证成功后获取数据</el-button>
+      <el-button type="primary" round @click="getValidModel">提交</el-button>
       <el-button type="primary" round @click="getModel">获取数据</el-button>
       <el-button type="primary" round @click="reset">重置</el-button>
     </template>

@@ -2,6 +2,7 @@
 home: true
 heroImage: /logo.png
 heroText: Element SaaS 扩展
+description: 基于 Element UI 对 SaaS 业务开发常见的交互组件。
 actionText: 搞起~
 actionLink: /Installation.html
 features:

@@ -17,7 +17,7 @@
     "form-auto",
     "saas"
   ],
-  "homepage": "https://kwokronny.top/document/element-ui-saas-extend",
+  "homepage": "https://kwokronny.gitee.io/element-ui-saas-extend",
   "style": "lib/theme-chalk/index.css",
   "bugs": {
     "url": "https://github.com/kwokronny/element-ui-saas-extend/issues"
@@ -56,6 +56,7 @@
     "@vue/eslint-config-typescript": "^7.0.0",
     "@vue/test-utils": "^1.0.3",
     "axios": "^0.21.1",
+    "babel-plugin-lodash": "^3.3.4",
     "chai": "^4.1.2",
     "cp-cli": "^2.0.0",
     "dayjs": "^1.10.5",
@@ -65,6 +66,7 @@
     "gulp-autoprefixer": "^8.0.0",
     "gulp-cssmin": "^0.2.0",
     "gulp-sass": "3.1.0",
+    "lodash-webpack-plugin": "^0.11.6",
     "mockjs": "^1.1.0",
     "numeral": "^2.0.6",
     "typescript": "^4.3.2",

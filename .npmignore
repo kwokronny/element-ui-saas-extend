@@ -3,6 +3,7 @@ node_modules
 docs
 .gitignore
 dist
+tests
 LICENSE
 
 .eslintrc.js

@@ -37,9 +37,9 @@
 						<template v-if="item.slot">
 							<dynamic-slot :name="item.slot" :data="{ item, model, name }"></dynamic-slot>
 						</template>
-						<template v-else-if="'component'==item.type">
+						<!-- <template v-else-if="'component'==item.type">
 							<component :is="item.component" v-bind="item.props" v-on="item.on"></component>
-						</template>
+						</template>-->
 						<template v-else-if="'plain' == item.type">
 							<div v-bind="item.props">{{ model[name] }}</div>
 						</template>
@@ -151,6 +151,7 @@
 									:key="`${name}_${key}`"
 									:label="option.label"
 									:value="`${option.value}`"
+									:disabled="option.disabled"
 								>
 									<i v-if="option.icon" :class="option.icon"></i>
 									<span>{{ option.label }}</span>
@@ -198,7 +199,10 @@ import {
 	Model,
 } from "vue-property-decorator";
 import { Form } from "element-ui";
-import { debounce, cloneDeep, forEach, omit } from "lodash";
+import debounce from "lodash/debounce";
+import cloneDeep from "lodash/cloneDeep";
+import forEach from "lodash/forEach";
+import omit from "lodash/omit";
 import { ElFormAutoField } from "../../types/form-auto";
 import { ElAutoMixinOptions, ElAutoOption } from "../../types/saas-extend"
 // @ts-ignore
@@ -332,7 +336,7 @@ export default class ElFormAuto extends Vue {
 		let _model = Object.assign({}, model);
 		for (let name in _model) {
 			if (Object.keys(this.model).includes(name)) {
-				if (!_model[name]) continue;
+				if (_model[name] !== undefined) continue;
 				let value = _model[name];
 				let field = this.fields[name];
 				if (/radio|select|check/.test(field.type) && Array.isArray(field.options)) {
