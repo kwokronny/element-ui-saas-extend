@@ -183,8 +183,7 @@
 	</div>
 </template>
 <script lang="ts">
-// @ts-ignore
-import DynamicSlot from "../components/DynamicSlot.js"
+import DynamicSlot from "../components/DynamicSlot"
 import { ElFormAutoField } from "../../types/form-auto"
 import ElTableDraggable from "element-ui-el-table-draggable"
 import { Table } from "element-ui"

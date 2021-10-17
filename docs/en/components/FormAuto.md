@@ -4,7 +4,7 @@ pageClass: component-page
 
 # FormAuto
 
-Settle development content repetitive and complicated in form interaction.
+Solve development content repetitive and complicated in form interaction.
 
 ## Inline Form
 

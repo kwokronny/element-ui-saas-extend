@@ -205,8 +205,7 @@ import forEach from "lodash/forEach";
 import omit from "lodash/omit";
 import { ElFormAutoField } from "../../types/form-auto";
 import { ElAutoMixinOptions, ElAutoOption } from "../../types/saas-extend"
-// @ts-ignore
-import DynamicSlot from "../components/DynamicSlot.js"
+import DynamicSlot from "../components/DynamicSlot"
 import { transformOptions } from "../util"
 
 @Component({
