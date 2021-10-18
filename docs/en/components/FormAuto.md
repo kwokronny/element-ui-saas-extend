@@ -8,7 +8,7 @@ Solve development content repetitive and complicated in form interaction.
 
 ## Inline Form
 
-Inline form is be usually used search interaction form.
+usually used search interaction form.
 
 ::: demo
 
@@ -79,14 +79,15 @@ export default {
 
 ## Basic Form
 
-Basic form is be usually used edit interaction form, use `<el-row>` component setting form layout.
+usually used edit interaction form, use `<el-row>` component setting form layout.
 
 ::: demo
 
 ```vue
 <template>
+  <el-button type="primary" round @click="edit">Edit</el-button>
   <el-button type="primary" round @click="changeRule">Change rule</el-button>
-  <el-button type="primary" round @click="setModel">Edit</el-button>
+
   <el-form-auto :data="form" ref="EditForm" v-model="model" label-width="120px">
     <template>
       <el-button type="primary" round @click="getValidModel">Valid Submit</el-button>
@@ -126,6 +127,9 @@ export default {
           col: 4,
           label: "switch",
           type: "switch",
+          activeValue: 1,
+          inactiveValue: 0,
+          value: 1,
           required: true,
         },
         slider: {
@@ -269,9 +273,10 @@ export default {
       this.form.check.required = false;
       this.form.datetimeRange.required = false;
     },
-    setModel() {
+    edit() {
       this.model = {
         id: "123",
+        switch: 0,
         text: "text",
         password: "GiBYRiKmY7fZ5",
         week: "2021-01-10",
@@ -370,13 +375,14 @@ export default {
 
 ## Setting options
 
-1. `options` standard value is `[{label: "Apple", value: 1, icon:"el-icon-apple", disabled:false }, ...]`
+1. `options` standard value is `[{label: "Apple", value: 1, icon:"el-icon-apple", disabled:false }, ...]`.
 2. `label` and `value` is "apple" when `options` value is `["apple", ...]`.
-3. `label` is options item value and `value` is options item key, when `options` is `{0: "apple", 2: "banana", ...}`
-4. when `options` value is promise function, will async request options data before form is generated .e.g `async (query?)=>{ return await $axios.get("options") }`, parameter `query` valid when attribute `remote` is true;
-5. options only supported standard format when `type: "cascader"`
+3. `label` is options item value and `value` is options item key, when `options` is `{0: "apple", 2: "banana", ...}`.
+4. when `options` value is promise function, will async request options data before form is generated .e.g `async (query?)=>{ return await $axios.get("options") }`, parameter `query` valid when attribute `remote` is true.
+5. options only supported standard format when `type: "cascader"`.
 
 ```typescript
+//options structure
 export declare interface ElAutoOption {
   icon?: string;
   label: string;
@@ -394,8 +400,8 @@ export declare type ElAutoMixinOptions = Record<string | number, string | number
 ```vue
 <template>
   <el-form-auto :data="form" ref="EditForm" v-model="model" label-width="160px">
-    <el-button type="primary" @click="editOptionReshow">远程搜索选项回显</el-button>
-    <el-button type="primary" @click="reset">重置</el-button>
+    <el-button type="primary" @click="editOptionReshow">Display</el-button>
+    <el-button type="primary" @click="reset">Reset</el-button>
   </el-form-auto>
 </template>
 <script>
@@ -410,8 +416,13 @@ export default {
           type: "select",
           style: "width:100%",
           options: () => {
-            return this.$axios.get("http://yapi.smart-xwork.cn/mock/90460/options").then((res) => {
-              return res.data;
+            return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
+              return res.data.map((item) => {
+                return {
+                  label: item.username,
+                  value: item.id,
+                };
+              });
             });
           },
         },
@@ -424,8 +435,15 @@ export default {
           required: true,
           remote: true,
           options: (query) => {
-            return this.$axios.get("http://yapi.smart-xwork.cn/mock/90460/options?q=" + query).then((res) => {
-              return res.data;
+            return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
+              return res.data
+                .filter((item) => item.username.indexOf(query) > -1)
+                .map((item) => {
+                  return {
+                    label: item.username,
+                    value: item.id,
+                  };
+                });
             });
           },
         },
@@ -459,7 +477,7 @@ export default {
           label: "cascader",
           type: "cascader",
           options: () => {
-            return this.$axios.get("http://yapi.smart-xwork.cn/mock/90460/cascader").then((res) => {
+            return axios.get("http://yapi.smart-xwork.cn/mock/90460/cascader").then((res) => {
               return res.data;
             });
           },
@@ -498,11 +516,6 @@ export default {
     },
     reset() {
       this.$refs["EditForm"].reset();
-      this.model.asyncSelect = { label: "test", value: "123" };
-      this.model.remote = [
-        { label: "test2", value: "123" },
-        { label: "test3", value: "1233" },
-      ];
     },
   },
   mounted() {
@@ -618,13 +631,13 @@ export default {
 
 ### Props
 
-| Attribute       | Description                  | Type                                                      | Accepted values | Default |
-| :-------------- | :--------------------------- | :-------------------------------------------------------- | :-------------- | ------- |
-| v-model         | binding values               | `object`                                                  | -               | {}      |
+| Attribute       | Description                  | Type                                             | Accepted values | Default |
+| :-------------- | :--------------------------- | :----------------------------------------------- | :-------------- | ------- |
+| v-model         | binding values               | `object`                                         | -               | {}      |
 | data            | form field config            | [`Record<string,FormAutoField>`](#formautofield) | -               | {}      |
-| gutter          | `<el-row>` attribute gutter  | `number`                                                  | -               | 15      |
-| label-hidden    | whether to hidden all label  | `boolean`                                                 | -               | false   |
-| `[prop:string]` | inherit `<el-form>` all prop | `any`                                                     | -               | -       |
+| gutter          | `<el-row>` attribute gutter  | `number`                                         | -               | 15      |
+| label-hidden    | whether to hidden all label  | `boolean`                                        | -               | false   |
+| `[prop:string]` | inherit `<el-form>` all prop | `any`                                            | -               | -       |
 
 ### FormAutoField
 

@@ -30,8 +30,8 @@
 						@click="search(1)"
 						:loading="loading"
 						v-bind="defaultButtonStyle"
-					>搜索</el-button>
-					<el-button type="default" @click="resetSearch" v-bind="defaultButtonStyle">重置</el-button>
+					>{{$t("tablepage.search")}}</el-button>
+					<el-button type="default" @click="resetSearch" v-bind="defaultButtonStyle">{{$t("tablepage.reset")}}</el-button>
 				</slot>
 			</el-form-auto>
 			<slot name="search_append"></slot>
@@ -43,9 +43,9 @@
 				<div>
 					<slot name="selection">
 						<span class="el-table-page_header-selected-text" v-if="$attrs['row-key']">
-							已选择
-							<b>{{multipleSelection.length}}</b> 条
-							<el-button type="text" @click="clearSelection">清空</el-button>
+							{{$t("tablepage.selection[0]")}}
+							<b>{{multipleSelection.length}}</b> {{$t("tablepage.selection[1]")}}
+							<el-button type="text" @click="clearSelection">{{$t("tablepage.clear")}}</el-button>
 						</span>
 					</slot>
 					<slot name="selection_right"></slot>
@@ -57,7 +57,7 @@
 							icon="el-icon-setting"
 							@click="openCustomColumnDialog"
 							v-bind="defaultButtonStyle"
-						>自定义列</el-button>
+						>{{$t("tablepage.customColumns")}}</el-button>
 					</slot>
 					<slot name="table_button"></slot>
 				</div>
@@ -151,24 +151,24 @@
 				<slot name="page_append"></slot>
 			</div>
 		</component>
-		<el-dialog v-if="customColumns" width="600px" :visible.sync="customColumnsDialog" title="自定义列">
-			<el-button type="text" @click="handleClickReset">重置列</el-button>
+		<el-dialog v-if="customColumns" width="600px" :visible.sync="customColumnsDialog" :title="$t('tablepage.customColumns')">
+			<el-button type="text" @click="handleClickReset">{{$t("tablepage.reset")}}</el-button>
 			<el-table-draggable>
 				<el-table :data="columnsSort" border height="300px">
-					<el-table-column label="排序" width="70px">
+					<el-table-column :label="$t('tablepage.sort')" width="70px">
 						<i class="el-icon-sort" style="cursor: move"></i>
 					</el-table-column>
-					<el-table-column label="表项" prop="label"></el-table-column>
-					<el-table-column label="固定" width="200px">
+					<el-table-column :label="$t('tablepage.column')" prop="label"></el-table-column>
+					<el-table-column :label="$t('tablepage.customColumns')" width="200px">
 						<template slot-scope="{row}">
 							<el-radio-group size="mini" v-model="row.fixed">
-								<el-radio-button label="left">左</el-radio-button>
-								<el-radio-button :label="false">否</el-radio-button>
-								<el-radio-button label="right">右</el-radio-button>
+								<el-radio-button label="left">{{$t("tablepage.left")}}</el-radio-button>
+								<el-radio-button :label="false">{{$t("tablepage.none")}}</el-radio-button>
+								<el-radio-button label="right">{{$t("tablepage.right")}}</el-radio-button>
 							</el-radio-group>
 						</template>
 					</el-table-column>
-					<el-table-column label="隐藏" width="90px">
+					<el-table-column :label="$t('tablepage.hide')" width="90px">
 						<template slot-scope="{row}">
 							<el-switch v-model="row.hide"></el-switch>
 						</template>
@@ -176,8 +176,8 @@
 				</el-table>
 			</el-table-draggable>
 			<div slot="footer">
-				<el-button type="text" v-bind="defaultButtonStyle" @click="handleClickClose">取消</el-button>
-				<el-button type="primary" v-bind="defaultButtonStyle" @click="handleClickSave">保存</el-button>
+				<el-button type="text" v-bind="defaultButtonStyle" @click="handleClickClose">{{$t("tablepage.cancel")}}</el-button>
+				<el-button type="primary" v-bind="defaultButtonStyle" @click="handleClickSave">{{$t("tablepage.save")}}</el-button>
 			</div>
 		</el-dialog>
 	</div>
@@ -194,6 +194,7 @@ import { ElAutoOption } from "types/saas-extend.js"
 import ElFormAuto from "../FormAuto";
 import omit from "lodash/omit"
 import cloneDeep from "lodash/cloneDeep"
+import locale from "../../src/mixin/locale"
 
 interface ElTablePageColumnSort {
 	prop: string,
@@ -207,6 +208,7 @@ interface ElTablePageColumnSort {
 	components: {
 		DynamicSlot, ElTableDraggable, ElFormAuto
 	},
+	mixins: [locale],
 	provide() {
 		return {
 			slotRoot: this

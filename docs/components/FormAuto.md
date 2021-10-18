@@ -8,7 +8,7 @@ pageClass: component-page
 
 ## 内联表单
 
-内联表单常用于搜索筛选交互
+常用于搜索筛选交互。
 
 ::: demo
 ```vue
@@ -82,7 +82,7 @@ export default {
 
 ## 基础栅格表单
 
-非内联模式下，应用了 `<el-row>` 可对表单项进行布局，仅需为表单项配置 col 值
+常用于编辑交互，应用了 `<el-row>` 可对表单项进行布局。
 
 ::: demo
 ```vue
@@ -316,9 +316,7 @@ export default {
 
 ## 绑定显隐
 
-::: tip
-为完成如根据不同选项而需要增加填写项的复杂表单需求，为表单项增加 `bindShow` 属性，自由绑定显示
-:::
+表单项增加 `bindShow` 属性，解决复杂表单交互
 
 ::: demo
 
@@ -384,14 +382,24 @@ export default {
 
 ## options 设置
 
-options 单独编写示例是为说明 options 在选项表单中有相对的复杂性，需要适应不同的使用情况。<br/>
-
-主要围绕 `label [显示标签]`, `value [值]` 的取值：<br/>
-
+1. `options` 标准规范值是 `[{label: "苹果", value: "apple", icon:"el-icon-apple", disabled: false }, ...]` <br/>
 1. `options` 值为 `["苹果", ...]` 文本数组时，`label` 与 `value` 皆为 "苹果"<br/>
-2. `options` 值为 `[{label: "苹果", value: "apple", icon:"el-icon-apple" }, ...]` 规范对象数组时，`label` 与 `value` 如规范对象指定一致<br/>
 3. `options` 值为 `{apple: "苹果", banana: "香蕉", ...}` 对象时，`label` 为值 `苹果`， `value` 为对你的键值 `apple`<br/>
-4. `options` 值为 `async (query?)=>{ return await $axios.get("options") }` 函数时，query 参数是当表单项为选择框时 且属性 `remote: true` 时应用于远程搜索的，否则无视 query 参数，会在表单生成前或搜索时执行此函数，除 cascader 组件的 options 仅支持第 2 项格式外，其余组件 options 返回的 `label`与`value`关系支持上面 3 项 格式 <br/>
+4. `options` 值为 `async (query?)=>{ return await $axios.get("options") }` 的 Promise函数时，会在表单生成前执行，query 参数是当 `{type: "select",remote:true}` 时应用于远程搜索。<br/>
+5. `type: "cascader"` 级联选择框只支持应用标准规范值。
+
+```typescript
+export declare interface ElAutoOption {
+  icon?: string;
+  label: string;
+  type?: "primary" | "warning" | "info" | "danger";
+  value: string | number;
+  disabled?: boolean;
+  children?: ElAutoOption[];
+  props?: Record<string, any>;
+}
+export declare type ElAutoMixinOptions = Record<string | number, string | number> | Array<string | ElAutoOption>;
+```
 
 ::: demo
 
@@ -414,8 +422,13 @@ export default {
           type: "select",
           style: "width:100%",
           options: () => {
-            return this.$axios.get("http://yapi.smart-xwork.cn/mock/90460/options").then((res) => {
-              return res.data;
+            return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
+              return res.data.map(item=>{
+                return {
+                  label: item.username,
+                  value: item.id
+                }
+              });
             });
           },
         },
@@ -428,8 +441,15 @@ export default {
           required: true,
           remote: true,
           options: (query) => {
-            return this.$axios.get("http://yapi.smart-xwork.cn/mock/90460/options?q=" + query).then((res) => {
-              return res.data;
+            return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
+              return res.data
+                .filter((item) => item.username.indexOf(query) > -1)
+                .map((item) => {
+                  return {
+                    label: item.username,
+                    value: item.id,
+                  };
+                });
             });
           },
         },
@@ -463,7 +483,7 @@ export default {
           label: "级联框",
           type: "cascader",
           options: () => {
-            return this.$axios.get("http://yapi.smart-xwork.cn/mock/90460/cascader").then((res) => {
+            return axios.get("http://yapi.smart-xwork.cn/mock/90460/cascader").then((res) => {
               return res.data;
             });
           },

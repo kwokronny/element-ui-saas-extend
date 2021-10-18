@@ -132,44 +132,47 @@ export default {
     };
   },
   methods: {
-    getList(page = 1, search, pageSize, from) {
-      if (from == "search") {
-        this.$msgbox({
-          title: "requery parameter",
-          dangerouslyUseHTMLString: true,
-          message: `<pre>${page}${pageSize}${JSON.stringify(search, undefined, 3)}</pre>`,
-        });
-      }
-      let Mock = this.$mock;
-      return new Promise((resolve) => {
+    getList(page = 1, search, pageSize) {
+      return axios.get("http://yapi.smart-xwork.cn/mock/90460/page").then(function(ret) {
         let baseId = (page - 1) * pageSize;
-        let data = Mock.mock({
+        ret.data.data.map();
+        return {
           page,
-          total: 500,
+          total: 100,
           pageSize: pageSize,
-          [`record|${pageSize}`]: [
-            {
-              "id|+1": baseId,
-              name: "@name",
-              email: "@email",
-              level: "@integer(1,100)",
-              phone: /^1[387][0-9]{9}$/,
-              address: "@province@city",
-              idNumber: /^[1-9]\d{5}(?:18|19|20)\d{2}(?:0[1-9]|10|11|12)(?:0[1-9]|[1-2]\d|30|31)\d{3}[\dXx]$/,
-              score: "@natural(0,9000)",
-              balance: "@float(0,9000)",
-              date: "2021-05-10 11:21:00",
-              status: "@integer(1,2)",
-              tags: "1,2,3",
-              tagArr: [1, 2, 3],
-            },
-          ],
-        });
-        setTimeout(function() {
-          // return data;
-          resolve(data);
-        }, 1000);
+          record: ret.data.data.filter(function(item,index){return index>baseId && index<baseId*pageSize}).map(function(item){
+            return item;
+          })
+        };
       });
+      // return new Promise((resolve) => {
+      //   let data = Mock.mock({
+      //     page,
+      //     total: 500,
+      //     pageSize: pageSize,
+      //     [`record|${pageSize}`]: [
+      //       {
+      //         "id|+1": baseId,
+      //         name: "@name",
+      //         email: "@email",
+      //         level: "@integer(1,100)",
+      //         phone: /^1[387][0-9]{9}$/,
+      //         address: "@province@city",
+      //         idNumber: /^[1-9]\d{5}(?:18|19|20)\d{2}(?:0[1-9]|10|11|12)(?:0[1-9]|[1-2]\d|30|31)\d{3}[\dXx]$/,
+      //         score: "@natural(0,9000)",
+      //         balance: "@float(0,9000)",
+      //         date: "2021-05-10 11:21:00",
+      //         status: "@integer(1,2)",
+      //         tags: "1,2,3",
+      //         tagArr: [1, 2, 3],
+      //       },
+      //     ],
+      //   });
+      //   setTimeout(function() {
+      //     // return data;
+      //     resolve(data);
+      //   }, 1000);
+      // });
     },
   },
 };
@@ -800,4 +803,3 @@ export default {
 | table_prepend        | slot before table.                                                                                          |
 | table_append         | slot after table.                                                                                           |
 | page_append          | slot after pagination.                                                                                      |
-

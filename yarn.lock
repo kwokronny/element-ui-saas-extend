@@ -7485,7 +7485,7 @@ locate-path@^5.0.0:
 
 lodash-webpack-plugin@^0.11.6:
   version "0.11.6"
-  resolved "https://registry.npm.taobao.org/lodash-webpack-plugin/download/lodash-webpack-plugin-0.11.6.tgz#8204c6b78beb62ce5211217dfe783c21557ecd33"
+  resolved "https://registry.npmmirror.com/lodash-webpack-plugin/download/lodash-webpack-plugin-0.11.6.tgz#8204c6b78beb62ce5211217dfe783c21557ecd33"
   integrity sha1-ggTGt4vrYs5SESF9/ng8IVV+zTM=
   dependencies:
     lodash "^4.17.20"

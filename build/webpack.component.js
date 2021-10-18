@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+
 const path = require("path");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
@@ -11,6 +12,8 @@ const Components = {
   "table-page": "./packages/TablePage/index.ts",
   "number-range": "./packages/NumberRange/index.ts",
 };
+
+// console.log(process.argv)
 
 const webpackConfig = {
   mode: "production",

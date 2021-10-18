@@ -4,7 +4,7 @@ pageClass: component-page
 
 # 表格页面 TablePage
 
-在日常管理业务中，表格页面的应用率非常的高，将 `<el-table>` 与 `<el-form-auto>` 结合，更快的完成表格页面，在配置 表格列的同时，可顺带配置搜索项，更多玩法看示例。
+将 `<el-table>` 与 `<el-form-auto>` 结合更快的完成常用表格页面。
 
 ## 添加搜索项
 
@@ -137,13 +137,6 @@ export default {
   },
   methods: {
     getList(page = 1, search, pageSize, from) {
-      if (from == "search") {
-        this.$msgbox({
-          title: "请求值",
-          dangerouslyUseHTMLString: true,
-          message: `<pre>${page}${pageSize}${JSON.stringify(search, undefined, 3)}</pre>`,
-        });
-      }
       let Mock = this.$mock;
       return new Promise((resolve) => {
         let baseId = (page - 1) * pageSize;

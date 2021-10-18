@@ -37,9 +37,9 @@
 						<template v-if="item.slot">
 							<dynamic-slot :name="item.slot" :data="{ item, model, name }"></dynamic-slot>
 						</template>
-						<!-- <template v-else-if="'component'==item.type">
+						<template v-else-if="'component'==item.type">
 							<component :is="item.component" v-bind="item.props" v-on="item.on"></component>
-						</template>-->
+						</template>
 						<template v-else-if="'plain' == item.type">
 							<div v-bind="item.props">{{ model[name] }}</div>
 						</template>
@@ -125,7 +125,7 @@
 								v-model="check[name]"
 								style="margin-right: 30px"
 								@change="checkAll(name)"
-							>全选</el-checkbox>
+							>{{$t("formauto.checkAll")}}</el-checkbox>
 							<el-checkbox-group
 								v-model="model[name]"
 								style="display: inline-block"
@@ -207,6 +207,8 @@ import { ElFormAutoField } from "../../types/form-auto";
 import { ElAutoMixinOptions, ElAutoOption } from "../../types/saas-extend"
 import DynamicSlot from "../components/DynamicSlot"
 import { transformOptions } from "../util"
+import locale from "../../src/mixin/locale"
+import { t } from "../../src/locale"
 
 @Component({
 	name: "ElFormAuto",
@@ -215,6 +217,7 @@ import { transformOptions } from "../util"
 			slotRoot: this
 		}
 	},
+	mixins: [locale],
 	components: {
 		DynamicSlot
 	}
@@ -334,11 +337,11 @@ export default class ElFormAuto extends Vue {
 		if (!this.isRender) return
 		let _model = Object.assign({}, model);
 		for (let name in _model) {
-			if (Object.keys(this.model).includes(name)) {
-				if (_model[name] !== undefined) continue;
+			if (Object.keys(_model).indexOf(name) > -1) {
+				if (_model[name] === undefined) break;
 				let value = _model[name];
 				let field = this.fields[name];
-				if (/radio|select|check/.test(field.type) && Array.isArray(field.options)) {
+				if (field && /radio|select|check/.test(field.type) && Array.isArray(field.options)) {
 					// 远程获取选项框选项回显功能
 					if (value && value.label && value.value) {
 						if (field.options.findIndex((option: any) => option.value == value.value) == -1) {
@@ -428,16 +431,16 @@ export default class ElFormAuto extends Vue {
 			// 根据字段 type 设置表单占位字符串
 			if (/range/g.test(item.type)) {
 				if (item.type == "numberrange") {
-					item.props.startPlaceholder = item.props.startPlaceholder || `最小${item.label}`;
-					item.props.endPlaceholder = item.props.endPlaceholder || `最大${item.label}`;
+					item.props.startPlaceholder = item.props.startPlaceholder || `${t("formauto.min")}${item.label}`;
+					item.props.endPlaceholder = item.props.endPlaceholder || `${t("formauto.max")}${item.label}`;
 				} else {
-					item.props.startPlaceholder = item.props.startPlaceholder || `起始${item.label}`;
-					item.props.endPlaceholder = item.props.endPlaceholder || `结束${item.label}`;
+					item.props.startPlaceholder = item.props.startPlaceholder || `${t("formauto.start")}${item.label}`;
+					item.props.endPlaceholder = item.props.endPlaceholder || `${t("formauto.end")}${item.label}`;
 				}
 			} if (/date|time|datetime|select|week|year|month|dates|cascader/g.test(item.type)) {
-				item.props.placeholder = item.props.placeholder || `请选择${item.label}`;
+				item.props.placeholder = item.props.placeholder || `${t("formauto.pleaseSelect")}${item.label}`;
 			} else {
-				item.props.placeholder = item.props.placeholder || `请输入${item.label}`;
+				item.props.placeholder = item.props.placeholder || `${t("formauto.pleaseInput")}${item.label}`;
 			}
 
 			// 针对日期时间类型组件设置统一日期格式及显示格式
@@ -544,7 +547,7 @@ export default class ElFormAuto extends Vue {
 						})
 					}
 				})
-			})).then(() => {
+			})).finally(() => {
 				this.canRender()
 			})
 		} else {

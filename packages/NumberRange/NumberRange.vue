@@ -40,11 +40,13 @@
 	</div>
 </template>
 <script lang="ts">
+import { Vue, Component, Model, Prop, Inject, Watch, Emit, Ref } from "vue-property-decorator"
 //@ts-ignore
 import Emitter from 'element-ui/src/mixins/emitter.js';
 import { Form, FormItem } from "element-ui";
 import { isNumber } from "lodash"
-import { Vue, Component, Model, Prop, Inject, Watch, Emit, Ref } from "vue-property-decorator"
+import { t } from "../../src/locale"
+
 @Component({
 	name: "ElNumberRange",
 	mixins: [Emitter]
@@ -103,8 +105,8 @@ export default class ElNumberRange extends Vue {
 		this.$on('fieldReset', this.handleClickClear);
 	}
 
-	@Prop({ type: String, default: "最小值" }) startPlaceholder!: string
-	@Prop({ type: String, default: "最大值" }) endPlaceholder!: string
+	@Prop({ type: String, default: () => t("numberrange.min") }) startPlaceholder!: string
+	@Prop({ type: String, default: () => t("numberrange.max") }) endPlaceholder!: string
 	@Prop({ type: String, default: "-" }) rangeSeparator!: string
 
 	@Prop(Boolean) disabled!: boolean;
