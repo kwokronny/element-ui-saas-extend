@@ -11,6 +11,14 @@ h2 {
 	background: rgba(243, 245, 246, 1);
 }
 
+.custom-block {
+	background: rgba(243, 245, 246, 1);
+
+	&.tip {
+		border-color: $accentColor;
+	}
+}
+
 .component-page .page {
 	.theme-default-content, .page-nav {
 		max-width: none;
@@ -22,8 +30,34 @@ h2 {
 	max-width: inherit !important;
 }
 
+table {
+	border-radius: 4px;
+	min-width: 100%;
+	display: table;
+	border-color: transparent;
+	border: 1px solid $borderColor;
+}
+
+th, td {
+	border: none;
+	border-right: 1px solid $borderColor;
+
+	&:last-child {
+		border: none;
+	}
+}
+
 tr {
 	line-height: 1.5em;
+
+	&:nth-child(2n) {
+		background: none;
+	}
+}
+
+thead tr:first-child {
+	border: none;
+	background: #f3f5f6;
 }
 
 .el-table {
