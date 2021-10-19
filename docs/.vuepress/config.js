@@ -27,7 +27,10 @@ module.exports = {
         lastUpdated: "最近更新",
         sidebar: [
           "/Changelog",
-          "/Installation",
+          {
+            title: "开发指南",
+            children: ["/Installation", "/I18n"],
+          },
           {
             title: "组件",
             children: ["/components/NumberRange", "/components/FormAuto", "/components/TablePage"],
@@ -49,7 +52,10 @@ module.exports = {
         ],
         sidebar: [
           "/en/Changelog",
-          "/en/Installation",
+          {
+            title: "Development Guide",
+            children: ["/en/Installation", "/en/I18n"],
+          },
           {
             title: "Components",
             children: ["/en/components/NumberRange", "/en/components/FormAuto", "/en/components/TablePage"],

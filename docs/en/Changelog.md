@@ -4,6 +4,12 @@ sidebarDepth: 0
 
 # Release Log
 
+## 1.0.14 <small>2021-09-27</small>
+- #### Feature
+	- support internationalization Chinese simplified
+- #### Fix
+	- component FormAuto switch pageSize emit refresh error
+
 ## 1.0.13 <small>2021-09-27</small>
 ## 1.0.12 <small>2021-09-27</small>
 - #### Fix

@@ -31,7 +31,11 @@
 						:loading="loading"
 						v-bind="defaultButtonStyle"
 					>{{$t("tablepage.search")}}</el-button>
-					<el-button type="default" @click="resetSearch" v-bind="defaultButtonStyle">{{$t("tablepage.reset")}}</el-button>
+					<el-button
+						type="default"
+						@click="resetSearch"
+						v-bind="defaultButtonStyle"
+					>{{$t("tablepage.reset")}}</el-button>
 				</slot>
 			</el-form-auto>
 			<slot name="search_append"></slot>
@@ -44,7 +48,8 @@
 					<slot name="selection">
 						<span class="el-table-page_header-selected-text" v-if="$attrs['row-key']">
 							{{$t("tablepage.selection[0]")}}
-							<b>{{multipleSelection.length}}</b> {{$t("tablepage.selection[1]")}}
+							<b>{{multipleSelection.length}}</b>
+							{{$t("tablepage.selection[1]")}}
 							<el-button type="text" @click="clearSelection">{{$t("tablepage.clear")}}</el-button>
 						</span>
 					</slot>
@@ -78,11 +83,11 @@
 						type="selection"
 						reserve-selection
 					></el-table-column>
-					<template v-for="column in headers">
+					<template v-for="(column,index) in headers">
 						<el-table-column
 							v-if="!column.hide"
 							:fixed="column.fixed"
-							:key="`column_${column.prop}`"
+							:key="`column_${column.prop}_${index}`"
 							v-bind="column.props"
 						>
 							<template slot="header" slot-scope="scope">
@@ -99,7 +104,7 @@
 											<component
 												:is="column.enumTag||'span'"
 												style="margin-right: 5px;"
-												:key="`column_${column.prop}_${v}`"
+												:key="`column_${column.prop}${$index}_${v}`"
 												v-if="column.enum[v]"
 												v-bind="column.enum[v].props"
 											>{{ column.enum[v].label }}</component>
@@ -111,7 +116,7 @@
 												:is="column.enumTag||'span'"
 												style="margin-right: 5px;"
 												v-if="column.enum[v]"
-												:key="`column_${column.prop}_${v}`"
+												:key="`column_${column.prop}${$index}_${v}`"
 												v-bind="column.enum[v].props"
 											>{{ column.enum[v].label }}</component>
 										</template>
@@ -151,10 +156,15 @@
 				<slot name="page_append"></slot>
 			</div>
 		</component>
-		<el-dialog v-if="customColumns" width="600px" :visible.sync="customColumnsDialog" :title="$t('tablepage.customColumns')">
+		<el-dialog
+			v-if="customColumns"
+			width="600px"
+			:visible.sync="customColumnsDialog"
+			:title="$t('tablepage.customColumns')"
+		>
 			<el-button type="text" @click="handleClickReset">{{$t("tablepage.reset")}}</el-button>
 			<el-table-draggable>
-				<el-table :data="columnsSort" border height="300px">
+				<el-table size="small" :data="columnsSort" border height="300px">
 					<el-table-column :label="$t('tablepage.sort')" width="70px">
 						<i class="el-icon-sort" style="cursor: move"></i>
 					</el-table-column>
@@ -176,8 +186,16 @@
 				</el-table>
 			</el-table-draggable>
 			<div slot="footer">
-				<el-button type="text" v-bind="defaultButtonStyle" @click="handleClickClose">{{$t("tablepage.cancel")}}</el-button>
-				<el-button type="primary" v-bind="defaultButtonStyle" @click="handleClickSave">{{$t("tablepage.save")}}</el-button>
+				<el-button
+					type="text"
+					v-bind="defaultButtonStyle"
+					@click="handleClickClose"
+				>{{$t("tablepage.cancel")}}</el-button>
+				<el-button
+					type="primary"
+					v-bind="defaultButtonStyle"
+					@click="handleClickSave"
+				>{{$t("tablepage.save")}}</el-button>
 			</div>
 		</el-dialog>
 	</div>

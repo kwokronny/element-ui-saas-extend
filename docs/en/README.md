@@ -3,7 +3,7 @@ home: true
 heroImage: /logo.png
 heroText: Element SaaS Extend
 description: Develop common interaction component for SaaS business base Element UI.
-actionText: Start
+actionText: 🚀Start
 actionLink: /en/Installation.html
 features:
 - title: Efficiency
@@ -13,7 +13,7 @@ features:
 - title: Easy
   details: Element UI standard develop, have Much example and documentation as possible to help you code.
 
-footer: MIT Licensed | KwokRonny
+footer: MIT Licensed | kwokronny.top
 ---
 
 As the recent work mainly focuses on SaaS business, and the development content is repetitive in form and table interaction.  development base hight utility component library - Element UI,  so want to organize development preset components library for SaaS business.

@@ -1,7 +1,10 @@
 import ElementUI from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
 import ElementUISaaSExtend from "../../packages/index.ts";
-import locale from "element-ui/lib/locale/lang/en";
+import en from "element-ui/lib/locale/lang/en";
+import saasEN from "../../src/locale/lang/en";
+import cn from "element-ui/lib/locale/lang/zh-CN";
+import saasCN from "../../src/locale/lang/zh-CN";
 import "../../packages/theme-chalk/lib/index.css";
 
 // import axios from "axios";
@@ -18,11 +21,6 @@ export default ({
   siteData, // 站点元数据
   isServer, // 当前应用配置是处于 服务端渲染 或 客户端
 }) => {
-  // console.log(router, siteData);
-  // if(router.currentRoute.path){
-  //   locale
-  // }
-  Vue.use(ElementUI, { locale });
   // Vue.prototype.$axios = axios;
   // Vue.prototype.$mock = Mock;
 
@@ -40,10 +38,6 @@ export default ({
 
   Vue.filter("dayjs", function(value, format) {
     return dayjs(value).format(format);
-  });
-
-  Vue.filter("yuan", function(value) {
-    return `${value} 元`;
   });
 
   Vue.prototype.$ELEMENT = {
@@ -110,14 +104,24 @@ export default ({
       },
     },
   };
+
+  Vue.use(ElementUI);
+  Vue.use(ElementUISaaSExtend);
+  ElementUI.locale(en);
+
+  router.beforeEach(function(to, form, next) {
+    if (/^\/en\//.test(to.path)) {
+      ElementUI.locale(en);
+      ElementUISaaSExtend.locale(saasEN);
+    } else {
+      ElementUI.locale(cn);
+      ElementUISaaSExtend.locale(saasCN);
+    }
+    next();
+  });
   if (!isServer) {
-    import("../../packages/index.ts").then((module) => {
-      Vue.use(ElementUISaaSExtend);
-    });
     import("./components/UserSelector.vue").then((module) => {
       Vue.component(module.name, module);
     });
-  } else {
-    Vue.use(ElementUISaaSExtend);
   }
 };

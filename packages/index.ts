@@ -5,7 +5,7 @@ import { VueConstructor } from "vue/types/umd";
 import locale from "../src/locale";
 
 const install = (Vue: VueConstructor, options: any = {}) => {
-  if (options.lang) {
+  if (options.locale) {
     locale.use(locale);
   }
   Vue.prototype.$ELEMENT = Object.assign({}, Vue.prototype.$ELEMENT, options);

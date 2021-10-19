@@ -1,4 +1,4 @@
-import defaultLang from "./lang/en";
+import defaultLang from "./lang/zh-CN";
 import { result } from "lodash";
 let lang: Record<string, any> = defaultLang;
 

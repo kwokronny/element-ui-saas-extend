@@ -14,7 +14,7 @@ just add attribute `search` can add search field for column, or add attribute `a
 
 ```vue
 <template>
-  <el-table-page ref="TablePage" border stripe :columns="columns" row-key="id" custom-columns="search_demo" :request="getList"></el-table-page>
+  <el-table-page ref="TablePage" border stripe :columns="columns" :request="getList"></el-table-page>
 </template>
 <script>
 export default {
@@ -25,7 +25,6 @@ export default {
           label: "Name",
           prop: "name",
           fixed: "left",
-          width: 120,
           search: {
             type: "text",
             value: "test",
@@ -33,51 +32,19 @@ export default {
           addSearch: {
             test: {
               type: "switch",
-              label: "add switch",
+              label: "Switch",
             },
-          },
-        },
-        {
-          label: "Phone",
-          prop: "phone",
-          width: 120,
-          search: {
-            type: "text",
-          },
-        },
-        {
-          label: "Address",
-          prop: "address",
-          width: 200,
-          showOverflowTooltip: true,
-          search: {
-            type: "text",
           },
         },
         {
           label: "Email",
           prop: "email",
-          width: 200,
           showOverflowTooltip: true,
-        },
-        {
-          label: "Level",
-          prop: "level",
-          width: 80,
-        },
-        {
-          label: "IDNumber",
-          prop: "idNumber",
-          width: 180,
-          search: {
-            type: "text",
-          },
         },
         {
           label: "Score",
           prop: "score",
           filters: [["numeral", "0,0"]],
-          width: 120,
           search: {
             type: "numberrange",
           },
@@ -86,7 +53,6 @@ export default {
           label: "Balance",
           prop: "balance",
           filters: [["numeral", "0,0.00"], "yuan"],
-          width: 120,
           search: {
             type: "numberrange",
           },
@@ -95,7 +61,6 @@ export default {
           label: "Registry date",
           prop: "date",
           filters: [["dayjs", "YYYY-MM-DD"]],
-          width: 120,
           search: {
             type: "daterange",
             rangeName: ["startDate", "endDate"],
@@ -116,7 +81,6 @@ export default {
         {
           label: "Tag",
           prop: "tagArr",
-          width: 200,
           enumTag: "el-tag",
           enum: [
             { label: "Clever", value: "1", type: "primary" },
@@ -135,44 +99,15 @@ export default {
     getList(page = 1, search, pageSize) {
       return axios.get("http://yapi.smart-xwork.cn/mock/90460/page").then(function(ret) {
         let baseId = (page - 1) * pageSize;
-        ret.data.data.map();
         return {
           page,
           total: 100,
-          pageSize: pageSize,
-          record: ret.data.data.filter(function(item,index){return index>baseId && index<baseId*pageSize}).map(function(item){
-            return item;
-          })
+          pageSize,
+          record: ret.data.data.filter(function(item, index) {
+            return index > baseId && index < baseId + pageSize;
+          }),
         };
       });
-      // return new Promise((resolve) => {
-      //   let data = Mock.mock({
-      //     page,
-      //     total: 500,
-      //     pageSize: pageSize,
-      //     [`record|${pageSize}`]: [
-      //       {
-      //         "id|+1": baseId,
-      //         name: "@name",
-      //         email: "@email",
-      //         level: "@integer(1,100)",
-      //         phone: /^1[387][0-9]{9}$/,
-      //         address: "@province@city",
-      //         idNumber: /^[1-9]\d{5}(?:18|19|20)\d{2}(?:0[1-9]|10|11|12)(?:0[1-9]|[1-2]\d|30|31)\d{3}[\dXx]$/,
-      //         score: "@natural(0,9000)",
-      //         balance: "@float(0,9000)",
-      //         date: "2021-05-10 11:21:00",
-      //         status: "@integer(1,2)",
-      //         tags: "1,2,3",
-      //         tagArr: [1, 2, 3],
-      //       },
-      //     ],
-      //   });
-      //   setTimeout(function() {
-      //     // return data;
-      //     resolve(data);
-      //   }, 1000);
-      // });
     },
   },
 };
@@ -189,7 +124,7 @@ setting attribute `custom-columns` will enable customize columns, customize colu
 
 ```vue
 <template>
-  <el-table-page layout-type="card" :columns="columns" :request="getList" custom-columns="table_test1"></el-table-page>
+  <el-table-page border stripe :columns="columns" :request="getList" custom-columns="table_test1"></el-table-page>
 </template>
 <script>
 export default {
@@ -200,53 +135,48 @@ export default {
           label: "Name",
           prop: "name",
           fixed: "left",
-          search: {
-            type: "text",
-          },
+          width: 200,
         },
         {
           label: "Phone",
           prop: "phone",
-          width: 140,
+          showOverflowTooltip: true,
+          width: 200,
         },
         {
           label: "Email",
           prop: "email",
-          width: 200,
           showOverflowTooltip: true,
+          width: 260,
         },
         {
-          label: "Address",
-          prop: "address",
-          width: 200,
+          label: "Other Email",
+          prop: "email",
           showOverflowTooltip: true,
-        },
-        {
-          label: "Level",
-          prop: "level",
-          width: 80,
-          formatter: (row, column, value, index) => `${row.level}级`,
-        },
-        {
-          label: "ID",
-          prop: "idNumber",
-          width: 200,
+          width: 260,
         },
         {
           label: "Score",
           prop: "score",
-          width: 120,
+          width: 180,
+        },
+        {
+          label: "Balance",
+          prop: "balance",
+          filters: [["numeral", "0,0.00"]],
+          width: 180,
         },
         {
           label: "Date",
           prop: "date",
           filters: [["dayjs", "MM-DD dd"]],
           showOverflowTooltip: true,
-          width: 120,
+          width: 200,
         },
         {
           label: "Status",
           prop: "status",
+          enumTag: "el-tag",
           enum: [
             { label: "Normal", value: 1, type: "primary" },
             { label: "Block", value: 2, type: "danger" },
@@ -256,31 +186,17 @@ export default {
     };
   },
   methods: {
-    getList(page = 1, search) {
-      let Mock = this.$mock;
-      return new Promise((resolve) => {
-        let data = Mock.mock({
+    getList(page = 1, search, pageSize) {
+      return axios.get("http://yapi.smart-xwork.cn/mock/90460/page").then(function(ret) {
+        let baseId = (page - 1) * pageSize;
+        return {
           page,
-          total: 500,
-          pageSize: 15,
-          "record|5": [
-            {
-              "id|+1": 1,
-              name: "@name",
-              email: "@email",
-              level: "@integer(1,100)",
-              phone: /^1[387][0-9]{9}$/,
-              address: "@province@city",
-              idNumber: /^[1-9]\d{5}(?:18|19|20)\d{2}(?:0[1-9]|10|11|12)(?:0[1-9]|[1-2]\d|30|31)\d{3}[\dX]$/,
-              score: "@natural(0,9000)",
-              date: "2021-05-10 11:21:00",
-              status: "@integer(1,2)",
-            },
-          ],
-        });
-        setTimeout(function() {
-          resolve(data);
-        }, 1000);
+          total: 100,
+          pageSize,
+          record: ret.data.data.filter(function(item, index) {
+            return index > baseId && index < baseId + pageSize;
+          }),
+        };
       });
     },
   },
@@ -292,25 +208,17 @@ export default {
 
 ## Mult-select batch operation
 
-setting attribute `row-key`, will auto enabled mult-select for table, and enabled attribute `reserve-selection`, reserve selection after data refreshing
+Setting attribute `row-key`, will auto enabled mult-select for table, and enabled attribute `reserve-selection`, reserve selection after data refreshing
 
-设置 `selection` 带 .sync 标识符，即：`selection.sync`，将会同步已选中项记录。<br/>
-设置 `selectable` 可设置决定这一行是否可以选择，接受的类型为 `Function(row,index)`
+Setting attribute `selection.sync`, will sync selected items in variable.<br/>
+Setting attribute `selectable` decision row whether is can select.
 
-::: tip
-开启多选功能后表格左上方默认预设添加了 选中情况 的显示，亦可通过 `selection` 插槽自定义
-:::
 :::demo
 
 ```vue
 <template>
   <el-table-page ref="TablePage" :columns="columns" :request="getList" border :selection.sync="selection" row-key="id" :selectable="(row) => row.id != 3">
-    <template slot="selection_right">
-      <el-button-group>
-        <el-button type="warning" size="small">Freeze</el-button>
-        <el-button type="success" size="small">UnFreeze</el-button>
-      </el-button-group>
-    </template>
+    <el-button size="small" @click="showSelection" slot="selection_right">Show selected</el-button>
   </el-table-page>
 </template>
 <script>
@@ -320,81 +228,56 @@ export default {
       selection: [],
       columns: [
         {
-          label: "姓名",
+          label: "Name",
           prop: "name",
           fixed: "left",
         },
         {
-          label: "手机",
-          prop: "phone",
-          width: 140,
-        },
-        {
-          label: "地址",
-          prop: "address",
-          width: 200,
-        },
-        {
-          label: "邮箱",
+          label: "Email",
           prop: "email",
-          width: 200,
         },
         {
-          label: "身份证",
-          prop: "idNumber",
-          width: 180,
-        },
-        {
-          label: "积分",
+          label: "Score",
           prop: "score",
           filters: [["numeral", "0,0.00"]],
-          width: 120,
         },
         {
-          label: "注册日期",
+          label: "Registry Date",
           prop: "date",
           filters: [["dayjs", "MM-DD dd"]],
           showOverflowTooltip: true,
-          width: 120,
         },
         {
-          label: "状态",
+          label: "Status",
           prop: "status",
+          enumTag: "el-tag",
           enum: [
-            { label: "正常", value: "1", type: "primary" },
-            { label: "失效", value: "2", type: "warning" },
+            { label: "Normal", value: "1", type: "primary" },
+            { label: "Block", value: "2", type: "warning" },
           ],
         },
       ],
     };
   },
   methods: {
+    showSelection() {
+      this.$msgbox({
+        title: "Selection value:",
+        dangerouslyUseHTMLString: true,
+        message: `<pre>${JSON.stringify(this.selection, undefined, 3)}</pre>`,
+      });
+    },
     getList(page = 1, search, pageSize) {
-      let Mock = this.$mock;
-      return new Promise((resolve) => {
-        let baseId = (page - 1) * 5;
-        let data = Mock.mock({
+      return axios.get("http://yapi.smart-xwork.cn/mock/90460/page").then(function(ret) {
+        let baseId = (page - 1) * pageSize;
+        return {
           page,
-          total: 500,
-          pageSize: 5,
-          ["record|" + 5]: [
-            {
-              "id|+1": baseId,
-              name: "@cname",
-              email: "@email",
-              phone: /^1[387][0-9]{9}$/,
-              address: "@province@city",
-              idNumber: /^[1-9]\d{5}(?:18|19|20)\d{2}(?:0[1-9]|10|11|12)(?:0[1-9]|[1-2]\d|30|31)\d{3}[\dXx]$/,
-              score: "@natural(0,9000)",
-              date: "@datetime",
-              status: "@integer(1,2)",
-            },
-          ],
-        });
-        setTimeout(function() {
-          // return data;
-          resolve(data);
-        }, 1000);
+          total: 100,
+          pageSize,
+          record: ret.data.data.filter(function(item, index) {
+            return index > baseId && index < baseId + pageSize;
+          }),
+        };
       });
     },
   },
@@ -406,10 +289,11 @@ export default {
 
 ## Filters
 
-表格常常需要对列内容展示进行格式化处理，所以很多时候经常需要为列内容自定义插槽 应用过滤器 格式化</br>
-提供 `filters` 属性为内容直接应用 Vue 全局及本地的 filters 函数，具体赋值如下 <br/>
+use Vue2 feature `filters` in table cell.
 
-`filters: "empty"` 时等于为列内容做如下处理
+### Examples
+
+setting `filters: "empty"`, result following example
 
 ```vue
 <template>
@@ -417,7 +301,7 @@ export default {
 </template>
 ```
 
-`filters: [["sensitive","name"], "empty"]` 时等于为列内容做如下处理
+setting `filters: [["sensitive","name"], "empty"]` , result following example
 
 ```vue
 <template>
@@ -426,10 +310,7 @@ export default {
 ```
 
 :::tip
-`filters` 与 `formatter` 属性不可共用，都赋值时，仅采用 `filters`
-:::
-
-已全局注册下列过滤器
+Global registered filters:
 
 ```js
 import numeral from "numeral";
@@ -450,11 +331,13 @@ Vue.filter("datetime", function(value) {
 Vue.filter("dayjs", function(value, format) {
   return dayjs(value).format(format);
 });
-
-Vue.filter("yuan", function(value) {
-  return `${value} 元`;
-});
 ```
+
+:::
+
+:::warning
+`filters` and `formatter` mutual exclusion, supported `filters` only when both setting.
+:::
 
 :::demo
 
@@ -480,32 +363,32 @@ export default {
     return {
       columns: [
         {
-          label: "日期时间",
-          prop: "datetime",
+          label: "datetime",
+          prop: "date",
           filters: "datetime",
         },
         {
-          label: "日期格式化",
-          prop: "dateformat",
+          label: "date",
+          prop: "date",
           filters: [["dayjs", "YYYY dd"]],
         },
         {
-          label: "数字格式化",
-          prop: "number",
+          label: "number",
+          prop: "score",
           filters: [["numeral", "0,0a"]],
         },
         {
-          label: "金额格式化",
-          prop: "yuan",
-          filters: [["numeral", "0,0.00"], "yuan"],
+          label: "money",
+          prop: "score",
+          filters: [["numeral", "$0,0.00"]],
         },
         {
-          label: "手机脱敏",
+          label: "phone sensitive",
           prop: "phone",
           filters: [["sensitive", "phone"]],
         },
         {
-          label: "邮箱脱敏",
+          label: "email sensitive",
           prop: "email",
           filters: [["sensitive", "email"]],
         },
@@ -513,29 +396,17 @@ export default {
     };
   },
   methods: {
-    getList(page = 1, search) {
-      let Mock = this.$mock;
-      return new Promise((resolve) => {
-        let data = Mock.mock({
+    getList(page = 1, search, pageSize) {
+      return axios.get("http://yapi.smart-xwork.cn/mock/90460/page").then(function(ret) {
+        let baseId = (page - 1) * pageSize;
+        return {
           page,
-          total: 500,
-          pageSize: 5,
-          "record|5": [
-            {
-              "id|+1": 1,
-              name: "@cname",
-              email: "@email",
-              phone: /^1[387][0-9]{9}$/,
-              number: "@float(0,9000)",
-              yuan: "@float(0,9000)",
-              datetime: "@datetime",
-              dateformat: "@datetime",
-            },
-          ],
-        });
-        setTimeout(function() {
-          resolve(data);
-        }, 1000);
+          total: 100,
+          pageSize,
+          record: ret.data.data.filter(function(item, index) {
+            return index > baseId && index < baseId + pageSize;
+          }),
+        };
       });
     },
   },
@@ -547,13 +418,15 @@ export default {
 
 ## Slot
 
-Set more slots, ensure the diversity of requirements as much as possible to solve products and designs.
+Design more slots, ensure the diversity of requirements as much as possible to solve products and designs.
 
 :::tip
 `search_button`, `selection` and `custom_column_button` will cover default content.
 :::
 
+:::warning
 Add `search-` before slot name when set slot for `<el-formauto>`
+:::
 
 ```vue
 <template slot="search-name" slot-scope="{ item, model, name }">
@@ -567,57 +440,58 @@ Add `search-` before slot name when set slot for `<el-formauto>`
 <template>
   <el-table-page ref="TablePage" border stripe :columns="columns" :request="getList" row-key="id" :selection.sync="selection" custom-columns="table_test2">
     <template slot="option" slot-scope="{ row, column, index }">
-      <el-button type="primary" round size="mini">编辑</el-button>
-      <el-button type="danger" round size="mini">删除</el-button>
+      <el-button type="primary" round size="mini">Edit</el-button>
+      <el-button type="danger" round size="mini">Remove</el-button>
     </template>
     <template slot="search-name" slot-scope="{ item, model, name }">
       <el-input suffix-icon="el-icon-help" v-model="model[name]"></el-input>
     </template>
     <template slot="search_prepend">
-      <el-alert title="搜索上方插槽" type="success" :closable="false"></el-alert>
+      <el-alert title="search_prepend" type="success" :closable="false"></el-alert>
     </template>
     <template slot="search_button">
-      <el-button>搜索</el-button>
-      <el-button>重置</el-button>
-      <el-button>刷新</el-button>
+      <el-button @click="search">Search</el-button>
+      <el-button @click="reset">Reset</el-button>
+      <el-button>Append Button</el-button>
     </template>
     <template slot="search_append">
-      <el-alert title="搜索下方插槽" type="success" :closable="false"></el-alert>
+      <el-alert title="slot on the bottom of search form." type="success" :closable="false"></el-alert>
     </template>
     <template slot="middle">
-      <el-alert title="搜索框与表格框中间插槽" type="success" :closable="false"></el-alert>
+      <el-alert title="slot between search and table." type="success" :closable="false"></el-alert>
     </template>
     <template slot="selection">
-      已选中 {{ selection.length }} 条
-      <el-tooltip v-if="selection.length > 0">
+      <b>{{ selection.length }}</b> items
+      <el-tooltip>
         <div slot="content">
-          <p v-for="item in selection" :key="`selection_test_${item.id}`">{{ item.name }} {{ item.phone }}</p>
+          <div v-if="selection.length > 0">
+            <p v-for="item in selection" :key="`selection_test_${item.id}`">{{ item.name }} {{ item.phone }}</p>
+          </div>
+          <div v-else>
+            please select row item.
+          </div>
         </div>
-        <el-button type="text">查看</el-button>
+        <el-button type="text">selected</el-button>
       </el-tooltip>
-      <el-button type="text" @click="resetSelection">清空</el-button>
+      <el-button type="text" @click="clearSelection">Clear</el-button>
     </template>
     <template slot="custom_column_button">
-      <el-button type="primary" size="small" @click="openCustomColumnDialog">自定义列</el-button>
+      <el-tag type="warning" @click="openCustomColumnDialog">CustomColumn</el-tag>
     </template>
     <template slot="selection_right">
-      <el-button-group>
-        <el-button type="warning" size="small">冻结</el-button>
-        <el-button type="success" size="small">启用</el-button>
-      </el-button-group>
+      <el-tag type="primary">slot on the right of selected status slot.</el-tag>
     </template>
     <template slot="table_button">
-      <el-button type="primary" size="small">添加</el-button>
-      <el-button type="primary" size="small">同步</el-button>
+      <el-tag type="primary">button slot on the top right of table.</el-tag>
     </template>
     <template slot="table_prepend">
-      <el-alert title="表格上方插槽" type="success" :closable="false"></el-alert>
+      <el-alert title="slot on the top of table." type="success" :closable="false"></el-alert>
     </template>
     <template slot="table_append">
-      <el-alert title="表格下方插槽" type="success" :closable="false"></el-alert>
+      <el-alert title="	slot on the bottom of table." type="success" :closable="false"></el-alert>
     </template>
     <template slot="page_append">
-      <el-alert title="页码下方插槽" type="success" :closable="false"></el-alert>
+      <el-alert title="slot on the bottom of pagination." type="success" :closable="false"></el-alert>
     </template>
   </el-table-page>
 </template>
@@ -628,7 +502,7 @@ export default {
       selection: [],
       columns: [
         {
-          label: "姓名",
+          label: "Name",
           prop: "name",
           fixed: "left",
           search: {
@@ -637,92 +511,63 @@ export default {
           },
         },
         {
-          label: "地址",
-          prop: "address",
-          width: 200,
-          showOverflowTooltip: true,
-          search: {
-            type: "text",
-          },
-        },
-        {
-          label: "邮箱",
+          label: "Email",
           prop: "email",
-          width: 200,
           showOverflowTooltip: true,
         },
         {
-          label: "等级",
-          prop: "level",
-          width: 80,
-          formatter: (row, column, value) => `${value} 级`,
-        },
-        {
-          label: "身份证",
-          prop: "idNumber",
-          width: 180,
-        },
-        {
-          label: "积分",
+          label: "Score",
           prop: "score",
           filters: [["numeral", "0,0.00"]],
-          width: 120,
         },
         {
-          label: "注册日期",
+          label: "Register date",
           prop: "date",
           filters: "datetime",
-          width: 120,
         },
         {
-          label: "状态",
+          label: "Status",
           prop: "status",
-          enum: ["正常", "失效"],
+          enumTag: "el-tag",
+          enum: [
+            { label: "Normal", value: "1", type: "primary" },
+            { label: "Block", value: "2", type: "warning" },
+          ],
         },
         {
-          label: "操作",
+          label: "Manual",
           prop: "option",
           fixed: "right",
-          width: 150,
+          width: 200,
           slot: true,
         },
       ],
     };
   },
   methods: {
+    search() {
+      this.$refs["TablePage"].search();
+    },
+    reset() {
+      this.$refs["TablePage"].resetSearch();
+    },
     openCustomColumnDialog() {
       this.$refs["TablePage"].openCustomColumnDialog();
     },
-    resetSelection() {
+    clearSelection() {
       this.$refs["TablePage"].clearSelection();
     },
     getList(page = 1, search, pageSize) {
-      let Mock = this.$mock;
-      return new Promise((resolve) => {
-        let baseId = (page - 1) * 5;
-        let data = Mock.mock({
+      return axios.get("http://yapi.smart-xwork.cn/mock/90460/page").then(function(ret) {
+        let baseId = (page - 1) * pageSize;
+        return {
           page,
-          total: 500,
-          pageSize: 5,
-          ["record|" + 5]: [
-            {
-              "id|+1": baseId,
-              name: "@cname",
-              email: "@email",
-              level: "@integer(1,100)",
-              phone: /^1[387][0-9]{9}$/,
-              address: "@province@city",
-              idNumber: /^[1-9]\d{5}(?:18|19|20)\d{2}(?:0[1-9]|10|11|12)(?:0[1-9]|[1-2]\d|30|31)\d{3}[\dXx]$/,
-              score: "@natural(0,9000)",
-              date: "2021-05-10 11:21:00",
-              status: "@integer(1,2)",
-            },
-          ],
-        });
-        setTimeout(function() {
-          // return data;
-          resolve(data);
-        }, 1000);
+          total: 100,
+          pageSize,
+          record: ret.data.data.filter(function(item, index) {
+            return index > baseId && index < baseId + pageSize;
+          }),
+        };
       });
     },
   },
@@ -792,14 +637,14 @@ export default {
 | :------------------- | :---------------------------------------------------------------------------------------------------------- |
 | `${slot}`            | Custom scope slot of table column, The scope parameter is { row,column,index }, reference [example](#slot)  |
 | `search-${slot}`     | Custom scope slot of search form, The scope parameter is { field, model, name }, reference [example](#slot) |
-| search_prepend       | slot before search form.                                                                                    |
+| search_prepend       | slot on the top of search form.                                                                             |
 | search_button        | button slot in search form, use will replace default design.                                                |
-| search_append        | slot after search form.                                                                                     |
+| search_append        | slot on the bottom of search form.                                                                          |
 | middle               | slot between search and table.                                                                              |
 | selection            | selected status slot on the top left of table, use will replace default design.                             |
 | selection_right      | slot on the right of selected status slot.                                                                  |
 | custom_column_button | customize column button slot on the top right of table, use will replace default design.                    |
 | table_button         | button slot on the top right of table.                                                                      |
-| table_prepend        | slot before table.                                                                                          |
-| table_append         | slot after table.                                                                                           |
-| page_append          | slot after pagination.                                                                                      |
+| table_prepend        | slot on the top of table.                                                                                   |
+| table_append         | slot on the bottom of table.                                                                                |
+| page_append          | slot on the bottom of pagination.                                                                           |

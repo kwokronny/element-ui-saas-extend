@@ -254,7 +254,7 @@ export default class ElFormAuto extends Vue {
 	 */
 	@Prop({ type: Number, default: 15 }) readonly gutter!: number;
 
-	private isRender: boolean = false;
+	private acceptValue: boolean = false;
 
 	private fields: Record<string, ElFormAutoField> = {};
 	private model: Record<string, any> = {};
@@ -334,7 +334,7 @@ export default class ElFormAuto extends Vue {
 	 * @param {object} model 表单项对应值数据 例如：{key:value,...}
 	 */
 	public setModel(model: Record<string, any>): void {
-		if (!this.isRender) return
+		if (!this.acceptValue) return
 		let _model = Object.assign({}, model);
 		for (let name in _model) {
 			if (Object.keys(_model).indexOf(name) > -1) {
@@ -475,7 +475,7 @@ export default class ElFormAuto extends Vue {
 				this.asyncOptions.push(item)
 			}
 
-			if (this.isRender == false) {
+			if (this.acceptValue == false) {
 				this.$set(this.model, name, this.value[name] || item.value);
 				if (item.type == "check" && item.checkAll !== false) {
 					this.$set(this.check, name, false);
@@ -486,7 +486,7 @@ export default class ElFormAuto extends Vue {
 	}
 
 	private generateRule(): void {
-		this.isRender = false;
+		this.acceptValue = false;
 		this.rules = {};
 		forEach(this.data, (item, name) => {
 			this.rules[name] = [];
@@ -556,7 +556,7 @@ export default class ElFormAuto extends Vue {
 	}
 
 	private canRender() {
-		this.isRender = true;
+		this.acceptValue = true;
 		this.$nextTick(function () {
 			this.setModel(this.value)
 		})

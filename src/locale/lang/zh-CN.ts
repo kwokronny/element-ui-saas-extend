@@ -1,7 +1,7 @@
 const zhCN = {
   numberrange: {
-    min: "Min Value",
-    max: "Max Value",
+    min: "最大值",
+    max: "最小值",
   },
   formauto: {
     pleaseInput: "请输入",
@@ -34,7 +34,7 @@ if (typeof window !== "undefined" && window.Vue && window.ElementUISaaSExtend) {
   if (window.ElementUISaaSExtend.lang) {
     window.ElementUISaaSExtend.lang = {};
   }
-  window.ElementUISaaSExtend.lang["zh-CN"] = zhCN;
+  window.ElementUISaaSExtend.lang["zhCN"] = zhCN;
 }
 
 export default zhCN;

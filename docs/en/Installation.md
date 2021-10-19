@@ -22,11 +22,12 @@ Vue.use(ElementUISaaSExtend);
 ## CDN Include
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.15.6/lib/theme-chalk/index.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui-saas-extend@latest/lib/theme-chalk/index.css" />
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+<link rel="stylesheet" href="https://unpkg.com/element-ui-saas-extend/lib/theme-chalk/index.css" />
 
-<script src="https://cdn.jsdelivr.net/npm/element-ui@2.15.6/lib/element-ui.common.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/element-ui-saas-extend@latest/lib/element-ui-saas-extend.min.js"></script>
+<script src="//unpkg.com/vue"></script>
+<script src="//unpkg.com/element-ui"></script>
+<script src="//unpkg.com/element-ui-saas-extend"></script>
 ```
 
 ## Global config

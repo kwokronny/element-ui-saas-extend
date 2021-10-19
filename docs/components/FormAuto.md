@@ -11,6 +11,7 @@ pageClass: component-page
 常用于搜索筛选交互。
 
 ::: demo
+
 ```vue
 <template>
   <el-form-auto :data="form" :show-message="false" ref="FilterForm" v-model="model" label-width="70px" inline>
@@ -85,9 +86,10 @@ export default {
 常用于编辑交互，应用了 `<el-row>` 可对表单项进行布局。
 
 ::: demo
+
 ```vue
 <template>
-  <el-button type="primary" round @click="setModel">编辑</el-button>
+  <el-button type="primary" round @click="edit">编辑</el-button>
   <el-button type="primary" round @click="changeRule">改变规则</el-button>
   <el-form-auto :data="form" ref="EditForm" v-model="model" label-width="120px">
     <template>
@@ -128,6 +130,9 @@ export default {
           col: 4,
           label: "开关",
           type: "switch",
+          activeValue: 1,
+          inactiveValue: 0,
+          value: 1,
           required: true,
         },
         slider: {
@@ -270,9 +275,10 @@ export default {
       this.form.check.required = false;
       this.form.datetimeRange.required = false;
     },
-    setModel() {
+    edit() {
       this.model = {
         id: "123",
+        switch: 0,
         text: "文本框",
         password: "password123456",
         date: "2021-01-10",
@@ -384,9 +390,9 @@ export default {
 
 1. `options` 标准规范值是 `[{label: "苹果", value: "apple", icon:"el-icon-apple", disabled: false }, ...]` <br/>
 1. `options` 值为 `["苹果", ...]` 文本数组时，`label` 与 `value` 皆为 "苹果"<br/>
-3. `options` 值为 `{apple: "苹果", banana: "香蕉", ...}` 对象时，`label` 为值 `苹果`， `value` 为对你的键值 `apple`<br/>
-4. `options` 值为 `async (query?)=>{ return await $axios.get("options") }` 的 Promise函数时，会在表单生成前执行，query 参数是当 `{type: "select",remote:true}` 时应用于远程搜索。<br/>
-5. `type: "cascader"` 级联选择框只支持应用标准规范值。
+1. `options` 值为 `{apple: "苹果", banana: "香蕉", ...}` 对象时，`label` 为值 `苹果`， `value` 为对你的键值 `apple`<br/>
+1. `options` 值为 `async (query?)=>{ return await $axios.get("options") }` 的 Promise 函数时，会在表单生成前执行，query 参数是当 `{type: "select",remote:true}` 时应用于远程搜索。<br/>
+1. `type: "cascader"` 级联选择框只支持应用标准规范值。
 
 ```typescript
 export declare interface ElAutoOption {
@@ -423,11 +429,11 @@ export default {
           style: "width:100%",
           options: () => {
             return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
-              return res.data.map(item=>{
+              return res.data.map((item) => {
                 return {
                   label: item.username,
-                  value: item.id
-                }
+                  value: item.id,
+                };
               });
             });
           },
@@ -522,11 +528,6 @@ export default {
     },
     reset() {
       this.$refs["EditForm"].reset();
-      this.model.asyncSelect = { label: "测试", value: "123" };
-      this.model.remote = [
-        { label: "测试2", value: "123" },
-        { label: "测试3", value: "1233" },
-      ];
     },
   },
   mounted() {
@@ -673,7 +674,7 @@ export default {
 | placeholder     | 占位符                                                                                       | `array`                         | -      |
 | on              | 设置 type 对应组件的事件                                                                     | `object`                        | {}     |
 | rangeName       | 日期范围名 type 为 daterange/timerange/datetimerange/numberrange 选填                        | `array<string>`                 | false  |
-| suffixTime      | type 为 daterange 选填，为日期范围增加 00:00:00 - 23:59:59 文本                              | `boolean`                       | false  |
+| suffixTime      | type 为 daterange 选填，为日期范围增加 00:00:00 - 23:59:59                               | `boolean`                       | false  |
 | options         | 控件选项，type 为 check/radio/select 必填，详情可参考 [options 设置](#options-设置)          | `object` / `array` / `Promise`  | []     |
 | remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                       | false  |
 | notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                       | false  |
@@ -712,6 +713,7 @@ export default {
 | switch        | &lt;el-switch&gt;                           | 开关             |
 | cascader      | &lt;el-cascader&gt;                         | 多级选择框       |
 | rate          | &lt;el-rate&gt;                             | 评分             |
+| component     | &lt;component :is=""&gt;                    | 自定义组件             |
 
 ### Method
 
