@@ -29,12 +29,3 @@ export default {
     save: "Save",
   },
 };
-
-// if (typeof window !== "undefined" && window.Vue && window.ElementUISaaSExtend) {
-//   if (window.ElementUISaaSExtend.lang) {
-//     window.ElementUISaaSExtend.lang = {};
-//   }
-//   window.ElementUISaaSExtend.lang["en"] = en;
-// }
-
-// export default en;

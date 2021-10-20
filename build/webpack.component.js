@@ -6,14 +6,13 @@ const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const LodashModuleReplacementPlugin = require("lodash-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 
+
 const Components = {
   "element-ui-saas-extend": "./packages/index.ts",
   "form-auto": "./packages/FormAuto/index.ts",
   "table-page": "./packages/TablePage/index.ts",
   "number-range": "./packages/NumberRange/index.ts",
 };
-
-// console.log(process.argv)
 
 const webpackConfig = {
   mode: "production",

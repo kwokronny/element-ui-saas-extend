@@ -29,12 +29,3 @@ export default {
     save: "保存",
   },
 };
-
-// if (typeof window !== "undefined" && window.Vue && window.ElementUISaaSExtend) {
-//   if (window.ElementUISaaSExtend.lang) {
-//     window.ElementUISaaSExtend.lang = {};
-//   }
-//   window.ElementUISaaSExtend.lang["zhCN"] = zhCN;
-// }
-
-// export default zhCN;
