@@ -5,25 +5,13 @@ import en from "element-ui/lib/locale/lang/en";
 import saasEN from "../../src/locale/lang/en";
 import cn from "element-ui/lib/locale/lang/zh-CN";
 import saasCN from "../../src/locale/lang/zh-CN";
-import "../../packages/theme-chalk/lib/index.css";
-
-// import axios from "axios";
-
-// import numeral from "numeral";
-// import dayjs from "dayjs";
-
-// import Mock from "mockjs";
+import "../../lib/theme-chalk/index.css";
 
 export default ({
   Vue,
-  options, // 附加到根实例的一些选项
   router, // 当前应用的路由实例
-  siteData, // 站点元数据
   isServer, // 当前应用配置是处于 服务端渲染 或 客户端
 }) => {
-  // Vue.prototype.$axios = axios;
-  // Vue.prototype.$mock = Mock;
-
   Vue.filter("numeral", function(value, format) {
     return numeral(value).format(format);
   });
@@ -105,10 +93,6 @@ export default ({
     },
   };
 
-  Vue.use(ElementUI);
-  Vue.use(ElementUISaaSExtend);
-  ElementUI.locale(en);
-
   router.beforeEach(function(to, form, next) {
     if (/^\/en\//.test(to.path)) {
       ElementUI.locale(en);
@@ -119,7 +103,11 @@ export default ({
     }
     next();
   });
+  
   if (!isServer) {
+    Vue.use(ElementUI);
+    Vue.use(ElementUISaaSExtend);
+    ElementUI.locale(en);
     import("./components/UserSelector.vue").then((module) => {
       Vue.component(module.name, module);
     });

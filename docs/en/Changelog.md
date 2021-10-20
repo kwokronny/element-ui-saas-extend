@@ -2,18 +2,20 @@
 sidebarDepth: 0
 ---
 
-# Release Log
+# Changelog
 
 ## 1.0.14 <small>2021-09-27</small>
 - #### Feature
-	- support internationalization Chinese simplified
+	- Support internationalization: Chinese simplified、English 
 - #### Fix
-	- component FormAuto switch pageSize emit refresh error
+	- FormAuto 组件更新 model 时问题。
+	- FormAuto 组件 select 中选项 disabled 未生效。
+	- TableAuto 自定义列调整后关闭窗口后重新打开，自定义列未恢复。
 
 ## 1.0.13 <small>2021-09-27</small>
 ## 1.0.12 <small>2021-09-27</small>
 - #### Fix
-	- component TablePage switch pageSize emit refresh error
+	- Component TablePage switch pageSize emit refresh error
 
 ## 1.0.11 <small>2021-09-27</small>
 - #### Optimization

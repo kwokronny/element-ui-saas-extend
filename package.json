@@ -24,8 +24,7 @@
   },
   "scripts": {
     "doc": "vuepress dev docs",
-    "build": "webpack --config build/webpack.component.js",
-    "build:theme": "gulp build --f packages/theme-chalk/gulpfile.js && cp-cli packages/theme-chalk/lib lib/theme-chalk",
+    "build": "webpack --config build/webpack.component.js && gulp theme",
     "build:doc": "vuepress build docs",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
@@ -41,6 +40,7 @@
     "vue-property-decorator": "^9.1.2"
   },
   "devDependencies": {
+    "@babel/plugin-transform-modules-umd": "^7.14.5",
     "@types/chai": "^4.2.11",
     "@types/lodash": "^4.14.170",
     "@types/mocha": "^5.2.4",
@@ -62,10 +62,12 @@
     "dayjs": "^1.10.5",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "file-save": "^0.2.0",
     "gulp": "^4.0.2",
     "gulp-autoprefixer": "^8.0.0",
     "gulp-cssmin": "^0.2.0",
     "gulp-sass": "3.1.0",
+    "gulp-typescript": "^6.0.0-alpha.1",
     "lodash-webpack-plugin": "^0.11.6",
     "mockjs": "^1.1.0",
     "numeral": "^2.0.6",

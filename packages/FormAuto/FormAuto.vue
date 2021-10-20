@@ -199,10 +199,7 @@ import {
 	Model,
 } from "vue-property-decorator";
 import { Form } from "element-ui";
-import debounce from "lodash/debounce";
-import cloneDeep from "lodash/cloneDeep";
-import forEach from "lodash/forEach";
-import omit from "lodash/omit";
+import { debounce, cloneDeep, forEach, omit } from "lodash";
 import { ElFormAutoField } from "../../types/form-auto";
 import { ElAutoMixinOptions, ElAutoOption } from "../../types/saas-extend"
 import DynamicSlot from "../components/DynamicSlot"
@@ -283,13 +280,16 @@ export default class ElFormAuto extends Vue {
 	public reset(): void {
 		this.generateModel();
 		for (let name in this.fields) {
-			this.model[name] = this.fields.value;
+			let field = this.fields[name];
+			this.model[name] = field.value;
+			if (field.type == "check" && field.checkAll) {
+				this.check[name] = false;
+			}
 		}
 		if (this.FormAuto) {
-			this.FormAuto.resetFields();
-		}
-		for (let key in this.check) {
-			this.check[key] = false;
+			this.$nextTick(function () {
+				this.FormAuto.resetFields();
+			})
 		}
 	}
 
@@ -310,17 +310,17 @@ export default class ElFormAuto extends Vue {
 			model = this.model;
 		forEach(this.fields, (item: ElFormAutoField, name: string) => {
 			if (!item.notSubmit) {
+				data[name] = model[name];
 				if (item.rangeName && item.type && (/range$/g.test(item.type) || (item.type == "slider" && item.props?.range == true))) {
 					let [sn, en] = item.rangeName;
 					let [sd, ed] = model[name] || [null, null];
+					data[name] = model[name]
 					data[sn] = sd;
 					data[en] = ed;
 					if (item.type == "daterange" && item.suffixTime == true) {
 						data[sn] += "00:00:00";
 						data[en] += "23:59:59";
 					}
-				} else {
-					data[name] = model[name];
 				}
 			}
 		});
@@ -337,9 +337,9 @@ export default class ElFormAuto extends Vue {
 		if (!this.acceptValue) return
 		let _model = Object.assign({}, model);
 		for (let name in _model) {
+			let value = _model[name];
 			if (Object.keys(_model).indexOf(name) > -1) {
-				if (_model[name] === undefined) break;
-				let value = _model[name];
+				if (value === undefined) break;
 				let field = this.fields[name];
 				if (field && /radio|select|check/.test(field.type) && Array.isArray(field.options)) {
 					// 远程获取选项框选项回显功能
@@ -352,7 +352,7 @@ export default class ElFormAuto extends Vue {
 					if ((field.type == "check" || (field.type == "select" && field.multiple)) && Array.isArray(value)) {
 						for (let idx = 0; idx < value.length; idx++) {
 							let val = value[idx];
-							if (val.label && val.value) {
+							if (val.label && val.value && field.type == "select") {
 								if (field.options.findIndex((option: any) => option.value == val.value) == -1) {
 									field.options.splice(0, 0, val)
 								}
@@ -361,12 +361,15 @@ export default class ElFormAuto extends Vue {
 								value[idx] = `${val}`
 							}
 						}
+						if (field.type == "check") {
+							this.handleCheckedChange(value, name)
+						}
 					} else {
 						value = `${value}`;
 					}
 				}
-				this.model[name] = value
 			}
+			this.model[name] = value
 		}
 	}
 
@@ -389,8 +392,9 @@ export default class ElFormAuto extends Vue {
 	 * 复选框组 change 事件
 	 */
 	private handleCheckedChange(value: string[], name: string): void {
+		if (this.check[name] == undefined) return
 		let checkedCount = value.length;
-		let options = this.fields[name].options as Array<ElAutoOption>;
+		let options = this.fields[name].options as ElAutoOption[];
 		let optionsCount = options.length;
 		if (checkedCount > 0 && checkedCount < optionsCount) {
 			this.check[name] = 2;
@@ -411,7 +415,10 @@ export default class ElFormAuto extends Vue {
 			// item.props = Object.assign({}, item.props);
 			item.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
-			if (item.slot && typeof item.slot == "boolean") item.slot = name;
+			if (item.slot) {
+				item.slot = typeof item.slot == "boolean" ? name : item.slot;
+				item.type = "text"
+			}
 			// 根据字段 type 设置 model 默认值
 			if (
 				/(check|range|cascader)/g.test(item.type) ||
@@ -473,12 +480,17 @@ export default class ElFormAuto extends Vue {
 
 			if (/select|radio|check|cascader/.test(item.type)) {
 				this.asyncOptions.push(item)
+				if (item.type == "check" && item.checkAll !== false) {
+					this.$set(this.check, name, false);
+				}
 			}
 
 			if (this.acceptValue == false) {
-				this.$set(this.model, name, this.value[name] || item.value);
-				if (item.type == "check" && item.checkAll !== false) {
-					this.$set(this.check, name, false);
+				// console.log(`${name}:${this.value[name]}`)
+				let value = this.value[name] == undefined ? item.value : this.value[name]
+				this.$set(this.model, name, value);
+				if (item.type == "check") {
+					this.handleCheckedChange(value, name)
 				}
 			}
 		})
@@ -547,9 +559,7 @@ export default class ElFormAuto extends Vue {
 						})
 					}
 				})
-			})).finally(() => {
-				this.canRender()
-			})
+			})).then(this.canRender, this.canRender)
 		} else {
 			this.canRender()
 		}

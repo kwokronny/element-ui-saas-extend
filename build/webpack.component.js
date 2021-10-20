@@ -63,7 +63,7 @@ const webpackConfig = {
         cache: true,
         terserOptions: {
           compress: {
-            drop_console: true,
+            // drop_console: true,
           },
         },
       }),
@@ -95,7 +95,7 @@ const webpackConfig = {
               babelrc: false,
               configFile: false,
               presets: ["@vue/cli-plugin-babel/preset"],
-              plugins: ["lodash"],
+              // plugins: ["lodash"],
             },
           },
           {

@@ -1,3 +1,18 @@
+// console.log(process.env);
+let externals = {};
+// if (process.env.NODE_ENV == "production") {
+//   externals = {
+//     vue: "Vue",
+//     "vue-router": "VueRouter",
+//     "element-ui": {
+//       root: "ELEMENT",
+//       commonjs: "element-ui",
+//       commonjs2: "element-ui",
+//       amd: "element-ui",
+//     },
+//   };
+// }
+
 module.exports = {
   title: "Element SaaS 扩展",
   description: "基于 Element UI 对 SaaS 业务开发常见的交互组件",
@@ -39,7 +54,7 @@ module.exports = {
         ],
         nav: [
           { text: "作者", link: "https://kwokronny.top" },
-          { text: "Gitee", link: "https://gitee.com/kwokronny/element-ui-saas-extend" },
+          { text: "码云", link: "https://gitee.com/kwokronny/element-ui-saas-extend" },
         ],
       },
       "/en/": {
@@ -69,18 +84,7 @@ module.exports = {
     resolve: {
       extensions: [".ts", ".tsx"],
     },
-    // externals: {
-    //   vue: "Vue",
-    //   "vue-router": "VueRouter",
-    //   dayjs: "dayjs",
-    //   axios: "axios",
-    //   "element-ui": {
-    //     root: "ELEMENT",
-    //     commonjs: "element-ui",
-    //     commonjs2: "element-ui",
-    //     amd: "element-ui",
-    //   }
-    // },
+    externals,
     module: {
       rules: [
         {

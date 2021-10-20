@@ -266,6 +266,26 @@ export default {
       },
     };
   },
+  mounted() {
+    this.model = {
+      id: "123",
+      switch: 0,
+      text: "文本框",
+      password: "password123456",
+      date: "2021-01-10",
+      datetime: "2021-01-10 11:11:00",
+      dateRange: ["2021-01-10", "2021-01-13"],
+      datetimeRange: ["2021-01-10 11:11:00", "2021-01-12 13:11:00"],
+      time: "11:11:00",
+      timeRange: ["11:11:00", "23:12:00"],
+      select: 0,
+      check: [3],
+      radiobutton: 0,
+      radio: 3,
+      cascader: [2, 6],
+      rate: 5,
+    };
+  },
   methods: {
     reset() {
       this.$refs["EditForm"].reset();
@@ -674,7 +694,7 @@ export default {
 | placeholder     | 占位符                                                                                       | `array`                         | -      |
 | on              | 设置 type 对应组件的事件                                                                     | `object`                        | {}     |
 | rangeName       | 日期范围名 type 为 daterange/timerange/datetimerange/numberrange 选填                        | `array<string>`                 | false  |
-| suffixTime      | type 为 daterange 选填，为日期范围增加 00:00:00 - 23:59:59                               | `boolean`                       | false  |
+| suffixTime      | type 为 daterange 选填，为日期范围增加 00:00:00 - 23:59:59                                   | `boolean`                       | false  |
 | options         | 控件选项，type 为 check/radio/select 必填，详情可参考 [options 设置](#options-设置)          | `object` / `array` / `Promise`  | []     |
 | remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                       | false  |
 | notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                       | false  |
@@ -713,7 +733,7 @@ export default {
 | switch        | &lt;el-switch&gt;                           | 开关             |
 | cascader      | &lt;el-cascader&gt;                         | 多级选择框       |
 | rate          | &lt;el-rate&gt;                             | 评分             |
-| component     | &lt;component :is=""&gt;                    | 自定义组件             |
+| component     | &lt;component :is=""&gt;                    | 自定义组件       |
 
 ### Method
 

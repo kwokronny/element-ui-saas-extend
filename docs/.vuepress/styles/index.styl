@@ -43,16 +43,12 @@ th, td {
 	border-right: 1px solid $borderColor;
 
 	&:last-child {
-		border: none;
+		border-right: none;
 	}
 }
 
 tr {
 	line-height: 1.5em;
-
-	&:nth-child(2n) {
-		background: none;
-	}
 }
 
 thead tr:first-child {
@@ -66,6 +62,9 @@ thead tr:first-child {
 		margin: auto;
 		display: table;
 		overflow-x: initial;
+		border-radius: 0;
+		min-width: auto;
+		border: none;
 	}
 
 	tr {

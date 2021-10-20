@@ -7,13 +7,13 @@ actionText: 🚀Start
 actionLink: /en/Installation.html
 features:
 - title: Efficiency
-  details: Settle repetitive work in common business combine into preset components for efficient completion.
+  details: Organize repetitive tasks under common businesses, merge them into preset components, and complete tasks efficiently.
 - title: Freedom
-  details: Organize Coupling as much as possible, giving both efficiency and customize for vertical industry business.
+  details: Organize Coupling as much as possible, While taking into account high efficiency, it also gives free space to customize special scenarios under vertical business.
 - title: Easy
-  details: Element UI standard develop, have Much example and documentation as possible to help you code.
+  details: Follow the standard development of Element UI, as many sample codes and documents as possible to help you get started quickly.
 
 footer: MIT Licensed | kwokronny.top
 ---
 
-As the recent work mainly focuses on SaaS business, and the development content is repetitive in form and table interaction.  development base hight utility component library - Element UI,  so want to organize development preset components library for SaaS business.
+Since recent work mainly focuses on SaaS business development, development in `form` and `table` interaction is highly repetitive, In order to reduce reppetitive work, it was decided to organize a library of perset components for  SaaS business. The project is developed on the basis of the Element UI suite, as his extension component library.

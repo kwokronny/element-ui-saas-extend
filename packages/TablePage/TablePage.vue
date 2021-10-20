@@ -164,11 +164,13 @@
 		>
 			<el-button type="text" @click="handleClickReset">{{$t("tablepage.reset")}}</el-button>
 			<el-table-draggable>
-				<el-table size="small" :data="columnsSort" border height="300px">
+				<el-table size="small" :data="sortColumns" border height="300px">
 					<el-table-column :label="$t('tablepage.sort')" width="70px">
 						<i class="el-icon-sort" style="cursor: move"></i>
 					</el-table-column>
-					<el-table-column :label="$t('tablepage.column')" prop="label"></el-table-column>
+					<el-table-column :label="$t('tablepage.column')">
+						<template slot-scope="{row}">{{labelEnum[row.prop]}}</template>
+					</el-table-column>
 					<el-table-column :label="$t('tablepage.customColumns')" width="200px">
 						<template slot-scope="{row}">
 							<el-radio-group size="mini" v-model="row.fixed">
@@ -201,22 +203,21 @@
 	</div>
 </template>
 <script lang="ts">
-import DynamicSlot from "../components/DynamicSlot"
-import { ElFormAutoField } from "../../types/form-auto"
-import ElTableDraggable from "element-ui-el-table-draggable"
-import { Table } from "element-ui"
-import { ElTablePageColumn, ElTablePageDataMap } from "types/table-page"
 import { Vue, Component, Prop, Ref, Watch, PropSync } from "vue-property-decorator"
-import { transformOptions, arrayToRecord } from "../util"
+import { Table } from "element-ui"
+import ElTableDraggable from "element-ui-el-table-draggable"
+import DynamicSlot from "../components/DynamicSlot"
 import { ElAutoOption } from "types/saas-extend.js"
+import { ElFormAutoField } from "../../types/form-auto"
+import { ElTablePageColumn, ElTablePageDataMap } from "types/table-page"
+import { transformOptions, arrayToRecord } from "../util"
 import ElFormAuto from "../FormAuto";
-import omit from "lodash/omit"
-import cloneDeep from "lodash/cloneDeep"
+import { omit, cloneDeep } from "lodash"
 import locale from "../../src/mixin/locale"
 
 interface ElTablePageColumnSort {
 	prop: string,
-	label: string,
+	// label: string,
 	fixed: "left" | "right" | boolean
 	hide: boolean
 }
@@ -409,17 +410,20 @@ export default class ElTablePage extends Vue {
 	@Prop({ type: [Boolean, String], default: false }) customColumns!: boolean | string;
 
 	private customColumnsDialog: boolean = false;
-	private columnsSort: ElTablePageColumnSort[] = []
+	private columnsSort: ElTablePageColumnSort[] = [] //当前应用的排序变量
+	private sortColumns: ElTablePageColumnSort[] = [] //弹窗用的临时排序变量
+	private labelEnum: Record<string, string> = {}
 
 	public openCustomColumnDialog(): void {
 		this.customColumnsDialog = true;
+		this.sortColumns = JSON.parse(JSON.stringify(this.columnsSort))
 	}
 
 	private initColumnsSortData() {
-		this.columnsSort = this.columns.map((column: ElTablePageColumn) => {
+		return this.columns.map((column: ElTablePageColumn) => {
 			return Object.assign({}, {
 				prop: column.prop,
-				label: column.label,
+				// label: column.label,
 				fixed: column.fixed || false,
 				hide: column.hide || false,
 			})
@@ -428,18 +432,21 @@ export default class ElTablePage extends Vue {
 
 	private loadCustomColumns() {
 		if (this.customColumns) {
-			if (this.columnsSort.length == 0) {
-				let sortStorage: null | string = window.localStorage.getItem("ElTablePage_" + this.customColumns);
-				if (sortStorage) {
-					this.columnsSort = JSON.parse(sortStorage)
-				} else {
-					this.initColumnsSortData();
-				}
+			// if (this.columnsSort.length == 0) {
+			let sortStorage: null | string = window.localStorage.getItem("ElTablePage_" + this.customColumns);
+			if (sortStorage) {
+				this.columnsSort = JSON.parse(sortStorage)
+			} else {
+				this.columnsSort = this.initColumnsSortData();
 			}
+			// }
 		}
 		this.refresh = false;
 		let sortProp: string[] = []
-		let props: string[] = this.headers.map((item: ElTablePageColumn) => item.prop)
+		let props: string[] = this.headers.map((item: ElTablePageColumn) => {
+			this.labelEnum[item.prop] = item.label
+			return item.prop
+		})
 		this.columnsSort = this.columnsSort.filter((item: ElTablePageColumnSort) => {
 			let index = props.indexOf(item.prop);
 			if (index > -1) {
@@ -459,17 +466,16 @@ export default class ElTablePage extends Vue {
 
 	private handleClickSave() {
 		if (this.customColumns == false) return
-		window.localStorage.setItem("ElTablePage_" + this.customColumns, JSON.stringify(this.columnsSort))
-		this.$emit("saved-custom-columns", JSON.stringify(this.columnsSort))
+		window.localStorage.setItem("ElTablePage_" + this.customColumns, JSON.stringify(this.sortColumns))
+		this.$emit("saved-custom-columns", JSON.stringify(this.sortColumns))
 		this.loadCustomColumns()
 		this.customColumnsDialog = false;
 	}
 
 	private async handleClickReset() {
 		if (this.customColumns == false) return
-		window.localStorage.removeItem("ElTablePage_" + this.customColumns)
-		this.columnsSort = []
-		this.initColumnsSortData();
+		this.sortColumns = []
+		this.sortColumns = this.initColumnsSortData();
 	}
 
 	private handleClickClose() {

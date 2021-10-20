@@ -1,16 +1,15 @@
 ---
 sidebarDepth: 0
 ---
-
 # 更新日志
 
 ## 1.0.14 <small>2021-10-19</small>
 - #### 新增
-	- 新增国际化，支持简体中文、英语。
+	- 支持国际化：简体中文、英语。
 - #### 修复
-	- FormAuto 组件编辑 model 时问题。
+	- FormAuto 组件更新 model 时问题。
 	- FormAuto 组件 select 中选项 disabled 未生效。
-	- TableAuto 自定义列调整后关闭窗口后重新打开，列未恢复。
+	- TableAuto 自定义列调整后关闭窗口后重新打开，自定义列未恢复。
 
 ## 1.0.13 <small>2021-09-27</small>
 ## 1.0.12 <small>2021-09-27</small>
