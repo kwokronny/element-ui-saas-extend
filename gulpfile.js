@@ -4,7 +4,6 @@ const { series, src, dest } = require("gulp");
 const sass = require("gulp-sass");
 const autoprefixer = require("gulp-autoprefixer");
 const cssmin = require("gulp-cssmin");
-const ts = require("gulp-typescript");
 
 exports.default = series(
   function transferSass() {
