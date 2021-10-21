@@ -44,7 +44,7 @@ import { Vue, Component, Model, Prop, Inject, Watch, Emit, Ref } from "vue-prope
 //@ts-ignore
 import Emitter from 'element-ui/src/mixins/emitter.js';
 import { Form, FormItem } from "element-ui";
-import { isNumber } from "lodash"
+import isNumber from "lodash-es/isNumber"
 import { t } from "../../src/locale"
 
 @Component({

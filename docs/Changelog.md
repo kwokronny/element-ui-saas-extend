@@ -3,13 +3,21 @@ sidebarDepth: 0
 ---
 # 更新日志
 
-## 1.0.14 <small>2021-10-19</small>
+## 1.0.14 <small>2021-10-21</small>
 - #### 新增
 	- 支持国际化：简体中文、英语。
+
+- #### 优化
+	- 按需引入 `lodash`，减少包体积
+
 - #### 修复
-	- FormAuto 组件更新 model 时问题。
-	- FormAuto 组件 select 中选项 disabled 未生效。
-	- TableAuto 自定义列调整后关闭窗口后重新打开，自定义列未恢复。
+	- FormAuto
+		- 更新 model 无效BUG。
+		- `type:select` 中选项 disabled 未生效。
+		- 重置表单偶现async-validator触发报错。
+		- 修改表单Prop[data]时部分值被清空。
+	- TableAuto 
+		- 自定义列调整未保存关闭窗口后重新打开应该恢复打开前的数据。
 
 ## 1.0.13 <small>2021-09-27</small>
 ## 1.0.12 <small>2021-09-27</small>

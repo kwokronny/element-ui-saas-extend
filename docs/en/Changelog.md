@@ -6,11 +6,19 @@ sidebarDepth: 0
 
 ## 1.0.14 <small>2021-09-27</small>
 - #### Feature
-	- Support internationalization: Chinese simplified、English 
+	- Support internationalization: Chinese simplified、English.
+	
+- #### Optimization
+	- Introduce `lodash` on demand to reduce package size.
+
 - #### Fix
-	- FormAuto 组件更新 model 时问题。
-	- FormAuto 组件 select 中选项 disabled 未生效。
-	- TableAuto 自定义列调整后关闭窗口后重新打开，自定义列未恢复。
+	- FormAuto
+		- Update model is invalid BUG.
+		- The option disabled in `type:select` has no working.
+		- Occasionally async-validator trigger Validater when form reset.
+		- Part of the value is cleared when the form Prop[data] is modified.
+	- TableAuto 
+		- Custom column editing is not saved, closing the window and reopening it should restore the data before opening.
 
 ## 1.0.13 <small>2021-09-27</small>
 ## 1.0.12 <small>2021-09-27</small>

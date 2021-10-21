@@ -199,7 +199,10 @@ import {
 	Model,
 } from "vue-property-decorator";
 import { Form } from "element-ui";
-import { debounce, cloneDeep, forEach, omit } from "lodash";
+import forEach from "lodash-es/forEach";
+import cloneDeep from "lodash-es/cloneDeep";
+import debounce from "lodash-es/debounce";
+import omit from "lodash-es/omit";
 import { ElFormAutoField } from "../../types/form-auto";
 import { ElAutoMixinOptions, ElAutoOption } from "../../types/saas-extend"
 import DynamicSlot from "../components/DynamicSlot"

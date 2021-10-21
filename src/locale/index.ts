@@ -1,5 +1,5 @@
 import defaultLang from "./lang/zh-CN.js";
-import { result } from "lodash";
+import { result } from "lodash-es";
 let lang: Record<string, any> = defaultLang;
 
 export const t = function(path: string) {

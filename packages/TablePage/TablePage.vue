@@ -212,7 +212,8 @@ import { ElFormAutoField } from "../../types/form-auto"
 import { ElTablePageColumn, ElTablePageDataMap } from "types/table-page"
 import { transformOptions, arrayToRecord } from "../util"
 import ElFormAuto from "../FormAuto";
-import { omit, cloneDeep } from "lodash"
+import omit from "lodash-es/omit"
+import cloneDeep from "lodash-es/cloneDeep"
 import locale from "../../src/mixin/locale"
 
 interface ElTablePageColumnSort {
