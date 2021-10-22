@@ -320,9 +320,9 @@ export default class ElFormAuto extends Vue {
 					data[name] = model[name]
 					data[sn] = sd;
 					data[en] = ed;
-					if (item.type == "daterange" && item.suffixTime == true) {
-						data[sn] += "00:00:00";
-						data[en] += "23:59:59";
+					if (sd && ed && item.type == "daterange" && item.suffixTime == true) {
+						data[sn] += " 00:00:00";
+						data[en] += " 23:59:59";
 					}
 				}
 			}

@@ -34,6 +34,7 @@ export default {
         dateRange: {
           label: "日期范围",
           type: "daterange",
+          suffixTime: true,
           rangeName: ["startDate", "endDate"],
         },
         numberrange: {
@@ -577,7 +578,7 @@ export default {
 <template>
   <el-form-auto :data="form" v-model="model" label-width="90px">
     <template slot-scope="{ field, model, name }" slot="upload">
-      <el-upload action="https://yapi.baidu.com/mock/13114/upload" v-model="model[name]" :on-success="uploadSuccess">
+      <el-upload action="http://yapi.baidu.com/mock/13114/upload" v-model="model[name]" :on-success="uploadSuccess">
         <el-button round type="primary" icon="el-icon-upload">上传文件</el-button>
       </el-upload>
     </template>

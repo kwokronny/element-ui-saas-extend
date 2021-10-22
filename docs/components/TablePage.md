@@ -67,6 +67,8 @@ export default {
           filters: [["dayjs", "YYYY-MM-DD"]],
           search: {
             type: "daterange",
+            value: ["2021-01-03", "2021-01-25"],
+            suffixTime: true,
             rangeName: ["startDate", "endDate"],
           },
         },
@@ -101,7 +103,8 @@ export default {
   },
   methods: {
     getList(page = 1, search, pageSize) {
-      return axios.get("http://yapi.smart-xwork.cn/mock/90460/page").then(function(ret) {
+      console.log(search)
+      return axios.get("http://yapi.smart-xwork.cn/mock/90460/page", { params: search }).then(function(ret) {
         let baseId = (page - 1) * pageSize;
         return {
           page,
@@ -128,7 +131,7 @@ export default {
 
 ```vue
 <template>
-  <el-table-page border stripe :columns="columns" :request="getList" custom-columns="table_test1"></el-table-page>
+  <el-table-page border stripe :columns="columns" custom-columns="table_test1"></el-table-page>
 </template>
 <script>
 export default {
@@ -302,6 +305,7 @@ export default {
 表格常常需要对列内容展示进行格式化处理，所以很多时候经常需要为列内容自定义插槽 应用过滤器 格式化
 
 ### 示例
+
 `filters: "empty"` 时等于为列内容做如下处理
 
 ```vue

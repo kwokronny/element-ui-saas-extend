@@ -3,6 +3,16 @@ sidebarDepth: 0
 ---
 # 更新日志
 
+## 1.0.15 <small>2021-10-21</small>
+- #### 优化
+	- TablePage
+		- 在组件完成对 columns 处理后触发搜索请求。
+
+- #### 修复
+	- FormAuto
+		- 解决启用 `suffixTime` 导致的日期拼合错误。
+
+
 ## 1.0.14 <small>2021-10-21</small>
 - #### 新增
 	- 支持国际化：简体中文、英语。

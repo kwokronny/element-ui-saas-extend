@@ -258,7 +258,7 @@ export default class ElTablePage extends Vue {
 	}
 
 	// # region 列相关
-	@Prop(Array) columns!: ElTablePageColumn[];
+	@Prop({ type: Array, required: true, default: () => [] }) columns!: ElTablePageColumn[];
 	private headers: ElTablePageColumn[] = [];
 	private refresh: boolean = true;
 
@@ -327,13 +327,15 @@ export default class ElTablePage extends Vue {
 			if (column.enum) {
 				let options: ElAutoOption[] = await transformOptions(column.enum);
 				column.enum = arrayToRecord(options, { key: "value", value: "label" })
-
 			}
 		})
 		if (this.customColumns) {
 			// 从localStorage获取存储的自定义列配置
 			this.loadCustomColumns()
 		}
+		this.$nextTick(function () {
+			this.search();
+		})
 	}
 
 	// #endregion
@@ -347,7 +349,7 @@ export default class ElTablePage extends Vue {
 
 	private searchForm: Record<string, ElFormAutoField> = {}
 	private loading: boolean = false;
-	@Prop(Function) request!: ((page: number, search?: Record<string, any>, pageSize?: number, from?: string) => Promise<Record<ElTablePageDataMap, any>>)
+	@Prop({ type: Function, required: true }) request!: ((page: number, search?: Record<string, any>, pageSize?: number, from?: string) => Promise<Record<ElTablePageDataMap, any>>)
 
 	get hasSearchCard(): boolean {
 		return Object.keys(this.searchForm).length > 0
@@ -364,7 +366,7 @@ export default class ElTablePage extends Vue {
 		return this.pageLayout || (this.$ELEMENT && this.$ELEMENT.tablePage?.pageLayout) || "total, sizes, prev, pager, next, jumper"
 	}
 
-	@Watch("request", { immediate: true })
+	@Watch("request")
 	private handleRequestChange() {
 		if (this.request instanceof Function) {
 			this.search(1)

@@ -541,7 +541,7 @@ setting attribute slot, customize dynamic slot, many field can common slot.
 <template>
   <el-form-auto :data="form" v-model="model" label-width="90px">
     <template slot-scope="{ field, model, name }" slot="upload">
-      <el-upload action="https://yapi.baidu.com/mock/13114/upload" v-model="model[name]" :on-success="uploadSuccess">
+      <el-upload action="http://yapi.baidu.com/mock/13114/upload" v-model="model[name]" :on-success="uploadSuccess">
         <el-button round type="primary" icon="el-icon-upload">Upload</el-button>
       </el-upload>
     </template>
