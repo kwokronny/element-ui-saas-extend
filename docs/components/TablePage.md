@@ -130,7 +130,7 @@ export default {
 
 ```vue
 <template>
-  <el-table-page border stripe :columns="columns" custom-columns="table_test1"></el-table-page>
+  <el-table-page border stripe :columns="columns" custom-columns="table_test1" :request="getList"></el-table-page>
 </template>
 <script>
 export default {
