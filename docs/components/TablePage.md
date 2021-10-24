@@ -103,8 +103,7 @@ export default {
   },
   methods: {
     getList(page = 1, search, pageSize) {
-      console.log(search)
-      return axios.get("http://yapi.smart-xwork.cn/mock/90460/page", { params: search }).then(function(ret) {
+      return axios.get("/element-ui-saas-extend/json/page.json").then(function(ret) {
         let baseId = (page - 1) * pageSize;
         return {
           page,
@@ -162,12 +161,6 @@ export default {
           width: 260,
         },
         {
-          label: "备用邮箱",
-          prop: "email",
-          showOverflowTooltip: true,
-          width: 260,
-        },
-        {
           label: "积分",
           prop: "score",
           width: 180,
@@ -198,7 +191,7 @@ export default {
   },
   methods: {
     getList(page = 1, search, pageSize) {
-      return axios.get("http://yapi.smart-xwork.cn/mock/90460/page").then(function(ret) {
+      return axios.get("/element-ui-saas-extend/json/page.json").then(function(ret) {
         let baseId = (page - 1) * pageSize;
         return {
           page,
@@ -281,7 +274,7 @@ export default {
       });
     },
     getList(page = 1, search, pageSize) {
-      return axios.get("http://yapi.smart-xwork.cn/mock/90460/page").then(function(ret) {
+      return axios.get("/element-ui-saas-extend/json/page.json").then(function(ret) {
         let baseId = (page - 1) * pageSize;
         return {
           page,
@@ -411,7 +404,7 @@ export default {
   },
   methods: {
     getList(page = 1, search, pageSize) {
-      return axios.get("http://yapi.smart-xwork.cn/mock/90460/page").then(function(ret) {
+      return axios.get("/element-ui-saas-extend/json/page.json").then(function(ret) {
         let baseId = (page - 1) * pageSize;
         return {
           page,
@@ -567,7 +560,7 @@ export default {
       this.$refs["TablePage"].clearSelection();
     },
     getList(page = 1, search, pageSize) {
-      return axios.get("http://yapi.smart-xwork.cn/mock/90460/page").then(function(ret) {
+      return axios.get("/element-ui-saas-extend/json/page.json").then(function(ret) {
         let baseId = (page - 1) * pageSize;
         return {
           page,

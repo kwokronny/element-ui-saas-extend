@@ -477,7 +477,7 @@ export default {
           label: "cascader",
           type: "cascader",
           options: () => {
-            return axios.get("http://yapi.smart-xwork.cn/mock/90460/cascader").then((res) => {
+            return axios.get("/element-ui-saas-extend/json/cascader.json").then((res) => {
               return res.data;
             });
           },

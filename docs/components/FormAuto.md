@@ -510,7 +510,7 @@ export default {
           label: "级联框",
           type: "cascader",
           options: () => {
-            return axios.get("http://yapi.smart-xwork.cn/mock/90460/cascader").then((res) => {
+            return axios.get("/element-ui-saas-extend/json/cascader.json").then((res) => {
               return res.data;
             });
           },
@@ -578,7 +578,7 @@ export default {
 <template>
   <el-form-auto :data="form" v-model="model" label-width="90px">
     <template slot-scope="{ field, model, name }" slot="upload">
-      <el-upload action="http://yapi.baidu.com/mock/13114/upload" v-model="model[name]" :on-success="uploadSuccess">
+      <el-upload action="https://jsonplaceholder.typicode.com/upload" v-model="model[name]" :on-success="uploadSuccess">
         <el-button round type="primary" icon="el-icon-upload">上传文件</el-button>
       </el-upload>
     </template>
@@ -671,7 +671,7 @@ export default {
 | 参数            | 描述                       | 类型                                                            | 可选值 | 默认值 |
 | :-------------- | :------------------------- | :-------------------------------------------------------------- | :----- | ------ |
 | v-model         | 表单数据对象               | `object`                                                        | -      | {}     |
-| data            | 表单项配置                 | [Record&lt;name:string,FormAutoField&gt;](#prop-data-attribute) | -      | {}     |
+| data            | 表单项配置                 | [Record&lt;name:string,FormAutoField&gt;](#FormAutoField) | -      | {}     |
 | gutter          | &lt;el-row&gt; 属性 gutter | `number`                                                        | -      | 15     |
 | label-hidden    | 所有表单项标签是否隐藏     | `boolean`                                                       | -      | false  |
 | `[prop:string]` | 继承 el-form 所有 Prop     | `any`                                                           | -      | -      |

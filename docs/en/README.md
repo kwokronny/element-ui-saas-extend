@@ -2,7 +2,7 @@
 home: true
 heroImage: /logo.png
 heroText: Element SaaS Extend
-description: Develop common interaction component for SaaS business base Element UI.
+description: Common interaction component for SaaS business base Element UI.
 actionText: 🚀Start
 actionLink: /en/Installation.html
 features:
