@@ -28,7 +28,7 @@ module.exports = {
     "/en/": {
       lang: "en-US",
       title: "Element UI SaaS Extend",
-      description: "Development common interaction component for SaaS business base Element UI.",
+      description: "Common interaction component for SaaS business base Element UI.",
     },
   },
   themeConfig: {
