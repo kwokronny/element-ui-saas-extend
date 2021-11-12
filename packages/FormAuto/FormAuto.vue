@@ -129,13 +129,13 @@
 							<el-checkbox-group
 								v-model="model[name]"
 								style="display: inline-block"
-								@change="handleCheckedChange($event, name)"
+								@change="handleCheckedChange(name,$event)"
 								v-bind="item.props"
 								v-on="item.on"
 							>
 								<el-checkbox
-									v-for="(option, key) in item.options"
-									:key="`${name}_${key}`"
+									v-for="option in item.options"
+									:key="`${name}_${option.value}`"
 									:label="`${option.value}`"
 									:disabled="item.disabled || option.disabled"
 								>
@@ -147,8 +147,18 @@
 						<template v-else-if="item.type == 'select'">
 							<el-select v-model="model[name]" v-bind="item.props" v-on="item.on">
 								<el-option
-									v-for="(option, key) in item.options"
-									:key="`${name}_${key}`"
+									v-for="option in item.echoOptions"
+									:key="`${name}_${option.value}`"
+									:label="option.label"
+									:value="`${option.value}`"
+									:disabled="option.disabled"
+								>
+									<i v-if="option.icon" :class="option.icon"></i>
+									<span>{{ option.label }}</span>
+								</el-option>
+								<el-option
+									v-for="option in item.options"
+									:key="`${name}_${option.value}`"
 									:label="option.label"
 									:value="`${option.value}`"
 									:disabled="option.disabled"
@@ -344,35 +354,45 @@ export default class ElFormAuto extends Vue {
 			if (Object.keys(_model).indexOf(name) > -1) {
 				if (value === undefined) break;
 				let field = this.fields[name];
-				if (field && /radio|select|check/.test(field.type) && Array.isArray(field.options)) {
-					// 远程获取选项框选项回显功能
-					if (value && value.label && value.value) {
-						if (field.options.findIndex((option: any) => option.value == value.value) == -1) {
-							field.options.splice(0, 0, value)
-						}
-						value = value.value;
-					}
-					if ((field.type == "check" || (field.type == "select" && field.multiple)) && Array.isArray(value)) {
-						for (let idx = 0; idx < value.length; idx++) {
-							let val = value[idx];
-							if (val.label && val.value && field.type == "select") {
-								if (field.options.findIndex((option: any) => option.value == val.value) == -1) {
-									field.options.splice(0, 0, val)
-								}
-								value[idx] = val.value;
-							} else {
-								value[idx] = `${val}`
-							}
-						}
-						if (field.type == "check") {
-							this.handleCheckedChange(value, name)
-						}
+				if (field && /radio|select|check/.test(field.type)) {
+					// if (field.type == "select" && field.remote) {
+					// value = this.selectEcho(name, value)
+					// } else 
+					if (field.type == "check" || (field.type == "select" && field.multiple)) {
+						field.type == "check" && this.handleCheckedChange(name, value)
+						value = value.map(String)
 					} else {
 						value = `${value}`;
 					}
 				}
 			}
 			this.model[name] = value
+		}
+	}
+
+	/**
+	 * 
+	 */
+	private selectEcho(name: string, options: ElAutoOption[] | ElAutoOption): any {
+		let field = this.fields[name];
+		if (!field) return options;
+		if (Array.isArray(options)) {
+			let value: string[] = [];
+			let echoOptions: ElAutoOption[] = [];
+			// if (options.every((option: ElAutoOption) => typeof option != "string")) {
+			options.forEach((option: ElAutoOption) => {
+				if (option && option.label && option.value) {
+					value.push(`${option.value}`)
+					echoOptions.push(Object.assign({}, option))
+				} else {
+					value.push(`${option}`)
+				}
+			});
+			field.echoOptions = echoOptions
+			return value;
+		} else if (options && options.label && options.value) {
+			field.echoOptions = [options];
+			return `${options.value}`;
 		}
 	}
 
@@ -394,7 +414,7 @@ export default class ElFormAuto extends Vue {
 	/**
 	 * 复选框组 change 事件
 	 */
-	private handleCheckedChange(value: string[], name: string): void {
+	private handleCheckedChange(name: string, value: string[]): void {
 		if (this.check[name] == undefined) return
 		let checkedCount = value.length;
 		let options = this.fields[name].options as ElAutoOption[];
@@ -491,17 +511,19 @@ export default class ElFormAuto extends Vue {
 			if (this.acceptValue == false) {
 				// console.log(`${name}:${this.value[name]}`)
 				let value = this.value[name] == undefined ? item.value : this.value[name]
-				this.$set(this.model, name, value);
-				if (item.type == "check") {
-					this.handleCheckedChange(value, name)
+				if (item.type == "select" && item.remote) {
+					value = this.selectEcho(name, value)
+				} else if (item.type == "check") {
+					this.handleCheckedChange(name, value)
 				}
+				this.$set(this.model, name, value);
 			}
 		})
 		this.asyncOptionsRequest()
+		this.acceptValue = true;
 	}
 
 	private generateRule(): void {
-		this.acceptValue = false;
 		this.rules = {};
 		forEach(this.data, (item, name) => {
 			this.rules[name] = [];
@@ -537,42 +559,29 @@ export default class ElFormAuto extends Vue {
 
 	private asyncOptionsRequest(): void {
 		if (this.asyncOptions.length) {
-			Promise.all(this.asyncOptions.map((item) => {
-				return new Promise((resolve, reject) => {
-					if (item.remote && item.type == "select" && item.options instanceof Function) {
-						let remoteMethod = item.options;
-						item.props.filterable = true;
-						item.props.remote = true;
-						item.props.remoteMethod = debounce((query?: string) => {
-							item.options = []
-							item.props && (item.props.loading = true);
-							remoteMethod(query).then((options: ElAutoMixinOptions) => {
-								return transformOptions(options)
-							}).then((options: any) => {
-								item.options = options;
-								resolve(true);
-							});
-							item.props && (item.props.loading = false);
-						}, 500);
-						item.props.remoteMethod("")
-					} else if (item.options) {
-						transformOptions(item.options).then((options) => {
-							item.options = options
-							resolve(true);
-						})
-					}
-				})
-			})).then(this.canRender, this.canRender)
-		} else {
-			this.canRender()
+			this.asyncOptions.forEach((item) => {
+				if (item.remote && item.type == "select" && item.options instanceof Function) {
+					let remoteMethod = item.options;
+					item.props.filterable = true;
+					item.props.remote = true;
+					item.props.remoteMethod = debounce((query?: string) => {
+						item.options = []
+						item.props && (item.props.loading = true);
+						remoteMethod(query).then((options: ElAutoMixinOptions) => {
+							return transformOptions(options)
+						}).then((options: any) => {
+							item.options = options;
+						});
+						item.props && (item.props.loading = false);
+					}, 500);
+					item.props.remoteMethod("")
+				} else if (item.options) {
+					transformOptions(item.options).then((options) => {
+						item.options = options
+					})
+				}
+			})
 		}
-	}
-
-	private canRender() {
-		this.acceptValue = true;
-		this.$nextTick(function () {
-			this.setModel(this.value)
-		})
 	}
 }
 </script>
