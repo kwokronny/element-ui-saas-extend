@@ -540,7 +540,6 @@ export default {
   },
   methods: {
     editOptionReshow() {
-      this.model.asyncSelect = { label: "测试", value: "123" };
       this.model.remote = [
         { label: "测试", value: "123" },
         { label: "测试2", value: "1233" },
@@ -551,7 +550,6 @@ export default {
     },
   },
   mounted() {
-    this.model.asyncSelect = { label: "测试", value: "123" };
     this.model.remote = [
       { label: "测试", value: "123" },
       { label: "测试2", value: "1233" },

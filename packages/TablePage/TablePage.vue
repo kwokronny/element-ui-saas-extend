@@ -145,6 +145,7 @@
 			<slot name="table_append"></slot>
 			<div class="el-table-page_pagination">
 				<el-pagination
+					v-if="total > 0"
 					:current-page="page"
 					:page-size.sync="limit"
 					:page-sizes="pageSizes"
@@ -214,7 +215,7 @@ import { transformOptions, arrayToRecord } from "../util"
 import ElFormAuto from "../FormAuto";
 import omit from "lodash-es/omit"
 import cloneDeep from "lodash-es/cloneDeep"
-import locale from "../../src/mixin/locale"
+import mixin from "../../src/mixin"
 
 interface ElTablePageColumnSort {
 	prop: string,
@@ -228,7 +229,7 @@ interface ElTablePageColumnSort {
 	components: {
 		DynamicSlot, ElTableDraggable, ElFormAuto
 	},
-	mixins: [locale],
+	mixins: [mixin],
 	provide() {
 		return {
 			slotRoot: this
@@ -380,11 +381,17 @@ export default class ElTablePage extends Vue {
 		this.loading = true;
 		let data: Record<ElTablePageDataMap, any> = await this.request(page, this.filter, this.limit)
 		this.loading = false;
-		this.record = data.record
-		// this.prehandleRecord();
-		this.page = data.page
-		this.limit = data.pageSize
-		this.total = data.total
+		if (Array.isArray(data)) {
+			this.record = data;
+			this.total = -1;
+		} else if (data && data.record && data.page && data.pageSize && data.total) {
+			this.record = data.record
+			this.page = data.page
+			this.limit = data.pageSize
+			this.total = data.total
+		} else {
+			console.error("request params callback result error: is not array or interface{ page: number, pageSize: number, record: any[], total: number }")
+		}
 	}
 
 	private handlePageChange(page: number) {

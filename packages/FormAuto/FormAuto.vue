@@ -134,8 +134,8 @@
 								v-on="item.on"
 							>
 								<el-checkbox
-									v-for="option in item.options"
-									:key="`${name}_${option.value}`"
+									v-for="(option, key) in item.options"
+									:key="`${name}_${key}`"
 									:label="`${option.value}`"
 									:disabled="item.disabled || option.disabled"
 								>
@@ -145,19 +145,9 @@
 							</el-checkbox-group>
 						</template>
 						<template v-else-if="item.type == 'select'">
-							<el-select v-model="model[name]" v-bind="item.props" v-on="item.on">
+							<el-select v-model="model[name]" v-bind="item.props" v-select-scroll="item" v-on="item.on">
 								<el-option
-									v-for="option in item.echoOptions"
-									:key="`${name}_${option.value}`"
-									:label="option.label"
-									:value="`${option.value}`"
-									:disabled="option.disabled"
-								>
-									<i v-if="option.icon" :class="option.icon"></i>
-									<span>{{ option.label }}</span>
-								</el-option>
-								<el-option
-									v-for="option in item.options"
+									v-for="option in selectOptions(item)"
 									:key="`${name}_${option.value}`"
 									:label="option.label"
 									:value="`${option.value}`"
@@ -200,25 +190,16 @@
 	</el-form>
 </template>
 <script lang="ts">
-import {
-	Vue,
-	Component,
-	Prop,
-	Ref,
-	Watch,
-	Model,
-} from "vue-property-decorator";
+import { Vue, Component, Prop, Ref, Watch, Model } from "vue-property-decorator";
 import { Form } from "element-ui";
-import forEach from "lodash-es/forEach";
-import cloneDeep from "lodash-es/cloneDeep";
-import debounce from "lodash-es/debounce";
-import omit from "lodash-es/omit";
+import { forEach, cloneDeep, debounce, uniqBy, omit } from "lodash-es";
 import { ElFormAutoField } from "../../types/form-auto";
 import { ElAutoMixinOptions, ElAutoOption } from "../../types/saas-extend"
-import DynamicSlot from "../components/DynamicSlot"
 import { transformOptions } from "../util"
-import locale from "../../src/mixin/locale"
 import { t } from "../../src/locale"
+import DynamicSlot from "../components/DynamicSlot"
+import mixin from "../../src/mixin"
+import selectScroll from "../../src/mixin/selectscroll"
 
 @Component({
 	name: "ElFormAuto",
@@ -227,7 +208,7 @@ import { t } from "../../src/locale"
 			slotRoot: this
 		}
 	},
-	mixins: [locale],
+	mixins: [mixin, selectScroll],
 	components: {
 		DynamicSlot
 	}
@@ -283,7 +264,15 @@ export default class ElFormAuto extends Vue {
 
 	@Watch("model", { immediate: true, deep: true })
 	private onModelChange() {
+		this.$emit("change")
 		this.$emit("input", this.getModel());
+	}
+
+	private selectOptions(field: ElFormAutoField) {
+		if (Array.isArray(field.options) && field.remote) {
+			return uniqBy(field.options.concat(field.echoOptions), "value")
+		}
+		return field.options
 	}
 
 	/**
@@ -347,20 +336,19 @@ export default class ElFormAuto extends Vue {
 	 * @param {object} model 表单项对应值数据 例如：{key:value,...}
 	 */
 	public setModel(model: Record<string, any>): void {
-		if (!this.acceptValue) return
-		let _model = Object.assign({}, model);
-		for (let name in _model) {
-			let value = _model[name];
-			if (Object.keys(_model).indexOf(name) > -1) {
+		for (let name in model) {
+			let value = model[name];
+			if (Object.keys(model).indexOf(name) > -1) {
 				if (value === undefined) break;
 				let field = this.fields[name];
 				if (field && /radio|select|check/.test(field.type)) {
-					// if (field.type == "select" && field.remote) {
-					// value = this.selectEcho(name, value)
-					// } else 
-					if (field.type == "check" || (field.type == "select" && field.multiple)) {
-						field.type == "check" && this.handleCheckedChange(name, value)
-						value = value.map(String)
+					if (field.type == "select" && field.remote) {
+						this.selectEcho(name, value)
+					} else if (field.type == "check" || (field.type == "select" && field.multiple)) {
+						field.type == "check" && this.handleCheckedChange(name, value);
+						for (let i = 0; i < value.length; i++) {
+							value[i] = `${value[i]}`
+						}
 					} else {
 						value = `${value}`;
 					}
@@ -373,26 +361,28 @@ export default class ElFormAuto extends Vue {
 	/**
 	 * 
 	 */
-	private selectEcho(name: string, options: ElAutoOption[] | ElAutoOption): any {
+	private selectEcho(name: string, options: any): any {
 		let field = this.fields[name];
 		if (!field) return options;
 		if (Array.isArray(options)) {
-			let value: string[] = [];
-			let echoOptions: ElAutoOption[] = [];
-			// if (options.every((option: ElAutoOption) => typeof option != "string")) {
-			options.forEach((option: ElAutoOption) => {
-				if (option && option.label && option.value) {
-					value.push(`${option.value}`)
-					echoOptions.push(Object.assign({}, option))
+			if (!field.echoOptions) {
+				field.echoOptions = []
+			}
+			for (let i = 0; i < options.length; i++) {
+				if (options[i] && options[i].label && options[i].value) {
+					if (!field.echoOptions.find((option: Record<string, string>) => option.value == options[i].value)) {
+						field.echoOptions.push(Object.assign({}, options[i]))
+					}
+					options[i] = `${options[i].value}`;
 				} else {
-					value.push(`${option}`)
+					options[i] = `${options[i]}`
 				}
-			});
-			field.echoOptions = echoOptions
-			return value;
+			}
+			// options = value;
 		} else if (options && options.label && options.value) {
 			field.echoOptions = [options];
-			return `${options.value}`;
+			options = `${options.value}`
+			// return `${options.value}`;
 		}
 	}
 
@@ -508,19 +498,15 @@ export default class ElFormAuto extends Vue {
 				}
 			}
 
-			if (this.acceptValue == false) {
-				// console.log(`${name}:${this.value[name]}`)
-				let value = this.value[name] == undefined ? item.value : this.value[name]
-				if (item.type == "select" && item.remote) {
-					value = this.selectEcho(name, value)
-				} else if (item.type == "check") {
-					this.handleCheckedChange(name, value)
-				}
-				this.$set(this.model, name, value);
+			let value = this.value[name] == undefined ? item.value : this.value[name]
+			if (item.type == "select" && item.remote) {
+				this.selectEcho(name, value)
+			} else if (item.type == "check") {
+				this.handleCheckedChange(name, value)
 			}
+			this.$set(this.model, name, value);
 		})
 		this.asyncOptionsRequest()
-		this.acceptValue = true;
 	}
 
 	private generateRule(): void {
@@ -564,16 +550,19 @@ export default class ElFormAuto extends Vue {
 					let remoteMethod = item.options;
 					item.props.filterable = true;
 					item.props.remote = true;
+					item.page = 1;
 					item.props.remoteMethod = debounce((query?: string) => {
 						item.options = []
 						item.props && (item.props.loading = true);
-						remoteMethod(query).then((options: ElAutoMixinOptions) => {
+						remoteMethod(query, item.page).then((options: ElAutoMixinOptions) => {
 							return transformOptions(options)
 						}).then((options: any) => {
+							item.props && (item.props.loading = false);
 							item.options = options;
+						}).catch(() => {
+							item.props && (item.props.loading = false);
 						});
-						item.props && (item.props.loading = false);
-					}, 500);
+					}, 500, { leading: true });
 					item.props.remoteMethod("")
 				} else if (item.options) {
 					transformOptions(item.options).then((options) => {

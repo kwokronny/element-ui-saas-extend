@@ -190,15 +190,9 @@ export default {
   methods: {
     getList(page = 1, search, pageSize) {
       return axios.get("/element-ui-saas-extend/json/page.json").then(function(ret) {
-        let baseId = (page - 1) * pageSize;
-        return {
-          page,
-          total: 100,
-          pageSize,
-          record: ret.data.data.filter(function(item, index) {
-            return index > baseId && index < baseId + pageSize;
-          }),
-        };
+        return ret.data.data.filter(function(item, index) {
+            return index < 10
+          })
       });
     },
   },
@@ -296,6 +290,7 @@ export default {
 表格常常需要对列内容展示进行格式化处理，所以很多时候经常需要为列内容自定义插槽 应用过滤器 格式化
 
 ### 示例
+
 `filters: "empty"` 时等于为列内容做如下处理
 
 ```vue
