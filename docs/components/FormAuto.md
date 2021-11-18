@@ -466,14 +466,14 @@ export default {
           multiple: true,
           required: true,
           remote: true,
-          options: (query) => {
-            return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
+          options: (query, page) => {
+            return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
               return res.data
                 .filter((item) => item.username.indexOf(query) > -1)
                 .map((item) => {
                   return {
                     label: item.username,
-                    value: item.id,
+                    value: item.id * page,
                   };
                 });
             });
@@ -665,13 +665,13 @@ export default {
 
 ### Props
 
-| 参数            | 描述                       | 类型                                                            | 可选值 | 默认值 |
-| :-------------- | :------------------------- | :-------------------------------------------------------------- | :----- | ------ |
-| v-model         | 表单数据对象               | `object`                                                        | -      | {}     |
+| 参数            | 描述                       | 类型                                                      | 可选值 | 默认值 |
+| :-------------- | :------------------------- | :-------------------------------------------------------- | :----- | ------ |
+| v-model         | 表单数据对象               | `object`                                                  | -      | {}     |
 | data            | 表单项配置                 | [Record&lt;name:string,FormAutoField&gt;](#FormAutoField) | -      | {}     |
-| gutter          | &lt;el-row&gt; 属性 gutter | `number`                                                        | -      | 15     |
-| label-hidden    | 所有表单项标签是否隐藏     | `boolean`                                                       | -      | false  |
-| `[prop:string]` | 继承 el-form 所有 Prop     | `any`                                                           | -      | -      |
+| gutter          | &lt;el-row&gt; 属性 gutter | `number`                                                  | -      | 15     |
+| label-hidden    | 所有表单项标签是否隐藏     | `boolean`                                                 | -      | false  |
+| `[prop:string]` | 继承 el-form 所有 Prop     | `any`                                                     | -      | -      |
 
 ### FormAutoField
 

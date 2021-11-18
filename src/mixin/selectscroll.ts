@@ -18,7 +18,6 @@ export default {
             //@ts-ignore
             const condition = this.scrollHeight - this.scrollTop <= this.clientHeight;
             //监听下拉框是否滚动到底部，滚动到底部就加载下一页数据
-            binding.value.page++;
             if (condition) binding.value.props.remoteMethod(query);
           });
         }

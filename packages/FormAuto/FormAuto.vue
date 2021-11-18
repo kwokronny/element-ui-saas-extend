@@ -553,20 +553,21 @@ export default class ElFormAuto extends Vue {
 					item.props.remote = true;
 					item.page = 1;
 					item.props.remoteMethod = debounce((query?: string) => {
-						item.options = []
+						if (item.page == 1) {
+							item.options = []
+						}
 						item.optionLoading = true;
 						remoteMethod(query, item.page).then((options: ElAutoMixinOptions) => {
 							return transformOptions(options)
 						}).then((options: any) => {
 							item.optionLoading = false;
-							if (item.page > 1) {
-								options = (item.options as ElAutoOption[]).concat(options)
-							}
+							options = (item.options as ElAutoOption[]).concat(options)
 							item.options = options;
+							item.page++
 						}).catch(() => {
 							item.optionLoading = false;
 						});
-					}, 500, { leading: true });
+					}, 1000, { leading: true });
 					item.props.remoteMethod("")
 				} else if (item.options) {
 					transformOptions(item.options).then((options) => {
