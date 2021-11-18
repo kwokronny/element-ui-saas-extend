@@ -133,7 +133,7 @@
 								<template
 									v-else-if="column.formatter"
 								>{{ column.formatter(row,column,row[column.prop],$index) }}</template>
-								<template v-else>{{ row[column.prop] }}</template>
+								<template v-else>{{ at(row,column.prop)[0] }}</template>
 								<!-- <template v-if="column.copy && !column.slot">
 								<i class="el-table-page_copy-icon el-icon-copy-document" title="复制"></i>
 								</template>-->
@@ -213,8 +213,7 @@ import { ElFormAutoField } from "../../types/form-auto"
 import { ElTablePageColumn, ElTablePageDataMap } from "types/table-page"
 import { transformOptions, arrayToRecord } from "../util"
 import ElFormAuto from "../FormAuto";
-import omit from "lodash-es/omit"
-import cloneDeep from "lodash-es/cloneDeep"
+import { omit, cloneDeep, at } from "lodash-es"
 import mixin from "../../src/mixin"
 
 interface ElTablePageColumnSort {
@@ -253,6 +252,10 @@ export default class ElTablePage extends Vue {
 		return this.buttonStyle || (this.$ELEMENT && this.$ELEMENT.tablePage?.buttonStyle) || {}
 	}
 
+	// get canCheck():boolean{
+	// 	return !!this.$attrs['row-key'] && this.multipleSelection 
+	// }
+
 	@Prop({ type: String, validator: (value: string) => { return (new RegExp("card|default")).test(value) }, default: "default" }) layoutType!: string
 	get wrapComponment(): string {
 		return this.layoutType == "card" ? "el-card" : "div"
@@ -262,6 +265,8 @@ export default class ElTablePage extends Vue {
 	@Prop(Array) columns!: ElTablePageColumn[];
 	private headers: ElTablePageColumn[] = [];
 	private refresh: boolean = true;
+
+	private at = at;
 
 	@Watch("columns", { immediate: true, deep: true })
 	private async handleColumnsChange() {
@@ -349,6 +354,7 @@ export default class ElTablePage extends Vue {
 	private searchForm: Record<string, ElFormAutoField> = {}
 	private loading: boolean = false;
 	@Prop(Function) request!: ((page: number, search?: Record<string, any>, pageSize?: number, from?: string) => Promise<Record<ElTablePageDataMap, any>>)
+
 
 	get hasSearchCard(): boolean {
 		return Object.keys(this.searchForm).length > 0

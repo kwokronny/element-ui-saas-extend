@@ -156,6 +156,7 @@
 									<i v-if="option.icon" :class="option.icon"></i>
 									<span>{{ option.label }}</span>
 								</el-option>
+								<el-option v-if="item.optionLoading" value="el-formauto-option-loading">加载中</el-option>
 							</el-select>
 						</template>
 						<template v-else-if="item.type == 'cascader'">
@@ -553,14 +554,17 @@ export default class ElFormAuto extends Vue {
 					item.page = 1;
 					item.props.remoteMethod = debounce((query?: string) => {
 						item.options = []
-						item.props && (item.props.loading = true);
+						item.optionLoading = true;
 						remoteMethod(query, item.page).then((options: ElAutoMixinOptions) => {
 							return transformOptions(options)
 						}).then((options: any) => {
-							item.props && (item.props.loading = false);
+							item.optionLoading = false;
+							if (item.page > 1) {
+								options = (item.options as ElAutoOption[]).concat(options)
+							}
 							item.options = options;
 						}).catch(() => {
-							item.props && (item.props.loading = false);
+							item.optionLoading = false;
 						});
 					}, 500, { leading: true });
 					item.props.remoteMethod("")
