@@ -271,7 +271,7 @@ export default class ElFormAuto extends Vue {
 
 	private selectOptions(field: ElFormAutoField) {
 		if (Array.isArray(field.options) && field.remote) {
-			return uniqBy(field.options.concat(field.echoOptions), "value")
+			return uniqBy(field.echoOptions.concat(field.options), "value")
 		}
 		return field.options
 	}
@@ -552,7 +552,8 @@ export default class ElFormAuto extends Vue {
 					item.props.filterable = true;
 					item.props.remote = true;
 					item.page = 1;
-					item.props.remoteMethod = debounce((query?: string) => {
+					item.props.remoteMethod = debounce((query?: string, isScroll?: boolean) => {
+						if (!isScroll) item.page = 1
 						if (item.page == 1) {
 							item.options = []
 						}
@@ -563,7 +564,7 @@ export default class ElFormAuto extends Vue {
 							item.optionLoading = false;
 							options = (item.options as ElAutoOption[]).concat(options)
 							item.options = options;
-							item.page++
+							isScroll && item.page++
 						}).catch(() => {
 							item.optionLoading = false;
 						});

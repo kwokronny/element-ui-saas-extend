@@ -469,7 +469,7 @@ export default {
           options: (query, page) => {
             return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
               return res.data
-                .filter((item) => item.username.indexOf(query) > -1)
+                // .filter((item) => item.username.indexOf(query) > -1)
                 .map((item) => {
                   return {
                     label: item.username,
