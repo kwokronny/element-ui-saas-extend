@@ -28,6 +28,7 @@ export declare type ElTablePageDataMap = "page" | "pageSize" | "total" | "record
 export declare interface ElTablePageColumn {
   prop: string;
   label: string;
+  children: ElTableColumn[];
   labelTooltip?: string;
   fixed?: boolean | "left" | "right";
   slot?: boolean | string;

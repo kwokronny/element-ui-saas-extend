@@ -72,10 +72,10 @@
 					ref="TablePage"
 					v-if="refresh"
 					:data="record"
-					@selection-change="handleSelectionChange"
 					v-bind="$attrs"
 					v-on="$listeners"
 					v-loading="loading"
+					@selection-change="handleSelectionChange"
 				>
 					<el-table-column
 						v-if="$attrs['row-key']"
@@ -84,61 +84,11 @@
 						reserve-selection
 					></el-table-column>
 					<template v-for="(column,index) in headers">
-						<el-table-column
-							v-if="!column.hide"
-							:fixed="column.fixed"
+						<table-column-reduce
 							:key="`column_${column.prop}_${index}`"
-							v-bind="column.props"
-						>
-							<template slot="header" slot-scope="scope">
-								{{scope.column.label || " "}}
-								<el-tooltip v-if="column.labelTooltip" :content="column.labelTooltip">
-									<i class="el-icon-question"></i>
-								</el-tooltip>
-							</template>
-							<template slot-scope="{row, $index}">
-								<dynamic-slot v-if="column.slot" :name="column.slot" :data="{row, column, index: $index}"></dynamic-slot>
-								<template v-else-if="column.enum">
-									<template v-if="Array.isArray(row[column.prop])">
-										<template v-for="v in row[column.prop]">
-											<component
-												:is="column.enumTag||'span'"
-												style="margin-right: 5px;"
-												:key="`column_${column.prop}${$index}_${v}`"
-												v-if="column.enum[v]"
-												v-bind="column.enum[v].props"
-											>{{ column.enum[v].label }}</component>
-										</template>
-									</template>
-									<template v-else-if="column.splitChar">
-										<template v-for="v in row[column.prop].split(column.splitChar)">
-											<component
-												:is="column.enumTag||'span'"
-												style="margin-right: 5px;"
-												v-if="column.enum[v]"
-												:key="`column_${column.prop}${$index}_${v}`"
-												v-bind="column.enum[v].props"
-											>{{ column.enum[v].label }}</component>
-										</template>
-									</template>
-									<template v-else>
-										<component
-											:is="column.enumTag||'span'"
-											v-if="column.enum[row[column.prop]]"
-											v-bind="column.enum[row[column.prop]].props"
-										>{{ column.enum[row[column.prop]].label }}</component>
-									</template>
-								</template>
-								<template v-else-if="column.filtersFunc">{{ column.filtersFunc(row[column.prop]) }}</template>
-								<template
-									v-else-if="column.formatter"
-								>{{ column.formatter(row,column,row[column.prop],$index) }}</template>
-								<template v-else>{{ at(row,column.prop)[0] }}</template>
-								<!-- <template v-if="column.copy && !column.slot">
-								<i class="el-table-page_copy-icon el-icon-copy-document" title="复制"></i>
-								</template>-->
-							</template>
-						</el-table-column>
+							v-if="!column.hide"
+							:column="column"
+						></table-column-reduce>
 					</template>
 				</el-table>
 			</div>
@@ -164,27 +114,36 @@
 			:title="$t('tablepage.customColumns')"
 		>
 			<el-button type="text" @click="handleClickReset">{{$t("tablepage.reset")}}</el-button>
-			<el-table-draggable>
-				<el-table size="small" :data="sortColumns" border height="300px">
-					<el-table-column :label="$t('tablepage.sort')" width="70px">
-						<i class="el-icon-sort" style="cursor: move"></i>
-					</el-table-column>
+			<!-- <el-table-draggable> -->
+				<el-table
+					size="small"
+					:data="sortColumns"
+					border
+					height="500px"
+					row-key="prop"
+					default-expand-all
+				>
+					<el-table-column prop="prop"></el-table-column>
 					<el-table-column :label="$t('tablepage.column')">
 						<template slot-scope="{row}">{{labelEnum[row.prop]}}</template>
 					</el-table-column>
-					<el-table-column :label="$t('tablepage.customColumns')" width="200px">
+					<el-table-column :label="$t('tablepage.fixed')" width="200px">
 						<template slot-scope="{row}">
-							<el-radio-group size="mini" v-model="row.fixed">
-								<el-radio-button label="left">{{$t("tablepage.left")}}</el-radio-button>
-								<el-radio-button :label="false">{{$t("tablepage.none")}}</el-radio-button>
-								<el-radio-button label="right">{{$t("tablepage.right")}}</el-radio-button>
+							<el-radio-group size="mini" v-if="!row.hasChildren" v-model="row.fixed">
+								<el-radio-button label="left">{{$t("tablepage.fixedLeft")}}</el-radio-button>
+								<el-radio-button :label="false">{{$t("tablepage.fixedNone")}}</el-radio-button>
+								<el-radio-button label="right">{{$t("tablepage.fixedRight")}}</el-radio-button>
 							</el-radio-group>
+							<span v-else>多级表头不支持固定</span>
 						</template>
 					</el-table-column>
-					<el-table-column :label="$t('tablepage.hide')" width="90px">
+					<el-table-column :label="$t('tablepage.hide')" width="120px">
 						<template slot-scope="{row}">
-							<el-switch v-model="row.hide"></el-switch>
+							<el-switch active-text="是" v-model="row.hide" inactive-text="否"></el-switch>
 						</template>
+					</el-table-column>
+					<el-table-column :label="$t('tablepage.sort')" width="70px">
+						<i class="el-icon-sort" style="cursor: move"></i>
 					</el-table-column>
 				</el-table>
 			</el-table-draggable>
@@ -207,26 +166,27 @@
 import { Vue, Component, Prop, Ref, Watch, PropSync } from "vue-property-decorator"
 import { Table } from "element-ui"
 import ElTableDraggable from "element-ui-el-table-draggable"
-import DynamicSlot from "../components/DynamicSlot"
 import { ElAutoOption } from "types/saas-extend.js"
 import { ElFormAutoField } from "../../types/form-auto"
 import { ElTablePageColumn, ElTablePageDataMap } from "types/table-page"
 import { transformOptions, arrayToRecord } from "../util"
 import ElFormAuto from "../FormAuto";
-import { omit, cloneDeep, at } from "lodash-es"
+import { omit, cloneDeep } from "lodash-es"
 import mixin from "../../src/mixin"
+import DynamicSlot from "../components/DynamicSlot"
+import TableColumnReduce from "./TableColumnReduce.vue"
 
 interface ElTablePageColumnSort {
 	prop: string,
-	// label: string,
 	fixed: "left" | "right" | boolean
 	hide: boolean
+	hasChildren?: boolean
 }
 
 @Component({
 	name: "ElTablePage",
 	components: {
-		DynamicSlot, ElTableDraggable, ElFormAuto
+		DynamicSlot, ElTableDraggable, ElFormAuto, TableColumnReduce
 	},
 	mixins: [mixin],
 	provide() {
@@ -266,13 +226,22 @@ export default class ElTablePage extends Vue {
 	private headers: ElTablePageColumn[] = [];
 	private refresh: boolean = true;
 
-	private at = at;
-
 	@Watch("columns", { immediate: true, deep: true })
 	private async handleColumnsChange() {
 		this.headers = cloneDeep(this.columns)
-		this.headers.forEach(async (column: ElTablePageColumn) => {
+		this.columnHandler(this.headers)
+		if (this.customColumns) {
+			// 从localStorage获取存储的自定义列配置
+			this.loadCustomColumns()
+		}
+	}
 
+	private columnHandler(columns: ElTablePageColumn[]) {
+		columns.forEach((column: ElTablePageColumn) => {
+			// let column = cloneDeep(item);
+			if (column.children) {
+				this.columnHandler(column.children)
+			}
 			if (column.search && !this.searchForm[column.prop]) {
 				let defaultForm: ElFormAutoField = {
 					label: column.label,
@@ -328,18 +297,15 @@ export default class ElTablePage extends Vue {
 					}) as (value: string) => any;
 				}
 			}
-			column.props = omit(column, ["slot", "enum", "filters", "splitChar", "addSearch", "search", "labelTooltip"])
+			column.props = omit(column, ["slot", "enum", "filters", "enumTag", "children", "splitChar", "addSearch", "search", "labelTooltip"])
 			if (column.slot && typeof column.slot == "boolean") column.slot = column.prop;
 			if (column.enum) {
-				let options: ElAutoOption[] = await transformOptions(column.enum);
-				column.enum = arrayToRecord(options, { key: "value", value: "label" })
-
+				transformOptions(column.enum).then((options: ElAutoOption[]) => {
+					column.enum = arrayToRecord(options, { key: "value", value: "label" })
+				});
 			}
+			return column;
 		})
-		if (this.customColumns) {
-			// 从localStorage获取存储的自定义列配置
-			this.loadCustomColumns()
-		}
 	}
 
 	// #endregion
@@ -434,14 +400,24 @@ export default class ElTablePage extends Vue {
 	}
 
 	private initColumnsSortData() {
-		return this.columns.map((column: ElTablePageColumn) => {
-			return Object.assign({}, {
-				prop: column.prop,
-				// label: column.label,
-				fixed: column.fixed || false,
-				hide: column.hide || false,
+		function _reduce(columns: ElTablePageColumn[]) {
+			return columns.map((column: ElTablePageColumn) => {
+				let prehandler = {}
+				if (column.children && column.children.length) {
+					prehandler = {
+						hasChildren: true,
+						children: _reduce(column.children)
+					}
+				}
+				console.log(prehandler)
+				return Object.assign({}, prehandler, {
+					prop: column.prop,
+					fixed: column.fixed || false,
+					hide: column.hide || false,
+				})
 			})
-		})
+		}
+		return _reduce(this.columns);
 	}
 
 	private loadCustomColumns() {
