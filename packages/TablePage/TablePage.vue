@@ -229,7 +229,6 @@ import ElFormAuto from "../FormAuto";
 import { omit, cloneDeep } from "lodash-es"
 import mixin from "../../src/mixin"
 import DynamicSlot from "../components/DynamicSlot"
-import TableColumnReduce from "./TableColumnReduce.vue"
 
 interface ElTablePageColumnSort {
 	prop: string,
@@ -240,7 +239,7 @@ interface ElTablePageColumnSort {
 @Component({
 	name: "ElTablePage",
 	components: {
-		DynamicSlot, ElTableDraggable, ElFormAuto, TableColumnReduce
+		DynamicSlot, ElTableDraggable, ElFormAuto
 	},
 	mixins: [mixin],
 	provide() {
@@ -443,13 +442,13 @@ export default class ElTablePage extends Vue {
 	@Prop({ type: [Boolean, String], default: false }) customColumns!: boolean | string;
 
 	private customColumnsDialog: boolean = false;
-	// private columnsSort: ElTablePageColumnSort[] = [] //当前应用的排序变量
+	private columnsSort: ElTablePageColumnSort[] = [] //当前应用的排序变量
 	private sortColumns: ElTablePageColumnSort[] = [] //弹窗用的临时排序变量
 	private labelEnum: Record<string, string> = {}
 
 	public openCustomColumnDialog(): void {
 		this.customColumnsDialog = true;
-		// this.sortColumns = JSON.parse(JSON.stringify(this.columnsSort))
+		this.sortColumns = JSON.parse(JSON.stringify(this.columnsSort))
 	}
 
 	private initColumnsSortData(): ElTablePageColumnSort[] {
@@ -469,20 +468,19 @@ export default class ElTablePage extends Vue {
 	}
 
 	private loadCustomColumns() {
-		let columnsSort: ElTablePageColumnSort[] = []
+		// let columnsSort: ElTablePageColumnSort[] = []
 		if (this.customColumns) {
-			columnsSort = this.initColumnsSortData();
+			this.columnsSort = this.initColumnsSortData();
 			let sortStorage: null | string = window.localStorage.getItem("ElTablePage_" + this.customColumns);
 			if (sortStorage) {
 				let sortColumns: ElTablePageColumnSort[] = JSON.parse(sortStorage)
 				if (!this.validColumnsHasChange(sortColumns)) {
-					columnsSort = sortColumns
+					this.columnsSort = sortColumns
 				}
 			}
 		}
-		this.sortColumns = JSON.parse(JSON.stringify(columnsSort));
 		this.refresh = false;
-		this.headers = columnsSort.map((item: ElTablePageColumnSort) => {
+		this.headers = this.columnsSort.map((item: ElTablePageColumnSort) => {
 			let header = this.headers.find((i: ElTablePageColumn) => item.prop == i.prop);
 			return Object.assign({}, item, header)
 		})
@@ -502,7 +500,6 @@ export default class ElTablePage extends Vue {
 
 	private async handleCustomColumnReset() {
 		if (this.customColumns == false) return
-		// this.sortColumns = []
 		this.sortColumns = this.initColumnsSortData();
 	}
 
