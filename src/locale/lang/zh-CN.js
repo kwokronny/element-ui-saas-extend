@@ -21,7 +21,7 @@ export default {
     sort: "排序",
     column: "表项",
     fixed: "固定",
-    hide: "是否隐藏",
+    hide: "显示",
     fixedLeft: "左",
     fixedNone: "否",
     fixedRight: "右",

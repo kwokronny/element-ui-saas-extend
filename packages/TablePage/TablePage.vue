@@ -84,11 +84,66 @@
 						reserve-selection
 					></el-table-column>
 					<template v-for="(column,index) in headers">
-						<table-column-reduce
-							:key="`column_${column.prop}_${index}`"
-							v-if="!column.hide"
-							:column="column"
-						></table-column-reduce>
+						<template v-if="!column.hide">
+							<el-table-column
+								:fixed="column.fixed"
+								:key="`column_${column.prop}_${index}`"
+								v-bind="column.props"
+							>
+								<template slot="header" slot-scope="scope">
+									{{scope.column.label || " "}}
+									<el-tooltip v-if="column.labelTooltip" :content="column.labelTooltip">
+										<i class="el-icon-question"></i>
+									</el-tooltip>
+								</template>
+								<template slot-scope="{row, $index}">
+									<dynamic-slot v-if="column.slot" :name="column.slot" :data="{row, column, index: $index}"></dynamic-slot>
+									<template v-else-if="column.enum">
+										<template v-if="Array.isArray(row[column.prop])">
+											<template v-for="v in row[column.prop]">
+												<component
+													:is="column.enumTag||'span'"
+													style="margin-right: 5px;"
+													:key="`column_${column.prop}${$index}_${v}`"
+													v-if="column.enum[v]"
+													v-bind="column.enum[v].props"
+												>{{ column.enum[v].label }}</component>
+											</template>
+										</template>
+										<template v-else-if="column.splitChar">
+											<template v-for="v in row[column.prop].split(column.splitChar)">
+												<component
+													:is="column.enumTag||'span'"
+													style="margin-right: 5px;"
+													v-if="column.enum[v]"
+													:key="`column_${column.prop}${$index}_${v}`"
+													v-bind="column.enum[v].props"
+												>{{ column.enum[v].label }}</component>
+											</template>
+										</template>
+										<template v-else>
+											<component
+												:is="column.enumTag||'span'"
+												v-if="column.enum[row[column.prop]]"
+												v-bind="column.enum[row[column.prop]].props"
+											>{{ column.enum[row[column.prop]].label }}</component>
+										</template>
+									</template>
+									<template v-else-if="column.filtersFunc">{{ column.filtersFunc(row[column.prop]) }}</template>
+									<template
+										v-else-if="column.formatter"
+									>{{ column.formatter(row,column,row[column.prop],$index) }}</template>
+									<template v-else>{{ row[column.prop] }}</template>
+									<template v-if="column.copy && !column.slot">
+										<i
+											class="el-table-page_copy-icon el-icon-copy-document"
+											v-copy="row[column.prop]"
+											title="复制"
+										></i>
+									</template>
+								</template>
+							</el-table-column>
+						</template>
 					</template>
 				</el-table>
 			</div>
@@ -113,21 +168,21 @@
 			:visible.sync="customColumnsDialog"
 			:title="$t('tablepage.customColumns')"
 		>
-			<el-button type="text" @click="handleClickReset">{{$t("tablepage.reset")}}</el-button>
-			<!-- <el-table-draggable> -->
+			<el-button type="text" @click="handleCustomColumnReset">{{$t("tablepage.reset")}}</el-button>
+			<el-table-draggable>
 				<el-table
 					size="small"
 					:data="sortColumns"
 					border
-					height="500px"
+					height="400px"
 					row-key="prop"
 					default-expand-all
+					:tree-props="{children:'children',hasChildren:'hasChildren'}"
 				>
-					<el-table-column prop="prop"></el-table-column>
-					<el-table-column :label="$t('tablepage.column')">
+					<el-table-column :label="$t('tablepage.column')" prop="prop">
 						<template slot-scope="{row}">{{labelEnum[row.prop]}}</template>
 					</el-table-column>
-					<el-table-column :label="$t('tablepage.fixed')" width="200px">
+					<el-table-column :label="$t('tablepage.fixed')" width="200px" prop="fixed">
 						<template slot-scope="{row}">
 							<el-radio-group size="mini" v-if="!row.hasChildren" v-model="row.fixed">
 								<el-radio-button label="left">{{$t("tablepage.fixedLeft")}}</el-radio-button>
@@ -137,9 +192,9 @@
 							<span v-else>多级表头不支持固定</span>
 						</template>
 					</el-table-column>
-					<el-table-column :label="$t('tablepage.hide')" width="120px">
+					<el-table-column :label="$t('tablepage.hide')" width="120px" prop="hide">
 						<template slot-scope="{row}">
-							<el-switch active-text="是" v-model="row.hide" inactive-text="否"></el-switch>
+							<el-switch :inactive-value="true" :active-value="false" v-model="row.hide"></el-switch>
 						</template>
 					</el-table-column>
 					<el-table-column :label="$t('tablepage.sort')" width="70px">
@@ -151,12 +206,12 @@
 				<el-button
 					type="text"
 					v-bind="defaultButtonStyle"
-					@click="handleClickClose"
+					@click="handleCustomColumnClose"
 				>{{$t("tablepage.cancel")}}</el-button>
 				<el-button
 					type="primary"
 					v-bind="defaultButtonStyle"
-					@click="handleClickSave"
+					@click="handleCustomColumnSave"
 				>{{$t("tablepage.save")}}</el-button>
 			</div>
 		</el-dialog>
@@ -180,7 +235,6 @@ interface ElTablePageColumnSort {
 	prop: string,
 	fixed: "left" | "right" | boolean
 	hide: boolean
-	hasChildren?: boolean
 }
 
 @Component({
@@ -229,89 +283,88 @@ export default class ElTablePage extends Vue {
 	@Watch("columns", { immediate: true, deep: true })
 	private async handleColumnsChange() {
 		this.headers = cloneDeep(this.columns)
-		this.columnHandler(this.headers)
+		this.headers.forEach((column: ElTablePageColumn) => {
+			column.props = omit(column, ["slot", "enum", "filters", "enumTag", "children", "splitChar", "addSearch", "search", "labelTooltip"])
+			if (column.slot && typeof column.slot == "boolean") column.slot = column.prop;
+			if (column.search) {
+				let defaultForm: ElFormAutoField = {
+					label: column.label,
+					type: "text"
+				}
+				column.enum && (defaultForm.options = column.search.options || column.enum)
+				this.addSearchField(column.prop, Object.assign(defaultForm, column.search))
+			}
+			// 追加搜索项
+			if (column.addSearch) {
+				for (let name in column.addSearch) {
+					this.addSearchField(name, column.addSearch[name])
+				}
+			}
+			// 获取全局过滤器及组件内过滤器对数据包装成一个函数使用
+			if (column.filters) {
+				column.filtersFunc = this.transfromFilter(column.filters)
+			}
+			if (column.enum) {
+				transformOptions(column.enum).then((options: ElAutoOption[]) => {
+					column.enum = arrayToRecord(options, { key: "value", value: "label" })
+				});
+			}
+		})
 		if (this.customColumns) {
 			// 从localStorage获取存储的自定义列配置
 			this.loadCustomColumns()
 		}
 	}
 
-	private columnHandler(columns: ElTablePageColumn[]) {
-		columns.forEach((column: ElTablePageColumn) => {
-			// let column = cloneDeep(item);
-			if (column.children) {
-				this.columnHandler(column.children)
+	private localFilter: Record<string, any> = this.$parent.$options.filters as Record<string, any>
+	private transfromFilter(filter: string | Array<string | string[]>): (value: string) => any {
+		if (typeof filter == "string") {
+			let filterFunc = this.localFilter[filter] || Vue.filter(filter);
+			if (filterFunc) {
+				return filterFunc as (value: string) => any;
 			}
-			if (column.search && !this.searchForm[column.prop]) {
-				let defaultForm: ElFormAutoField = {
-					label: column.label,
-					type: "text"
-				}
-				if (column.search.slot) {
-					let name = column.search.slot == true ? column.prop : column.search.slot
-					column.search.slot = `search-${name}`;
-				}
-				column.enum && (defaultForm.options = column.search.options || column.enum)
-				this.searchForm[column.prop] = Object.assign(defaultForm, column.search);
-			}
-			// 追加搜索项
-			if (column.addSearch) {
-				for (let name in column.addSearch) {
-					if (!this.searchForm[name]) {
-						let field = column.addSearch[name]
-						if (field.slot) {
-							let name = field.slot == true ? column.prop : field.slot
-							field.slot = `search-${name}`;
-						}
-						this.searchForm[name] = field
-					}
-				}
-			}
-			// 获取全局过滤器及组件内过滤器对数据包装成一个函数使用
-			if (column.filters) {
-				let localFilter: Record<string, any> = this.$parent.$options.filters as Record<string, any>
-				if (typeof column.filters == "string") {
-					let filterFunc = localFilter[column.filters] || Vue.filter(column.filters);
+		} else if (Array.isArray(filter)) {
+			return filter.reduce((prev: any, current: any) => {
+				if (typeof current == "string") {
+					let filterFunc = this.localFilter[current] || Vue.filter(current);
 					if (filterFunc) {
-						column.filtersFunc = filterFunc as (value: string) => any;
-					}
-				} else if (Array.isArray(column.filters)) {
-					column.filtersFunc = column.filters.reduce((prev: any, current: any) => {
-						if (typeof current == "string") {
-							let filterFunc = localFilter[current] || Vue.filter(current);
-							if (filterFunc) {
-								return (value: any) => {
-									return filterFunc(prev(value))
-								}
-							}
-						} else if (Array.isArray(current)) {
-							let filterFunc = localFilter[current[0]] || Vue.filter(current[0]);
-							if (filterFunc) {
-								return (value: any) => {
-									return filterFunc(prev(value), ...current.slice(1, current.length))
-								}
-							}
+						filterFunc = (value: string) => {
+							return filterFunc(prev(value))
 						}
-					}, (value: any) => {
-						return value;
-					}) as (value: string) => any;
+					} else {
+						return prev
+					}
+				} else if (Array.isArray(current)) {
+					let filterFunc = this.localFilter[current[0]] || Vue.filter(current[0]);
+					if (filterFunc) {
+						return (value: string) => {
+							return filterFunc(prev(value), ...current.slice(1, current.length))
+						}
+					} else {
+						return prev
+					}
 				}
-			}
-			column.props = omit(column, ["slot", "enum", "filters", "enumTag", "children", "splitChar", "addSearch", "search", "labelTooltip"])
-			if (column.slot && typeof column.slot == "boolean") column.slot = column.prop;
-			if (column.enum) {
-				transformOptions(column.enum).then((options: ElAutoOption[]) => {
-					column.enum = arrayToRecord(options, { key: "value", value: "label" })
-				});
-			}
-			return column;
-		})
+			}, (value: string) => {
+				return value;
+			}) as (value: string) => any;
+		}
+		return (value: string) => { return value };
 	}
 
 	// #endregion
 
 	// #region 搜索
 	private filter: Record<string, any> = {}
+
+	private addSearchField(name: string, field: ElFormAutoField) {
+		if (!this.searchForm[name]) {
+			if (field.slot) {
+				let slot_name = field.slot == true ? name : field.slot
+				field.slot = `search-${slot_name}`;
+			}
+			this.searchForm[name] = field
+		}
+	}
 
 	public getParams(): Record<string, any> {
 		return this.filter;
@@ -390,63 +443,48 @@ export default class ElTablePage extends Vue {
 	@Prop({ type: [Boolean, String], default: false }) customColumns!: boolean | string;
 
 	private customColumnsDialog: boolean = false;
-	private columnsSort: ElTablePageColumnSort[] = [] //当前应用的排序变量
+	// private columnsSort: ElTablePageColumnSort[] = [] //当前应用的排序变量
 	private sortColumns: ElTablePageColumnSort[] = [] //弹窗用的临时排序变量
 	private labelEnum: Record<string, string> = {}
 
 	public openCustomColumnDialog(): void {
 		this.customColumnsDialog = true;
-		this.sortColumns = JSON.parse(JSON.stringify(this.columnsSort))
+		// this.sortColumns = JSON.parse(JSON.stringify(this.columnsSort))
 	}
 
-	private initColumnsSortData() {
-		function _reduce(columns: ElTablePageColumn[]) {
-			return columns.map((column: ElTablePageColumn) => {
-				let prehandler = {}
-				if (column.children && column.children.length) {
-					prehandler = {
-						hasChildren: true,
-						children: _reduce(column.children)
-					}
-				}
-				console.log(prehandler)
-				return Object.assign({}, prehandler, {
-					prop: column.prop,
-					fixed: column.fixed || false,
-					hide: column.hide || false,
-				})
+	private initColumnsSortData(): ElTablePageColumnSort[] {
+		let columns = cloneDeep(this.columns)
+		return columns.map((column: ElTablePageColumn) => {
+			this.labelEnum[column.prop] = column.label;
+			return Object.assign({}, {
+				prop: column.prop,
+				fixed: column.fixed || false,
+				hide: column.hide || false,
 			})
-		}
-		return _reduce(this.columns);
+		})
+	}
+
+	private validColumnsHasChange(sortStorage: ElTablePageColumnSort[]) {
+		return this.columns.every((item: ElTablePageColumn) => !sortStorage.find((i: ElTablePageColumnSort) => i.prop == item.prop)) || sortStorage.every((item: ElTablePageColumnSort) => !this.columns.find((i: ElTablePageColumn) => i.prop == item.prop))
 	}
 
 	private loadCustomColumns() {
+		let columnsSort: ElTablePageColumnSort[] = []
 		if (this.customColumns) {
-			// if (this.columnsSort.length == 0) {
+			columnsSort = this.initColumnsSortData();
 			let sortStorage: null | string = window.localStorage.getItem("ElTablePage_" + this.customColumns);
 			if (sortStorage) {
-				this.columnsSort = JSON.parse(sortStorage)
-			} else {
-				this.columnsSort = this.initColumnsSortData();
+				let sortColumns: ElTablePageColumnSort[] = JSON.parse(sortStorage)
+				if (!this.validColumnsHasChange(sortColumns)) {
+					columnsSort = sortColumns
+				}
 			}
-			// }
 		}
+		this.sortColumns = JSON.parse(JSON.stringify(columnsSort));
 		this.refresh = false;
-		let sortProp: string[] = []
-		let props: string[] = this.headers.map((item: ElTablePageColumn) => {
-			this.labelEnum[item.prop] = item.label
-			return item.prop
-		})
-		this.columnsSort = this.columnsSort.filter((item: ElTablePageColumnSort) => {
-			let index = props.indexOf(item.prop);
-			if (index > -1) {
-				sortProp.push(item.prop)
-				this.headers[index] = Object.assign(this.headers[index], item)
-			}
-			return index > -1;
-		});
-		this.headers.sort((a: ElTablePageColumn, b: ElTablePageColumn) => {
-			return sortProp.indexOf(a.prop) - sortProp.indexOf(b.prop)
+		this.headers = columnsSort.map((item: ElTablePageColumnSort) => {
+			let header = this.headers.find((i: ElTablePageColumn) => item.prop == i.prop);
+			return Object.assign({}, item, header)
 		})
 		this.$nextTick(function () {
 			this.refresh = true;
@@ -454,7 +492,7 @@ export default class ElTablePage extends Vue {
 	}
 
 
-	private handleClickSave() {
+	private handleCustomColumnSave() {
 		if (this.customColumns == false) return
 		window.localStorage.setItem("ElTablePage_" + this.customColumns, JSON.stringify(this.sortColumns))
 		this.$emit("saved-custom-columns", JSON.stringify(this.sortColumns))
@@ -462,13 +500,13 @@ export default class ElTablePage extends Vue {
 		this.customColumnsDialog = false;
 	}
 
-	private async handleClickReset() {
+	private async handleCustomColumnReset() {
 		if (this.customColumns == false) return
-		this.sortColumns = []
+		// this.sortColumns = []
 		this.sortColumns = this.initColumnsSortData();
 	}
 
-	private handleClickClose() {
+	private handleCustomColumnClose() {
 		this.customColumnsDialog = false;
 	}
 	// #endregion

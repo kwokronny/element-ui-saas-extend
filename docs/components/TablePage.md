@@ -148,21 +148,15 @@ export default {
           width: 200,
         },
         {
-          label: "联系方式",
-          prop: "contact",
-          children: [
-            {
-              label: "手机",
-              prop: "phone",
-              width: 200,
-            },
-            {
-              label: "邮箱",
-              prop: "email",
-              showOverflowTooltip: true,
-              width: 260,
-            },
-          ],
+          label: "手机",
+          prop: "phone",
+          width: 200,
+        },
+        {
+          label: "邮箱",
+          prop: "email",
+          showOverflowTooltip: true,
+          width: 260,
         },
         {
           label: "积分",

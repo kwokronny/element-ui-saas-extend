@@ -28,13 +28,12 @@ export declare type ElTablePageDataMap = "page" | "pageSize" | "total" | "record
 export declare interface ElTablePageColumn {
   prop: string;
   label: string;
-  children: ElTableColumn[];
   labelTooltip?: string;
   fixed?: boolean | "left" | "right";
   slot?: boolean | string;
   hide?: boolean;
   filters?: string | Array<string | any[]>;
-  filtersFunc?: (value: string) => string;
+  filtersFunc?: (value: string) => any;
   enum?: ElAutoMixinOptions | ((query?: string) => Promise<ElAutoMixinOptions>);
   splitChar?: string;
   search?: ElFormAutoField;
