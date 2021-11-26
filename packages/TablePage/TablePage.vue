@@ -99,35 +99,12 @@
 								<template slot-scope="{row, $index}">
 									<dynamic-slot v-if="column.slot" :name="column.slot" :data="{row, column, index: $index}"></dynamic-slot>
 									<template v-else-if="column.enum">
-										<template v-if="Array.isArray(row[column.prop])">
-											<template v-for="v in row[column.prop]">
-												<component
-													:is="column.enumTag||'span'"
-													style="margin-right: 5px;"
-													:key="`column_${column.prop}${$index}_${v}`"
-													v-if="column.enum[v]"
-													v-bind="column.enum[v].props"
-												>{{ column.enum[v].label }}</component>
-											</template>
-										</template>
-										<template v-else-if="column.splitChar">
-											<template v-for="v in row[column.prop].split(column.splitChar)">
-												<component
-													:is="column.enumTag||'span'"
-													style="margin-right: 5px;"
-													v-if="column.enum[v]"
-													:key="`column_${column.prop}${$index}_${v}`"
-													v-bind="column.enum[v].props"
-												>{{ column.enum[v].label }}</component>
-											</template>
-										</template>
-										<template v-else>
-											<component
-												:is="column.enumTag||'span'"
-												v-if="column.enum[row[column.prop]]"
-												v-bind="column.enum[row[column.prop]].props"
-											>{{ column.enum[row[column.prop]].label }}</component>
-										</template>
+										<enum-tags
+											:type="column.enum"
+											:value="row[column.prop]"
+											:enumTag="column.enumTag"
+											:splitChar="column.splitChar"
+										></enum-tags>
 									</template>
 									<template v-else-if="column.filtersFunc">{{ column.filtersFunc(row[column.prop]) }}</template>
 									<template
@@ -137,8 +114,7 @@
 									<template v-if="column.copy && !column.slot">
 										<i
 											class="el-table-page_copy-icon el-icon-copy-document"
-											v-copy="row[column.prop]"
-											title="复制"
+											v-copy="column.copy(row, column)"
 										></i>
 									</template>
 								</template>
@@ -179,6 +155,9 @@
 					default-expand-all
 					:tree-props="{children:'children',hasChildren:'hasChildren'}"
 				>
+					<el-table-column :label="$t('tablepage.sort')" width="70px">
+						<i class="el-icon-sort" style="cursor: move"></i>
+					</el-table-column>
 					<el-table-column :label="$t('tablepage.column')" prop="prop">
 						<template slot-scope="{row}">{{labelEnum[row.prop]}}</template>
 					</el-table-column>
@@ -196,9 +175,6 @@
 						<template slot-scope="{row}">
 							<el-switch :inactive-value="true" :active-value="false" v-model="row.hide"></el-switch>
 						</template>
-					</el-table-column>
-					<el-table-column :label="$t('tablepage.sort')" width="70px">
-						<i class="el-icon-sort" style="cursor: move"></i>
 					</el-table-column>
 				</el-table>
 			</el-table-draggable>
@@ -226,6 +202,7 @@ import { ElFormAutoField } from "../../types/form-auto"
 import { ElTablePageColumn, ElTablePageDataMap } from "types/table-page"
 import { transformOptions, arrayToRecord } from "../util"
 import ElFormAuto from "../FormAuto";
+import EnumTags from "./EnumTags.vue";
 import { omit, cloneDeep } from "lodash-es"
 import mixin from "../../src/mixin"
 import DynamicSlot from "../components/DynamicSlot"
@@ -239,7 +216,7 @@ interface ElTablePageColumnSort {
 @Component({
 	name: "ElTablePage",
 	components: {
-		DynamicSlot, ElTableDraggable, ElFormAuto
+		DynamicSlot, ElTableDraggable, ElFormAuto, EnumTags
 	},
 	mixins: [mixin],
 	provide() {
@@ -280,10 +257,12 @@ export default class ElTablePage extends Vue {
 	private refresh: boolean = true;
 
 	@Watch("columns", { immediate: true, deep: true })
-	private async handleColumnsChange() {
+	private handleColumnsChange() {
 		this.headers = cloneDeep(this.columns)
 		this.headers.forEach((column: ElTablePageColumn) => {
-			column.props = omit(column, ["slot", "enum", "filters", "enumTag", "children", "splitChar", "addSearch", "search", "labelTooltip"])
+			column.props = omit(column, ["slot", "enum", "filters", "enumTag", "children", "splitChar", "addSearch", "search", "labelTooltip", "copy"])
+
+			if (column.copy && typeof column.copy == "boolean") column.copy = function (row: Record<string, any>, column: ElTablePageColumn) { return row[column.prop] };
 			if (column.slot && typeof column.slot == "boolean") column.slot = column.prop;
 			if (column.search) {
 				let defaultForm: ElFormAutoField = {
@@ -427,6 +406,14 @@ export default class ElTablePage extends Vue {
 	@Prop({ type: Function }) selectable!: ((row: Record<string, any>, index: number) => boolean)
 	@PropSync("selection", { type: Array, default: () => [] }) multipleSelection!: any[]
 
+	private mounted() {
+		if (this.multipleSelection.length) {
+			this.multipleSelection.forEach((row: any) => {
+				this.TablePage.toggleRowSelection(row)
+			})
+		}
+	}
+
 	private handleSelectionChange(selection: any[]) {
 		this.multipleSelection = selection
 		this.$emit("selection-change", selection)
@@ -468,7 +455,6 @@ export default class ElTablePage extends Vue {
 	}
 
 	private loadCustomColumns() {
-		// let columnsSort: ElTablePageColumnSort[] = []
 		if (this.customColumns) {
 			this.columnsSort = this.initColumnsSortData();
 			let sortStorage: null | string = window.localStorage.getItem("ElTablePage_" + this.customColumns);
@@ -482,7 +468,7 @@ export default class ElTablePage extends Vue {
 		this.refresh = false;
 		this.headers = this.columnsSort.map((item: ElTablePageColumnSort) => {
 			let header = this.headers.find((i: ElTablePageColumn) => item.prop == i.prop);
-			return Object.assign({}, item, header)
+			return Object.assign(header, item)
 		})
 		this.$nextTick(function () {
 			this.refresh = true;

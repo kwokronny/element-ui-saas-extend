@@ -27,7 +27,7 @@
     "build": "webpack --config build/webpack.component.js && gulp && node ./build/locale.js",
     "build:doc": "vuepress build docs",
     "test:unit": "vue-cli-service test:unit",
-    "lint": "vue-cli-service lint"
+    "serve": "vue-cli-service serve"
   },
   "dependencies": {
     "async-validator": "1.11.5",

@@ -468,14 +468,16 @@ export default {
           remote: true,
           options: (query, page) => {
             return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
-              return res.data
-                // .filter((item) => item.username.indexOf(query) > -1)
-                .map((item) => {
-                  return {
-                    label: item.username,
-                    value: item.id * page,
-                  };
-                });
+              return (
+                res.data
+                  .filter((item) => item.username.indexOf(query) > -1)
+                  .map((item) => {
+                    return {
+                      label: item.username,
+                      value: item.id * page,
+                    };
+                  })
+              );
             });
           },
         },
@@ -540,6 +542,7 @@ export default {
   },
   methods: {
     editOptionReshow() {
+      this.model.asyncSelect = 1;
       this.model.remote = [
         { label: "测试", value: "123" },
         { label: "测试2", value: "1233" },
@@ -608,6 +611,7 @@ export default {
         id: {
           col: 12,
           label: "用户ID",
+          notSubmit: true,
           type: "plain",
           value: "未选择",
         },
@@ -615,6 +619,7 @@ export default {
           col: 12,
           label: "姓名",
           type: "plain",
+          notSubmit: true,
           value: "未选择",
         },
         phone: {
@@ -622,6 +627,7 @@ export default {
           label: "手机",
           type: "plain",
           value: "未选择",
+          notSubmit: true,
         },
         email: {
           col: 12,

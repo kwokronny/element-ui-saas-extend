@@ -21,8 +21,33 @@ export default {
           },
           action: "copy",
         });
-        clipboard.on("success", function() {});
-        clipboard.on("error", function() {});
+        let tooltip: HTMLSpanElement | null = document.querySelector(".element-ui-saas-extend-copy-tooltip");
+        if (!tooltip) {
+          tooltip = document.createElement("span");
+          tooltip.className = "element-ui-saas-extend-copy-tooltip";
+          tooltip.onanimationend = function() {
+            if (tooltip) {
+              tooltip.style.display = "none";
+            }
+          };
+        }
+        document.body.appendChild(tooltip);
+        clipboard.on("success", function() {
+          if (tooltip) {
+            tooltip.style.display = "inline-block";
+            tooltip.style.left = `${el.getBoundingClientRect().left + document.documentElement.scrollLeft}px`;
+            tooltip.style.top = `${el.getBoundingClientRect().top + document.documentElement.scrollTop - 28}px`;
+            tooltip.innerHTML = "复制成功";
+          }
+        });
+        clipboard.on("error", function() {
+          if (tooltip) {
+            tooltip.style.display = "inline-block";
+            tooltip.style.left = `${el.getBoundingClientRect().left + document.documentElement.scrollLeft}px`;
+            tooltip.style.top = `${el.getBoundingClientRect().top + document.documentElement.scrollTop - 28}px`;
+            tooltip.innerHTML = "复制失败";
+          }
+        });
         el._vClipboard = clipboard;
       },
       update: function(el: DirectiveElement, binding: DirectiveBinding): void {

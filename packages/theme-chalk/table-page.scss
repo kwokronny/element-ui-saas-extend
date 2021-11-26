@@ -15,8 +15,35 @@
   .el-table-page__search-card {
     margin-bottom: 15px;
   }
-  /*.el-table-page_copy-icon {
-		line-height: 28px;
-		cursor: pointer;
-	} */
+  .el-table-page_copy-icon {
+    position: relative;
+    line-height: 28px;
+    cursor: pointer;
+  }
+}
+.element-ui-saas-extend-copy-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+  color: white;
+  padding: 3px 8px;
+  font-size: 14px;
+  line-height: 20px;
+  z-index: 2;
+  display: none;
+  animation: fadeIn 2s;
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }

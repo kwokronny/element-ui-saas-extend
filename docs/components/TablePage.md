@@ -155,6 +155,7 @@ export default {
         {
           label: "邮箱",
           prop: "email",
+          copy: true,
           showOverflowTooltip: true,
           width: 260,
         },
@@ -180,8 +181,8 @@ export default {
           label: "状态",
           prop: "status",
           enum: [
-            { label: "正常", value: 1, type: "primary" },
-            { label: "失效", value: 2, type: "danger" },
+            { label: "正常", value: "1", type: "primary" },
+            { label: "失效", value: "2", type: "warning" },
           ],
         },
       ],

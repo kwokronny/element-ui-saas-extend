@@ -219,7 +219,7 @@ export default class ElFormAuto extends Vue {
 	@Ref("FormAuto") readonly FormAuto!: Form;
 
 
-	@Model("input", { type: Object }) readonly value!: Record<string, any>;
+	@Model("input", { type: Object, default: () => { return {} } }) readonly value!: Record<string, any>;
 
 	/**
 	 * 行内表单模式
@@ -263,15 +263,103 @@ export default class ElFormAuto extends Vue {
 		value && this.setModel(value);
 	}
 
+
 	@Watch("model", { immediate: true, deep: true })
 	private onModelChange() {
-		this.$emit("change")
 		this.$emit("input", this.getModel());
+	}
+
+
+	/**
+	 * @public
+	 * 获取表单所有参数
+	 */
+	public getModel(): Record<string, any> {
+		let data: Record<string, any> = {};
+		forEach(this.fields, (item: ElFormAutoField, name: string) => {
+			if (!item.notSubmit) {
+				data[name] = this.model[name];
+				if (item.rangeName && item.type && (/range$/g.test(item.type) || (item.type == "slider" && item.props?.range == true))) {
+					let [sn, en] = item.rangeName;
+					let [sd, ed] = this.model[name] || [null, null];
+					data[sn] = sd;
+					data[en] = ed;
+					if (item.type == "daterange" && item.suffixTime == true) {
+						data[sn] += "00:00:00";
+						data[en] += "23:59:59";
+					}
+				}
+			}
+		});
+		// console.log(Object.assign({}, this.value, data))
+		return Object.assign({}, this.value, data);
+	}
+
+	/**
+	 * @public
+	 * 设置表单对应参数，表单项不存在的将被无视
+	 *
+	 * @param {object} model 表单项对应值数据 例如：{key:value,...}
+	 */
+	public setModel(model: Record<string, any>): void {
+		for (let name in model) {
+			if (model[name] === undefined || model[name] === null) break;
+			let value = model[name];
+			let field = this.fields[name];
+			if (field && /radio|select|check/.test(field.type)) {
+				console.log(name,value)
+				if (field.type == "select" && field.remote) {
+					let values = this.selectEcho(name, value);
+					if (Array.isArray(value)) {
+						values.forEach((v: string, i: number) => {
+							value[i] = v;
+						})
+					} else {
+						value = values
+					}
+				} else if (field.type == "check" || (field.type == "select" && field.multiple)) {
+					field.type == "check" && this.handleCheckedChange(name, value);
+					value.forEach((v: number, i: number) => { value[i] = `${v}` })
+				} else {
+					value = `${value}`;
+				}
+			}
+			this.model[name] = value;
+		}
+	}
+
+	/**
+	 * 
+	 */
+	private selectEcho(name: string, options: any): any {
+		let field = this.fields[name];
+		if (!field) return options;
+		if (Array.isArray(options)) {
+			if (!field.echoOptions) {
+				field.echoOptions = []
+			}
+			let values: string[] = []
+			for (let i = 0; i < options.length; i++) {
+				if (options[i] && options[i].label && options[i].value) {
+					if (!field.echoOptions.find((option: Record<string, string>) => option.value == options[i].value)) {
+						field.echoOptions.push(Object.assign({}, options[i]))
+					}
+					values.push(`${options[i].value}`);
+				} else {
+					values.push(`${options[i]}`);
+				}
+			}
+			return values;
+		} else if (options && options.label && options.value) {
+			field.echoOptions = [options];
+			return `${options.value}`;
+		}
 	}
 
 	private selectOptions(field: ElFormAutoField) {
 		if (Array.isArray(field.options) && field.remote) {
-			return uniqBy(field.echoOptions.concat(field.options), "value")
+			let echoOpitons = field.echoOptions || []
+			return uniqBy(echoOpitons.concat(field.options), "value")
 		}
 		return field.options
 	}
@@ -303,90 +391,6 @@ export default class ElFormAuto extends Vue {
 	public async validate(): Promise<boolean> {
 		return await this.FormAuto.validate();
 	}
-
-	/**
-	 * @public
-	 * 获取表单所有参数
-	 */
-	public getModel(): Record<string, any> {
-		let data: Record<string, any> = {},
-			model = this.model;
-		forEach(this.fields, (item: ElFormAutoField, name: string) => {
-			if (!item.notSubmit) {
-				data[name] = model[name];
-				if (item.rangeName && item.type && (/range$/g.test(item.type) || (item.type == "slider" && item.props?.range == true))) {
-					let [sn, en] = item.rangeName;
-					let [sd, ed] = model[name] || [null, null];
-					data[name] = model[name]
-					data[sn] = sd;
-					data[en] = ed;
-					if (item.type == "daterange" && item.suffixTime == true) {
-						data[sn] += "00:00:00";
-						data[en] += "23:59:59";
-					}
-				}
-			}
-		});
-		return data;
-	}
-
-	/**
-	 * @public
-	 * 设置表单对应参数，表单项不存在的将被无视
-	 *
-	 * @param {object} model 表单项对应值数据 例如：{key:value,...}
-	 */
-	public setModel(model: Record<string, any>): void {
-		for (let name in model) {
-			let value = model[name];
-			if (Object.keys(model).indexOf(name) > -1) {
-				if (value === undefined) break;
-				let field = this.fields[name];
-				if (field && /radio|select|check/.test(field.type)) {
-					if (field.type == "select" && field.remote) {
-						this.selectEcho(name, value)
-					} else if (field.type == "check" || (field.type == "select" && field.multiple)) {
-						field.type == "check" && this.handleCheckedChange(name, value);
-						for (let i = 0; i < value.length; i++) {
-							value[i] = `${value[i]}`
-						}
-					} else {
-						value = `${value}`;
-					}
-				}
-			}
-			this.model[name] = value
-		}
-	}
-
-	/**
-	 * 
-	 */
-	private selectEcho(name: string, options: any): any {
-		let field = this.fields[name];
-		if (!field) return options;
-		if (Array.isArray(options)) {
-			if (!field.echoOptions) {
-				field.echoOptions = []
-			}
-			for (let i = 0; i < options.length; i++) {
-				if (options[i] && options[i].label && options[i].value) {
-					if (!field.echoOptions.find((option: Record<string, string>) => option.value == options[i].value)) {
-						field.echoOptions.push(Object.assign({}, options[i]))
-					}
-					options[i] = `${options[i].value}`;
-				} else {
-					options[i] = `${options[i]}`
-				}
-			}
-			// options = value;
-		} else if (options && options.label && options.value) {
-			field.echoOptions = [options];
-			options = `${options.value}`
-			// return `${options.value}`;
-		}
-	}
-
 	/**
 	 * 复选框 全选
 	 */
@@ -501,7 +505,7 @@ export default class ElFormAuto extends Vue {
 
 			let value = this.value[name] == undefined ? item.value : this.value[name]
 			if (item.type == "select" && item.remote) {
-				this.selectEcho(name, value)
+				value = this.selectEcho(name, value)
 			} else if (item.type == "check") {
 				this.handleCheckedChange(name, value)
 			}
@@ -560,7 +564,7 @@ export default class ElFormAuto extends Vue {
 						item.optionLoading = true;
 						remoteMethod(query, item.page).then((options: ElAutoMixinOptions) => {
 							return transformOptions(options)
-						}).then((options: any) => {
+						}).then((options: ElAutoOption[]) => {
 							item.optionLoading = false;
 							options = (item.options as ElAutoOption[]).concat(options)
 							item.options = options;
