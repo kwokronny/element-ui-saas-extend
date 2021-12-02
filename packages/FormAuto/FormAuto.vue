@@ -197,10 +197,9 @@ import { forEach, cloneDeep, debounce, uniqBy, omit } from "lodash-es";
 import { ElFormAutoField } from "../../types/form-auto";
 import { ElAutoMixinOptions, ElAutoOption } from "../../types/saas-extend"
 import { transformOptions } from "../util"
-import { t } from "../../src/locale"
 import DynamicSlot from "../components/DynamicSlot"
-import mixin from "../../src/mixin"
-import selectScroll from "../../src/mixin/selectscroll"
+import locale from "../../src/mixin/locale"
+import selectLoadScroll from "../../src/mixin/selectLoadScroll"
 
 @Component({
 	name: "ElFormAuto",
@@ -209,7 +208,7 @@ import selectScroll from "../../src/mixin/selectscroll"
 			slotRoot: this
 		}
 	},
-	mixins: [mixin, selectScroll],
+	mixins: [locale, selectLoadScroll],
 	components: {
 		DynamicSlot
 	}
@@ -307,7 +306,7 @@ export default class ElFormAuto extends Vue {
 			let value = model[name];
 			let field = this.fields[name];
 			if (field && /radio|select|check/.test(field.type)) {
-				console.log(name,value)
+				console.log(name, value)
 				if (field.type == "select" && field.remote) {
 					let values = this.selectEcho(name, value);
 					if (Array.isArray(value)) {
@@ -456,16 +455,16 @@ export default class ElFormAuto extends Vue {
 			// 根据字段 type 设置表单占位字符串
 			if (/range/g.test(item.type)) {
 				if (item.type == "numberrange") {
-					item.props.startPlaceholder = item.props.startPlaceholder || `${t("formauto.min")}${item.label}`;
-					item.props.endPlaceholder = item.props.endPlaceholder || `${t("formauto.max")}${item.label}`;
+					item.props.startPlaceholder = item.props.startPlaceholder || `${this.$t("formauto.min")}${item.label}`;
+					item.props.endPlaceholder = item.props.endPlaceholder || `${this.$t("formauto.max")}${item.label}`;
 				} else {
-					item.props.startPlaceholder = item.props.startPlaceholder || `${t("formauto.start")}${item.label}`;
-					item.props.endPlaceholder = item.props.endPlaceholder || `${t("formauto.end")}${item.label}`;
+					item.props.startPlaceholder = item.props.startPlaceholder || `${this.$t("formauto.start")}${item.label}`;
+					item.props.endPlaceholder = item.props.endPlaceholder || `${this.$t("formauto.end")}${item.label}`;
 				}
 			} if (/date|time|datetime|select|week|year|month|dates|cascader/g.test(item.type)) {
-				item.props.placeholder = item.props.placeholder || `${t("formauto.pleaseSelect")}${item.label}`;
+				item.props.placeholder = item.props.placeholder || `${this.$t("formauto.pleaseSelect")}${item.label}`;
 			} else {
-				item.props.placeholder = item.props.placeholder || `${t("formauto.pleaseInput")}${item.label}`;
+				item.props.placeholder = item.props.placeholder || `${this.$t("formauto.pleaseInput")}${item.label}`;
 			}
 
 			// 针对日期时间类型组件设置统一日期格式及显示格式

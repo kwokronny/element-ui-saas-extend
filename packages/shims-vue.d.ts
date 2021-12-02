@@ -5,3 +5,4 @@ declare module "*.vue" {
 
 declare module "numeral";
 declare module "element-ui-el-table-draggable";
+declare module "element-ui/src/utils/popper";

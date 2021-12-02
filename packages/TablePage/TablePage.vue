@@ -46,7 +46,7 @@
 			<div class="el-table-page_header">
 				<div>
 					<slot name="selection">
-						<span class="el-table-page_header-selected-text" v-if="$attrs['row-key']">
+						<span class="el-table-page_header-selected-text" v-if="$attrs['row-key'] && multipleSelection"">
 							{{$t("tablepage.selection[0]")}}
 							<b>{{multipleSelection.length}}</b>
 							{{$t("tablepage.selection[1]")}}
@@ -78,7 +78,7 @@
 					@selection-change="handleSelectionChange"
 				>
 					<el-table-column
-						v-if="$attrs['row-key']"
+						v-if="$attrs['row-key'] && multipleSelection"
 						:selectable="selectable"
 						type="selection"
 						reserve-selection
@@ -111,10 +111,10 @@
 										v-else-if="column.formatter"
 									>{{ column.formatter(row,column,row[column.prop],$index) }}</template>
 									<template v-else>{{ row[column.prop] }}</template>
-									<template v-if="column.copy && !column.slot">
+									<template v-if="column.copy">
 										<i
 											class="el-table-page_copy-icon el-icon-copy-document"
-											v-copy="column.copy(row, column)"
+											v-copy="typeof column.copy=='boolean' ? defaultCopy:()=>column.copy(row)"
 										></i>
 									</template>
 								</template>
@@ -196,6 +196,7 @@
 <script lang="ts">
 import { Vue, Component, Prop, Ref, Watch, PropSync } from "vue-property-decorator"
 import { Table } from "element-ui"
+import { omit, cloneDeep } from "lodash-es"
 import ElTableDraggable from "element-ui-el-table-draggable"
 import { ElAutoOption } from "types/saas-extend.js"
 import { ElFormAutoField } from "../../types/form-auto"
@@ -203,8 +204,6 @@ import { ElTablePageColumn, ElTablePageDataMap } from "types/table-page"
 import { transformOptions, arrayToRecord } from "../util"
 import ElFormAuto from "../FormAuto";
 import EnumTags from "./EnumTags.vue";
-import { omit, cloneDeep } from "lodash-es"
-import mixin from "../../src/mixin"
 import DynamicSlot from "../components/DynamicSlot"
 
 interface ElTablePageColumnSort {
@@ -218,7 +217,6 @@ interface ElTablePageColumnSort {
 	components: {
 		DynamicSlot, ElTableDraggable, ElFormAuto, EnumTags
 	},
-	mixins: [mixin],
 	provide() {
 		return {
 			slotRoot: this
@@ -262,7 +260,6 @@ export default class ElTablePage extends Vue {
 		this.headers.forEach((column: ElTablePageColumn) => {
 			column.props = omit(column, ["slot", "enum", "filters", "enumTag", "children", "splitChar", "addSearch", "search", "labelTooltip", "copy"])
 
-			if (column.copy && typeof column.copy == "boolean") column.copy = function (row: Record<string, any>, column: ElTablePageColumn) { return row[column.prop] };
 			if (column.slot && typeof column.slot == "boolean") column.slot = column.prop;
 			if (column.search) {
 				let defaultForm: ElFormAutoField = {
@@ -328,6 +325,14 @@ export default class ElTablePage extends Vue {
 		}
 		return (value: string) => { return value };
 	}
+
+	private defaultCopy(target: Node) {
+		let container = target.parentNode
+		if (container) {
+			let text = container.textContent || (container as HTMLElement).innerText
+			return text.trim()
+		}
+	};
 
 	// #endregion
 
@@ -404,10 +409,10 @@ export default class ElTablePage extends Vue {
 
 	// #region 多选
 	@Prop({ type: Function }) selectable!: ((row: Record<string, any>, index: number) => boolean)
-	@PropSync("selection", { type: Array, default: () => [] }) multipleSelection!: any[]
+	@PropSync("selection", { type: Array }) multipleSelection!: any[]
 
 	private mounted() {
-		if (this.multipleSelection.length) {
+		if (this.multipleSelection && this.multipleSelection.length) {
 			this.multipleSelection.forEach((row: any) => {
 				this.TablePage.toggleRowSelection(row)
 			})
@@ -464,15 +469,15 @@ export default class ElTablePage extends Vue {
 					this.columnsSort = sortColumns
 				}
 			}
+			this.refresh = false;
+			this.headers = this.columnsSort.map((item: ElTablePageColumnSort) => {
+				let header = this.headers.find((i: ElTablePageColumn) => item.prop == i.prop);
+				return Object.assign(header, item)
+			})
+			this.$nextTick(function () {
+				this.refresh = true;
+			})
 		}
-		this.refresh = false;
-		this.headers = this.columnsSort.map((item: ElTablePageColumnSort) => {
-			let header = this.headers.find((i: ElTablePageColumn) => item.prop == i.prop);
-			return Object.assign(header, item)
-		})
-		this.$nextTick(function () {
-			this.refresh = true;
-		})
 	}
 
 

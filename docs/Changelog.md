@@ -3,6 +3,21 @@ sidebarDepth: 0
 ---
 # 更新日志
 
+## 1.0.15 <small>2021-10-21</small>
+- #### 新增
+	- 添加 `v-copy` 指令
+	- FormAuto
+		- `type:select` 开启 `remote` 时支持开启 `loadScroll` 实现滚动分页加载
+
+- #### 优化
+	- FormAuto
+		- 优化 `type:select` 开启 remote 时的回显逻辑
+	- TablePage
+		- 支持已选择行回显
+		- `request` 支持返回值为数组时隐藏分页组件
+		- 缓存的自定义列数据与 `columns` 配置有差异时不采用
+		- 优化自定义列显隐操作交互
+
 ## 1.0.14 <small>2021-10-21</small>
 - #### 新增
 	- 支持国际化：简体中文、英语。
@@ -16,7 +31,7 @@ sidebarDepth: 0
 		- `type:select` 中选项 disabled 未生效。
 		- 重置表单偶现async-validator触发报错。
 		- 修改表单Prop[data]时部分值被清空。
-	- TableAuto 
+	- TablePage 
 		- 自定义列调整未保存关闭窗口后重新打开应该恢复打开前的数据。
 
 ## 1.0.13 <small>2021-09-27</small>

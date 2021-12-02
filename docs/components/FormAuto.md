@@ -447,6 +447,7 @@ export default {
           label: "渲染框",
           type: "select",
           style: "width:100%",
+          filterable: true,
           options: () => {
             return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
               return res.data.map((item) => {
@@ -465,6 +466,7 @@ export default {
           style: "width:100%",
           multiple: true,
           required: true,
+          loadScroll: true,
           remote: true,
           options: (query, page) => {
             return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {

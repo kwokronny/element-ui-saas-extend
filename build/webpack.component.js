@@ -5,10 +5,10 @@ const VueLoaderPlugin = require("vue-loader/lib/plugin");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const TerserPlugin = require("terser-webpack-plugin");
 
-
 const Components = {
   "element-ui-saas-extend": "./packages/index.ts",
   "form-auto": "./packages/FormAuto/index.ts",
+  copy: "./src/mixin/copy.ts",
   "table-page": "./packages/TablePage/index.ts",
   "number-range": "./packages/NumberRange/index.ts",
 };

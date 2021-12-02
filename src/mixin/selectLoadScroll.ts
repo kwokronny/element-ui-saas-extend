@@ -11,7 +11,7 @@ export default {
       bind: function(el: DirectiveElement, binding: DirectiveBinding, vnode: VNode): void {
         let SELECTWRAP_DOM: Element | null = el.querySelector(".el-select-dropdown .el-select-dropdown__wrap");
         let SELECT_INPUT: HTMLInputElement | null = el.querySelector("input.el-select__input");
-        if (SELECTWRAP_DOM && SELECT_INPUT && binding.value.remote && binding.value.scrollLoad) {
+        if (SELECTWRAP_DOM && SELECT_INPUT && binding.value.remote && binding.value.loadScroll) {
           SELECTWRAP_DOM.addEventListener("scroll", function() {
             let query = SELECT_INPUT?.value || "";
             //@ts-ignore

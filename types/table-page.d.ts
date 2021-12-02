@@ -38,5 +38,6 @@ export declare interface ElTablePageColumn {
   splitChar?: string;
   search?: ElFormAutoField;
   addSearch?: Record<string, ElFormAutoField>;
+  copy?: boolean | ((row: Record<string, any>) => string);
   [name: string]: any;
 }

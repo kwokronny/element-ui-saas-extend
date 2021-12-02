@@ -1,4 +1,8 @@
 export default {
+  copy: {
+    success: "复制成功!",
+    faild: "复制失败!",
+  },
   numberrange: {
     min: "最大值",
     max: "最小值",

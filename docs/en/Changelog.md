@@ -17,7 +17,7 @@ sidebarDepth: 0
 		- The option disabled in `type:select` has no working.
 		- Occasionally async-validator trigger Validater when form reset.
 		- Part of the value is cleared when the form Prop[data] is modified.
-	- TableAuto 
+	- TablePage 
 		- Custom column editing is not saved, closing the window and reopening it should restore the data before opening.
 
 ## 1.0.13 <small>2021-09-27</small>
