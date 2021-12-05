@@ -448,6 +448,7 @@ export default {
           label: "渲染框",
           type: "select",
           style: "width:100%",
+          filterable: true,
           options: () => {
             return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
               return res.data.map((item) => {
@@ -466,17 +467,20 @@ export default {
           style: "width:100%",
           multiple: true,
           required: true,
+          loadScroll: true,
           remote: true,
-          options: (query) => {
-            return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
-              return res.data
-                .filter((item) => item.username.indexOf(query) > -1)
-                .map((item) => {
-                  return {
-                    label: item.username,
-                    value: item.id,
-                  };
-                });
+          options: (query, page) => {
+            return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
+              return (
+                res.data
+                  .filter((item) => item.username.indexOf(query) > -1)
+                  .map((item) => {
+                    return {
+                      label: item.username,
+                      value: item.id * page,
+                    };
+                  })
+              );
             });
           },
         },
@@ -541,7 +545,7 @@ export default {
   },
   methods: {
     editOptionReshow() {
-      this.model.asyncSelect = { label: "测试", value: "123" };
+      this.model.asyncSelect = 1;
       this.model.remote = [
         { label: "测试", value: "123" },
         { label: "测试2", value: "1233" },
@@ -552,7 +556,6 @@ export default {
     },
   },
   mounted() {
-    this.model.asyncSelect = { label: "测试", value: "123" };
     this.model.remote = [
       { label: "测试", value: "123" },
       { label: "测试2", value: "1233" },
@@ -611,6 +614,7 @@ export default {
         id: {
           col: 12,
           label: "用户ID",
+          notSubmit: true,
           type: "plain",
           value: "未选择",
         },
@@ -618,6 +622,7 @@ export default {
           col: 12,
           label: "姓名",
           type: "plain",
+          notSubmit: true,
           value: "未选择",
         },
         phone: {
@@ -625,6 +630,7 @@ export default {
           label: "手机",
           type: "plain",
           value: "未选择",
+          notSubmit: true,
         },
         email: {
           col: 12,
@@ -668,13 +674,13 @@ export default {
 
 ### Props
 
-| 参数            | 描述                       | 类型                                                            | 可选值 | 默认值 |
-| :-------------- | :------------------------- | :-------------------------------------------------------------- | :----- | ------ |
-| v-model         | 表单数据对象               | `object`                                                        | -      | {}     |
+| 参数            | 描述                       | 类型                                                      | 可选值 | 默认值 |
+| :-------------- | :------------------------- | :-------------------------------------------------------- | :----- | ------ |
+| v-model         | 表单数据对象               | `object`                                                  | -      | {}     |
 | data            | 表单项配置                 | [Record&lt;name:string,FormAutoField&gt;](#FormAutoField) | -      | {}     |
-| gutter          | &lt;el-row&gt; 属性 gutter | `number`                                                        | -      | 15     |
-| label-hidden    | 所有表单项标签是否隐藏     | `boolean`                                                       | -      | false  |
-| `[prop:string]` | 继承 el-form 所有 Prop     | `any`                                                           | -      | -      |
+| gutter          | &lt;el-row&gt; 属性 gutter | `number`                                                  | -      | 15     |
+| label-hidden    | 所有表单项标签是否隐藏     | `boolean`                                                 | -      | false  |
+| `[prop:string]` | 继承 el-form 所有 Prop     | `any`                                                     | -      | -      |
 
 ### FormAutoField
 

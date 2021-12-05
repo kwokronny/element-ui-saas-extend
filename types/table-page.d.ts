@@ -33,10 +33,11 @@ export declare interface ElTablePageColumn {
   slot?: boolean | string;
   hide?: boolean;
   filters?: string | Array<string | any[]>;
-  filtersFunc?: (value: string) => string;
+  filtersFunc?: (value: string) => any;
   enum?: ElAutoMixinOptions | ((query?: string) => Promise<ElAutoMixinOptions>);
   splitChar?: string;
   search?: ElFormAutoField;
   addSearch?: Record<string, ElFormAutoField>;
+  copy?: boolean | ((row: Record<string, any>) => string);
   [name: string]: any;
 }

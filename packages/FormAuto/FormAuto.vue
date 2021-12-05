@@ -129,7 +129,7 @@
 							<el-checkbox-group
 								v-model="model[name]"
 								style="display: inline-block"
-								@change="handleCheckedChange($event, name)"
+								@change="handleCheckedChange(name,$event)"
 								v-bind="item.props"
 								v-on="item.on"
 							>
@@ -145,10 +145,10 @@
 							</el-checkbox-group>
 						</template>
 						<template v-else-if="item.type == 'select'">
-							<el-select v-model="model[name]" v-bind="item.props" v-on="item.on">
+							<el-select v-model="model[name]" v-bind="item.props" v-select-scroll="item" v-on="item.on">
 								<el-option
-									v-for="(option, key) in item.options"
-									:key="`${name}_${key}`"
+									v-for="option in selectOptions(item)"
+									:key="`${name}_${option.value}`"
 									:label="option.label"
 									:value="`${option.value}`"
 									:disabled="option.disabled"
@@ -156,6 +156,7 @@
 									<i v-if="option.icon" :class="option.icon"></i>
 									<span>{{ option.label }}</span>
 								</el-option>
+								<el-option v-if="item.optionLoading" value="el-formauto-option-loading">加载中</el-option>
 							</el-select>
 						</template>
 						<template v-else-if="item.type == 'cascader'">
@@ -190,25 +191,15 @@
 	</el-form>
 </template>
 <script lang="ts">
-import {
-	Vue,
-	Component,
-	Prop,
-	Ref,
-	Watch,
-	Model,
-} from "vue-property-decorator";
+import { Vue, Component, Prop, Ref, Watch, Model } from "vue-property-decorator";
 import { Form } from "element-ui";
-import forEach from "lodash-es/forEach";
-import cloneDeep from "lodash-es/cloneDeep";
-import debounce from "lodash-es/debounce";
-import omit from "lodash-es/omit";
+import { forEach, cloneDeep, debounce, uniqBy, omit } from "lodash-es";
 import { ElFormAutoField } from "../../types/form-auto";
 import { ElAutoMixinOptions, ElAutoOption } from "../../types/saas-extend"
-import DynamicSlot from "../components/DynamicSlot"
 import { transformOptions } from "../util"
+import DynamicSlot from "../components/DynamicSlot"
 import locale from "../../src/mixin/locale"
-import { t } from "../../src/locale"
+import selectLoadScroll from "../../src/mixin/selectLoadScroll"
 
 @Component({
 	name: "ElFormAuto",
@@ -217,7 +208,7 @@ import { t } from "../../src/locale"
 			slotRoot: this
 		}
 	},
-	mixins: [locale],
+	mixins: [locale, selectLoadScroll],
 	components: {
 		DynamicSlot
 	}
@@ -227,7 +218,7 @@ export default class ElFormAuto extends Vue {
 	@Ref("FormAuto") readonly FormAuto!: Form;
 
 
-	@Model("input", { type: Object }) readonly value!: Record<string, any>;
+	@Model("input", { type: Object, default: () => { return {} } }) readonly value!: Record<string, any>;
 
 	/**
 	 * 行内表单模式
@@ -271,9 +262,105 @@ export default class ElFormAuto extends Vue {
 		value && this.setModel(value);
 	}
 
+
 	@Watch("model", { immediate: true, deep: true })
 	private onModelChange() {
 		this.$emit("input", this.getModel());
+	}
+
+
+	/**
+	 * @public
+	 * 获取表单所有参数
+	 */
+	public getModel(): Record<string, any> {
+		let data: Record<string, any> = {};
+		forEach(this.fields, (item: ElFormAutoField, name: string) => {
+			if (!item.notSubmit) {
+				data[name] = this.model[name];
+				if (item.rangeName && item.type && (/range$/g.test(item.type) || (item.type == "slider" && item.props?.range == true))) {
+					let [sn, en] = item.rangeName;
+					let [sd, ed] = this.model[name] || [null, null];
+					data[sn] = sd;
+					data[en] = ed;
+					if (sd && ed && item.type == "daterange" && item.suffixTime == true) {
+						data[sn] += " 00:00:00";
+						data[en] += " 23:59:59";
+					}
+				}
+			}
+		});
+		// console.log(Object.assign({}, this.value, data))
+		return Object.assign({}, this.value, data);
+	}
+
+	/**
+	 * @public
+	 * 设置表单对应参数，表单项不存在的将被无视
+	 *
+	 * @param {object} model 表单项对应值数据 例如：{key:value,...}
+	 */
+	public setModel(model: Record<string, any>): void {
+		for (let name in model) {
+			if (model[name] === undefined || model[name] === null) break;
+			let value = model[name];
+			let field = this.fields[name];
+			if (field && /radio|select|check/.test(field.type)) {
+				console.log(name, value)
+				if (field.type == "select" && field.remote) {
+					let values = this.selectEcho(name, value);
+					if (Array.isArray(value)) {
+						values.forEach((v: string, i: number) => {
+							value[i] = v;
+						})
+					} else {
+						value = values
+					}
+				} else if (field.type == "check" || (field.type == "select" && field.multiple)) {
+					field.type == "check" && this.handleCheckedChange(name, value);
+					value.forEach((v: number, i: number) => { value[i] = `${v}` })
+				} else {
+					value = `${value}`;
+				}
+			}
+			this.model[name] = value;
+		}
+	}
+
+	/**
+	 * 
+	 */
+	private selectEcho(name: string, options: any): any {
+		let field = this.fields[name];
+		if (!field) return options;
+		if (Array.isArray(options)) {
+			if (!field.echoOptions) {
+				field.echoOptions = []
+			}
+			let values: string[] = []
+			for (let i = 0; i < options.length; i++) {
+				if (options[i] && options[i].label && options[i].value) {
+					if (!field.echoOptions.find((option: Record<string, string>) => option.value == options[i].value)) {
+						field.echoOptions.push(Object.assign({}, options[i]))
+					}
+					values.push(`${options[i].value}`);
+				} else {
+					values.push(`${options[i]}`);
+				}
+			}
+			return values;
+		} else if (options && options.label && options.value) {
+			field.echoOptions = [options];
+			return `${options.value}`;
+		}
+	}
+
+	private selectOptions(field: ElFormAutoField) {
+		if (Array.isArray(field.options) && field.remote) {
+			let echoOpitons = field.echoOptions || []
+			return uniqBy(echoOpitons.concat(field.options), "value")
+		}
+		return field.options
 	}
 
 	/**
@@ -303,79 +390,6 @@ export default class ElFormAuto extends Vue {
 	public async validate(): Promise<boolean> {
 		return await this.FormAuto.validate();
 	}
-
-	/**
-	 * @public
-	 * 获取表单所有参数
-	 */
-	public getModel(): Record<string, any> {
-		let data: Record<string, any> = {},
-			model = this.model;
-		forEach(this.fields, (item: ElFormAutoField, name: string) => {
-			if (!item.notSubmit) {
-				data[name] = model[name];
-				if (item.rangeName && item.type && (/range$/g.test(item.type) || (item.type == "slider" && item.props?.range == true))) {
-					let [sn, en] = item.rangeName;
-					let [sd, ed] = model[name] || [null, null];
-					data[name] = model[name]
-					data[sn] = sd;
-					data[en] = ed;
-					if (sd && ed && item.type == "daterange" && item.suffixTime == true) {
-						data[sn] += " 00:00:00";
-						data[en] += " 23:59:59";
-					}
-				}
-			}
-		});
-		return data;
-	}
-
-	/**
-	 * @public
-	 * 设置表单对应参数，表单项不存在的将被无视
-	 *
-	 * @param {object} model 表单项对应值数据 例如：{key:value,...}
-	 */
-	public setModel(model: Record<string, any>): void {
-		if (!this.acceptValue) return
-		let _model = Object.assign({}, model);
-		for (let name in _model) {
-			let value = _model[name];
-			if (Object.keys(_model).indexOf(name) > -1) {
-				if (value === undefined) break;
-				let field = this.fields[name];
-				if (field && /radio|select|check/.test(field.type) && Array.isArray(field.options)) {
-					// 远程获取选项框选项回显功能
-					if (value && value.label && value.value) {
-						if (field.options.findIndex((option: any) => option.value == value.value) == -1) {
-							field.options.splice(0, 0, value)
-						}
-						value = value.value;
-					}
-					if ((field.type == "check" || (field.type == "select" && field.multiple)) && Array.isArray(value)) {
-						for (let idx = 0; idx < value.length; idx++) {
-							let val = value[idx];
-							if (val.label && val.value && field.type == "select") {
-								if (field.options.findIndex((option: any) => option.value == val.value) == -1) {
-									field.options.splice(0, 0, val)
-								}
-								value[idx] = val.value;
-							} else {
-								value[idx] = `${val}`
-							}
-						}
-						if (field.type == "check") {
-							this.handleCheckedChange(value, name)
-						}
-					} else {
-						value = `${value}`;
-					}
-				}
-			}
-			this.model[name] = value
-		}
-	}
-
 	/**
 	 * 复选框 全选
 	 */
@@ -394,7 +408,7 @@ export default class ElFormAuto extends Vue {
 	/**
 	 * 复选框组 change 事件
 	 */
-	private handleCheckedChange(value: string[], name: string): void {
+	private handleCheckedChange(name: string, value: string[]): void {
 		if (this.check[name] == undefined) return
 		let checkedCount = value.length;
 		let options = this.fields[name].options as ElAutoOption[];
@@ -441,16 +455,16 @@ export default class ElFormAuto extends Vue {
 			// 根据字段 type 设置表单占位字符串
 			if (/range/g.test(item.type)) {
 				if (item.type == "numberrange") {
-					item.props.startPlaceholder = item.props.startPlaceholder || `${t("formauto.min")}${item.label}`;
-					item.props.endPlaceholder = item.props.endPlaceholder || `${t("formauto.max")}${item.label}`;
+					item.props.startPlaceholder = item.props.startPlaceholder || `${this.$t("formauto.min")}${item.label}`;
+					item.props.endPlaceholder = item.props.endPlaceholder || `${this.$t("formauto.max")}${item.label}`;
 				} else {
-					item.props.startPlaceholder = item.props.startPlaceholder || `${t("formauto.start")}${item.label}`;
-					item.props.endPlaceholder = item.props.endPlaceholder || `${t("formauto.end")}${item.label}`;
+					item.props.startPlaceholder = item.props.startPlaceholder || `${this.$t("formauto.start")}${item.label}`;
+					item.props.endPlaceholder = item.props.endPlaceholder || `${this.$t("formauto.end")}${item.label}`;
 				}
 			} if (/date|time|datetime|select|week|year|month|dates|cascader/g.test(item.type)) {
-				item.props.placeholder = item.props.placeholder || `${t("formauto.pleaseSelect")}${item.label}`;
+				item.props.placeholder = item.props.placeholder || `${this.$t("formauto.pleaseSelect")}${item.label}`;
 			} else {
-				item.props.placeholder = item.props.placeholder || `${t("formauto.pleaseInput")}${item.label}`;
+				item.props.placeholder = item.props.placeholder || `${this.$t("formauto.pleaseInput")}${item.label}`;
 			}
 
 			// 针对日期时间类型组件设置统一日期格式及显示格式
@@ -488,20 +502,18 @@ export default class ElFormAuto extends Vue {
 				}
 			}
 
-			if (this.acceptValue == false) {
-				// console.log(`${name}:${this.value[name]}`)
-				let value = this.value[name] == undefined ? item.value : this.value[name]
-				this.$set(this.model, name, value);
-				if (item.type == "check") {
-					this.handleCheckedChange(value, name)
-				}
+			let value = this.value[name] == undefined ? item.value : this.value[name]
+			if (item.type == "select" && item.remote) {
+				value = this.selectEcho(name, value)
+			} else if (item.type == "check") {
+				this.handleCheckedChange(name, value)
 			}
+			this.$set(this.model, name, value);
 		})
 		this.asyncOptionsRequest()
 	}
 
 	private generateRule(): void {
-		this.acceptValue = false;
 		this.rules = {};
 		forEach(this.data, (item, name) => {
 			this.rules[name] = [];
@@ -537,42 +549,37 @@ export default class ElFormAuto extends Vue {
 
 	private asyncOptionsRequest(): void {
 		if (this.asyncOptions.length) {
-			Promise.all(this.asyncOptions.map((item) => {
-				return new Promise((resolve, reject) => {
-					if (item.remote && item.type == "select" && item.options instanceof Function) {
-						let remoteMethod = item.options;
-						item.props.filterable = true;
-						item.props.remote = true;
-						item.props.remoteMethod = debounce((query?: string) => {
+			this.asyncOptions.forEach((item) => {
+				if (item.remote && item.type == "select" && item.options instanceof Function) {
+					let remoteMethod = item.options;
+					item.props.filterable = true;
+					item.props.remote = true;
+					item.page = 1;
+					item.props.remoteMethod = debounce((query?: string, isScroll?: boolean) => {
+						if (!isScroll) item.page = 1
+						if (item.page == 1) {
 							item.options = []
-							item.props && (item.props.loading = true);
-							remoteMethod(query).then((options: ElAutoMixinOptions) => {
-								return transformOptions(options)
-							}).then((options: any) => {
-								item.options = options;
-								resolve(true);
-							});
-							item.props && (item.props.loading = false);
-						}, 500);
-						item.props.remoteMethod("")
-					} else if (item.options) {
-						transformOptions(item.options).then((options) => {
-							item.options = options
-							resolve(true);
-						})
-					}
-				})
-			})).then(this.canRender, this.canRender)
-		} else {
-			this.canRender()
+						}
+						item.optionLoading = true;
+						remoteMethod(query, item.page).then((options: ElAutoMixinOptions) => {
+							return transformOptions(options)
+						}).then((options: ElAutoOption[]) => {
+							item.optionLoading = false;
+							options = (item.options as ElAutoOption[]).concat(options)
+							item.options = options;
+							isScroll && item.page++
+						}).catch(() => {
+							item.optionLoading = false;
+						});
+					}, 1000, { leading: true });
+					item.props.remoteMethod("")
+				} else if (item.options) {
+					transformOptions(item.options).then((options) => {
+						item.options = options
+					})
+				}
+			})
 		}
-	}
-
-	private canRender() {
-		this.acceptValue = true;
-		this.$nextTick(function () {
-			this.setModel(this.value)
-		})
 	}
 }
 </script>

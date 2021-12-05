@@ -1,0 +1,20 @@
+.element-ui-saas-extend-copy-tooltip {
+  display: none;
+  animation: CopyTooltipEffect .8s;
+}
+@keyframes CopyTooltipEffect {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0%);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20%);
+  }
+}

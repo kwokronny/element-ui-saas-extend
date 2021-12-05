@@ -1,4 +1,8 @@
 export default {
+  copy: {
+    success: "Copied!",
+    faild: "Cope Faild!",
+  },
   numberrange: {
     min: "Min value",
     max: "Max value",
@@ -21,10 +25,10 @@ export default {
     sort: "Sort",
     column: "Column",
     fixed: "Fixed",
-    hide: "Hide",
-    left: "Left",
-    none: "None",
-    right: "Right",
+    hide: "Show",
+    fixedLeft: "Left",
+    fixedNone: "None",
+    fixedRight: "Right",
     cancel: "Cancel",
     save: "Save",
   },

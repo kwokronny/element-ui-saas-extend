@@ -48,7 +48,7 @@ module.exports = {
           },
           {
             title: "组件",
-            children: ["/components/NumberRange", "/components/FormAuto", "/components/TablePage"],
+            children: ["/components/Copy", "/components/NumberRange", "/components/FormAuto", "/components/TablePage"],
           },
           "/Donate",
         ],
@@ -73,7 +73,7 @@ module.exports = {
           },
           {
             title: "Components",
-            children: ["/en/components/NumberRange", "/en/components/FormAuto", "/en/components/TablePage"],
+            children: ["/en/components/Copy", "/en/components/NumberRange", "/en/components/FormAuto", "/en/components/TablePage"],
           },
           "/en/Donate",
         ],

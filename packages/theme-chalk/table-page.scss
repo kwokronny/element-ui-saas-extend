@@ -15,8 +15,9 @@
   .el-table-page__search-card {
     margin-bottom: 15px;
   }
-  /*.el-table-page_copy-icon {
-		line-height: 28px;
-		cursor: pointer;
-	} */
+  .el-table-page_copy-icon {
+    position: relative;
+    line-height: 28px;
+    cursor: pointer;
+  }
 }

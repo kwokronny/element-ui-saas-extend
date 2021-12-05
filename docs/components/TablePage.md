@@ -18,12 +18,13 @@ pageClass: component-page
 
 ```vue
 <template>
-  <el-table-page ref="TablePage" border stripe :columns="columns" :request="getList"></el-table-page>
+  <el-table-page row-key="id"  ref="TablePage" border stripe :columns="columns" :request="getList"></el-table-page>
 </template>
 <script>
 export default {
   data() {
     return {
+      selection:[],
       columns: [
         {
           label: "姓名",
@@ -88,6 +89,7 @@ export default {
           label: "标签",
           prop: "tagArr",
           enumTag: "el-tag",
+          copy: true,
           enum: [
             { label: "聪明", value: "1", type: "primary" },
             { label: "可爱", value: "2", type: "success" },
@@ -157,6 +159,7 @@ export default {
         {
           label: "邮箱",
           prop: "email",
+          copy: true,
           showOverflowTooltip: true,
           width: 260,
         },
@@ -182,8 +185,8 @@ export default {
           label: "状态",
           prop: "status",
           enum: [
-            { label: "正常", value: 1, type: "primary" },
-            { label: "失效", value: 2, type: "danger" },
+            { label: "正常", value: "1", type: "primary" },
+            { label: "失效", value: "2", type: "warning" },
           ],
         },
       ],
@@ -192,15 +195,9 @@ export default {
   methods: {
     getList(page = 1, search, pageSize) {
       return axios.get("/element-ui-saas-extend/json/page.json").then(function(ret) {
-        let baseId = (page - 1) * pageSize;
-        return {
-          page,
-          total: 100,
-          pageSize,
-          record: ret.data.data.filter(function(item, index) {
-            return index > baseId && index < baseId + pageSize;
-          }),
-        };
+        return ret.data.data.filter(function(item, index) {
+          return index < 10;
+        });
       });
     },
   },
@@ -583,40 +580,41 @@ export default {
 
 ### Props
 
-| 参数            | 描述                                                                                                    | 类型                                                                                                                                            | 可选值 | 默认值 |
-| :-------------- | :------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------- | :----- | ------ |
-| columns         | 列配置                                                                                                  | [columns[]](#prop-columns-attribute)                                                                                                            | -      | []     |
-| search-props    | 表单项配置，参考 [FormAuto 属性](FormAuto.html#props)                                                   | [FormAuto Prop](FormAuto.html#props)                                                                                                            | -      | {}     |
-| `[prop:string]` | 可追加 &lt;el-table&gt; 的 [属性](https://element.eleme.io/#/zh-CN/component/table#table-attributes)    | `any`                                                                                                                                           | -      |
-| 请求相关        |                                                                                                         |                                                                                                                                                 |        |        |
-| request         | 请求方法，参考 [添加搜索项](#添加搜索项)                                                                | `(page:number, searchField:Record<string,any>, pageSize:number, from:"page_change"|"request_change"|"search")=>{page, pageSize, total, record}` | -      | -      |
-| page-layout     | 分页组件布局，参考 [文档 layout 属性](https://element.eleme.io/#/zh-CN/component/pagination#attributes) | `string`                                                                                                                                        | -      | -      |
-| page-sizes      | 分页组件每页显示个数选择器的选项设置                                                                    | `number[]`                                                                                                                                      | -      | -      |
-| 多选相关        | 参考 [示例](#多选批量操作)                                                                              |                                                                                                                                                 |        |        |
-| row-key         | 与 &lt;el-table&gt;的 row-key 用法相同，赋值该属性则化开启多选功能                                      | `string` / `Function(row)`                                                                                                                      | -      | -      |
-| selectable      | 多选时决定这一行的 CheckBox 是否可以勾选                                                                | `(row,index)=>boolean`                                                                                                                          | -      | -      |
-| selection       | 已选中项，支持.sync                                                                                     | `object[]`                                                                                                                                      | `[]`   |
-| 自定义列相关    |                                                                                                         |                                                                                                                                                 |        |        |
-| custom-columns  | 开启自定义列，该值将按 `ElTablePage_${custom-columns}` 为键名在 `localStorage` 保存自定义列的结果       | `string`                                                                                                                                        | -      | false  |
-| layout-type     | 表格页主题                                                                                              | `default` / `card`                                                                                                                              | -      | -      |
-| button-style    | 默认按钮样式简易自定义                                                                                  | `Record<"plain"|"round|"class"|"size"|"style",boolean|string>`                                                                                  | -      | -      |
+| 参数            | 描述                                                                                                    | 类型                                                                                  | 可选值 | 默认值 |
+| :-------------- | :------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------ | :----- | ------ |
+| columns         | 列配置                                                                                                  | [columns[]](#prop-columns-attribute)                                                  | -      | []     |
+| search-props    | 表单项配置，参考 [FormAuto 属性](FormAuto.html#props)                                                   | [FormAuto Prop](FormAuto.html#props)                                                  | -      | {}     |
+| `[prop:string]` | 可追加 &lt;el-table&gt; 的 [属性](https://element.eleme.io/#/zh-CN/component/table#table-attributes)    | `any`                                                                                 | -      |
+| 请求相关        |                                                                                                         |                                                                                       |        |        |
+| request         | 请求方法，参考 [添加搜索项](#添加搜索项)，当函数返回结果类型为数组时将隐藏分页组件                      | `(page, searchField, pageSize)=>{page, pageSize, total, record}|Record<string,any>[]` | -      | -      |
+| page-layout     | 分页组件布局，参考 [文档 layout 属性](https://element.eleme.io/#/zh-CN/component/pagination#attributes) | `string`                                                                              | -      | -      |
+| page-sizes      | 分页组件每页显示个数选择器的选项设置                                                                    | `number[]`                                                                            | -      | -      |
+| 多选相关        | 参考 [示例](#多选批量操作)                                                                              |                                                                                       |        |        |
+| row-key         | 与 &lt;el-table&gt;的 row-key 用法相同，赋值该属性则化开启多选功能                                      | `string` / `Function(row)`                                                            | -      | -      |
+| selectable      | 多选时决定这一行的 CheckBox 是否可以勾选                                                                | `(row,index)=>boolean`                                                                | -      | -      |
+| selection       | 已选中项，支持.sync                                                                                     | `object[]`                                                                            | `[]`   |
+| 自定义列相关    |                                                                                                         |                                                                                       |        |        |
+| custom-columns  | 开启自定义列，该值将按 `ElTablePage_${custom-columns}` 为键名在 `localStorage` 保存自定义列的结果       | `string`                                                                              | -      | false  |
+| layout-type     | 表格页主题                                                                                              | `default` / `card`                                                                    | -      | -      |
+| button-style    | 默认按钮样式简易自定义                                                                                  | `Record<"plain"|"round|"class"|"size"|"style",boolean|string>`                        | -      | -      |
 
 ### Prop: columns Attribute
 
-| 参数            | 描述                                                                                                                                                           | 类型                                                         | 默认值 |
-| :-------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :----- |
-| label           | 列显示标题                                                                                                                                                     | `string`                                                     | -      |
-| prop            | 列对应字段名                                                                                                                                                   | `boolean`                                                    | false  |
-| labelTooltip    | 列名提示                                                                                                                                                       | `string` / `boolean`                                         | false  |
-| hide            | 是否隐藏                                                                                                                                                       | `boolean`                                                    | -      |
-| fixed           | 字段默认值                                                                                                                                                     | `left` / `right` / `boolean`                                 | -      |
-| filters         | 应用 Vue 过滤器，具体参考此 [示例](#应用过滤器)                                                                                                                | -                                                            | -      |
-| slot            | 自定义动态插槽，设为 true 时，slot 为 prop，详情可参考 [插槽示例](#所有插槽)                                                                                   | `string` / `boolean`                                         | false  |
-| enum            | 列内容枚举值，与 FormAuto 的 options 属性一致，详情可参考[options 设置](FormAuto.html#options-设置)，开启搜索项[search]后会未配置 options 属性 时自动使用 enum |                                                              | -      |
-| splitChar       | 仅 `enum` 值且数据值为序列化字符串时，设置列值分隔符 split 数据值                                                                                              | `string`                                                     | -      |
-| search          | 为此字段添加搜索项，参考 [添加搜索项](#添加搜索项)                                                                                                             | [FormAutoField](FormAuto.html#formautofield)                 | -      |
-| addSearch       | 为此字段后添加更多搜索项，参考 [添加搜索项](#添加搜索项)                                                                                                       | [Record<string, FormAutoField>](FormAuto.html#formautofield) | -      |
-| `[prop:string]` | 可直接追加 &lt;el-table-column&gt; 组件的 prop，参考 [&lt;el-table&gt;属性](https://element.eleme.io/#/zh-CN/component/table#table-attributes)                 | `any`                                                        | -      |
+| 参数            | 描述                                                                                                                                           | 类型                                                         | 默认值 |
+| :-------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :----- |
+| label           | 列显示标题                                                                                                                                     | `string`                                                     | -      |
+| prop            | 列对应字段名                                                                                                                                   | `boolean`                                                    | false  |
+| labelTooltip    | 列名提示                                                                                                                                       | `string`                                                     | false  |
+| copy            | 增加复制功能，默认复制单元格内容                                                                                                               | `boolean` / `(row)=>string`                                  | false  |
+| hide            | 是否隐藏                                                                                                                                       | `boolean`                                                    | -      |
+| fixed           | 字段默认值                                                                                                                                     | `left` / `right` / `boolean`                                 | -      |
+| filters         | 应用 Vue 过滤器，具体参考此 [示例](#应用过滤器)                                                                                                | -                                                            | -      |
+| slot            | 自定义动态插槽，设为 true 时，slot 为 prop，详情可参考 [插槽示例](#所有插槽)                                                                   | `string` / `boolean`                                         | false  |
+| enum            | 列内容枚举值，与 FormAuto 的 options 属性一致，详情可参考[options 设置](FormAuto.html#options-设置)，配置 `search.options` 属性时默认应用 enum |                                                              | -      |
+| splitChar       | 仅 `enum` 值且数据值为序列化字符串时，设置列值分隔符 split 数据值                                                                              | `string`                                                     | -      |
+| search          | 为此字段添加搜索项，参考 [添加搜索项](#添加搜索项)                                                                                             | [FormAutoField](FormAuto.html#formautofield)                 | -      |
+| addSearch       | 为此字段后添加更多搜索项，参考 [添加搜索项](#添加搜索项)                                                                                       | [Record<string, FormAutoField>](FormAuto.html#formautofield) | -      |
+| `[prop:string]` | 可直接追加 `<el-table-column>` 组件的 prop，参考 [`<el-table>`属性](https://element.eleme.io/#/zh-CN/component/table#table-attributes)         | `any`                                                        | -      |
 
 ### Event
 

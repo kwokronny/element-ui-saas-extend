@@ -1,4 +1,4 @@
-import defaultLang from "./lang/zh-CN.js";
+const defaultLang = require("./lang/zh-CN.js");
 import { result } from "lodash-es";
 let lang: Record<string, any> = defaultLang;
 

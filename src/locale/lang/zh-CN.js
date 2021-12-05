@@ -1,4 +1,8 @@
 export default {
+  copy: {
+    success: "复制成功!",
+    faild: "复制失败!",
+  },
   numberrange: {
     min: "最大值",
     max: "最小值",
@@ -21,10 +25,10 @@ export default {
     sort: "排序",
     column: "表项",
     fixed: "固定",
-    hide: "隐藏",
-    left: "左",
-    none: "否",
-    right: "右",
+    hide: "显示",
+    fixedLeft: "左",
+    fixedNone: "否",
+    fixedRight: "右",
     cancel: "取消",
     save: "保存",
   },
