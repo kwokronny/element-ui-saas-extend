@@ -4,7 +4,6 @@ const { series, src, dest, watch } = require("gulp");
 const sass = require("gulp-sass");
 const autoprefixer = require("gulp-autoprefixer");
 const cssmin = require("gulp-cssmin");
-const ts = require("gulp-typescript");
 
 function transferSass() {
   return src("./packages/theme-chalk/*.scss")

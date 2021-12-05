@@ -1,7 +1,10 @@
-import Vue from "vue";
+import Vue, { VueConstructor } from "vue";
 import Element from "element-ui";
+import ElementUISaaSExtend from "../packages/index";
+import { ComponentOptions } from "vue/types/umd";
 
 Vue.use(Element);
+Vue.use(ElementUISaaSExtend);
 
 let id = 0;
 
@@ -29,8 +32,8 @@ export const destroyVM = function(vm: Vue): void {
  * @param  {Boolean=false} mounted 是否添加到 DOM 上
  * @return {Object} vm
  */
-export const createVue = function(Compo: any, mounted: boolean = false): Vue {
-  if (Object.prototype.toString.call(Compo) === "[object String]") {
+export const createVue = function(Compo: ComponentOptions<Vue> | string, mounted: boolean = false): Vue {
+  if (typeof Compo === "string") {
     Compo = { template: Compo };
   }
   return new Vue(Compo).$mount(mounted === false ? undefined : createElm());
@@ -44,7 +47,7 @@ export const createVue = function(Compo: any, mounted: boolean = false): Vue {
  * @param  {Boolean=false} mounted  - 是否添加到 DOM 上
  * @return {Object} vm
  */
-export const createTest = function(Compo: any, propsData: any = {}, mounted: boolean = false): Vue {
+export const createTest = function(Compo: ComponentOptions<Vue>, propsData: any = {}, mounted: boolean = false): Vue {
   if (propsData === true || propsData === false) {
     mounted = propsData;
     propsData = {};
