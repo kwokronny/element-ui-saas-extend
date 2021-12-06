@@ -358,7 +358,7 @@ export default class ElTablePage extends Vue {
 
 	private searchForm: Record<string, ElFormAutoField> = {}
 	private loading: boolean = false;
-	@Prop({ type: Function, required: true }) request!: ((page: number, search?: Record<string, any>, pageSize?: number, from?: string) => Promise<Record<ElTablePageDataMap, any>>)
+	@Prop({ type: Function, required: true }) request!: ((page: number, search?: Record<string, any>, pageSize?: number, from?: string) => Promise<Record<ElTablePageDataMap, any>|Record<string,any>[]>)
 
 
 	get hasSearchCard(): boolean {
@@ -390,7 +390,7 @@ export default class ElTablePage extends Vue {
 
 	public async search(page: number = 1): Promise<void> {
 		this.loading = true;
-		let data: Record<ElTablePageDataMap, any> = await this.request(page, this.filter, this.limit)
+		let data = await this.request(page, this.filter, this.limit)
 		this.loading = false;
 		if (Array.isArray(data)) {
 			this.record = data;
@@ -400,8 +400,6 @@ export default class ElTablePage extends Vue {
 			this.page = data.page
 			this.limit = data.pageSize
 			this.total = data.total
-		} else {
-			console.error("request params callback result error: is not array or interface{ page: number, pageSize: number, record: any[], total: number }")
 		}
 	}
 

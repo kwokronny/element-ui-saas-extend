@@ -306,7 +306,6 @@ export default class ElFormAuto extends Vue {
 			let value = model[name];
 			let field = this.fields[name];
 			if (field && /radio|select|check/.test(field.type)) {
-				console.log(name, value)
 				if (field.type == "select" && field.remote) {
 					let values = this.selectEcho(name, value);
 					if (Array.isArray(value)) {
@@ -352,6 +351,8 @@ export default class ElFormAuto extends Vue {
 		} else if (options && options.label && options.value) {
 			field.echoOptions = [options];
 			return `${options.value}`;
+		} else {
+			return options
 		}
 	}
 
