@@ -3,7 +3,8 @@ sidebarDepth: 0
 ---
 # 更新日志
 
-## 1.0.15 <small>2021-10-21</small>
+## 1.0.18 <small>2021-12-06</small>
+
 - #### 新增
 	- 添加 `v-copy` 指令
 	- FormAuto
@@ -17,6 +18,16 @@ sidebarDepth: 0
 		- `request` 支持返回值为数组时隐藏分页组件
 		- 缓存的自定义列数据与 `columns` 配置有差异时不采用
 		- 优化自定义列显隐操作交互
+
+
+## 1.0.15 <small>2021-10-21</small>
+- #### 优化
+	- TablePage
+		- 在组件完成对 columns 处理后触发搜索请求。
+
+- #### 修复
+	- FormAuto
+		- 解决启用 `suffixTime` 导致的日期拼合错误。
 
 ## 1.0.14 <small>2021-10-21</small>
 - #### 新增

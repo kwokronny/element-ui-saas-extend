@@ -250,7 +250,7 @@ export default class ElTablePage extends Vue {
 	}
 
 	// # region 列相关
-	@Prop(Array) columns!: ElTablePageColumn[];
+	@Prop({ type: Array, required: true, default: () => [] }) columns!: ElTablePageColumn[];
 	private headers: ElTablePageColumn[] = [];
 	private refresh: boolean = true;
 
@@ -289,6 +289,9 @@ export default class ElTablePage extends Vue {
 			// 从localStorage获取存储的自定义列配置
 			this.loadCustomColumns()
 		}
+		this.$nextTick(function () {
+			this.search();
+		})
 	}
 
 	private localFilter: Record<string, any> = this.$parent.$options.filters as Record<string, any>
@@ -355,7 +358,7 @@ export default class ElTablePage extends Vue {
 
 	private searchForm: Record<string, ElFormAutoField> = {}
 	private loading: boolean = false;
-	@Prop(Function) request!: ((page: number, search?: Record<string, any>, pageSize?: number, from?: string) => Promise<Record<ElTablePageDataMap, any>>)
+	@Prop({ type: Function, required: true }) request!: ((page: number, search?: Record<string, any>, pageSize?: number, from?: string) => Promise<Record<ElTablePageDataMap, any>|Record<string,any>[]>)
 
 
 	get hasSearchCard(): boolean {
@@ -373,7 +376,7 @@ export default class ElTablePage extends Vue {
 		return this.pageLayout || (this.$ELEMENT && this.$ELEMENT.tablePage?.pageLayout) || "total, sizes, prev, pager, next, jumper"
 	}
 
-	@Watch("request", { immediate: true })
+	@Watch("request")
 	private handleRequestChange() {
 		if (this.request instanceof Function) {
 			this.search(1)
@@ -387,7 +390,7 @@ export default class ElTablePage extends Vue {
 
 	public async search(page: number = 1): Promise<void> {
 		this.loading = true;
-		let data: Record<ElTablePageDataMap, any> = await this.request(page, this.filter, this.limit)
+		let data = await this.request(page, this.filter, this.limit)
 		this.loading = false;
 		if (Array.isArray(data)) {
 			this.record = data;
@@ -397,8 +400,6 @@ export default class ElTablePage extends Vue {
 			this.page = data.page
 			this.limit = data.pageSize
 			this.total = data.total
-		} else {
-			console.error("request params callback result error: is not array or interface{ page: number, pageSize: number, record: any[], total: number }")
 		}
 	}
 

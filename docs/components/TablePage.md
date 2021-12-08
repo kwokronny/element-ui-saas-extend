@@ -68,6 +68,8 @@ export default {
           filters: [["dayjs", "YYYY-MM-DD"]],
           search: {
             type: "daterange",
+            value: ["2021-01-03", "2021-01-25"],
+            suffixTime: true,
             rangeName: ["startDate", "endDate"],
           },
         },
@@ -130,7 +132,7 @@ export default {
 
 ```vue
 <template>
-  <el-table-page border stripe :columns="columns" :request="getList" custom-columns="table_test1"></el-table-page>
+  <el-table-page border stripe :columns="columns" custom-columns="table_test1" :request="getList"></el-table-page>
 </template>
 <script>
 export default {

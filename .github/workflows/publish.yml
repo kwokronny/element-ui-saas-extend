@@ -17,7 +17,6 @@ jobs:
         registry-url: 'https://registry.npmjs.org'
     - run: yarn install
     - run: yarn build
-    - run: yarn build:theme
     - run: yarn remove element-ui vue -D
     - run: yarn add element-ui vue -P
     - name: Publish Package 

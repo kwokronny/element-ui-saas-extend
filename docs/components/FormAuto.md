@@ -34,6 +34,7 @@ export default {
         dateRange: {
           label: "日期范围",
           type: "daterange",
+          suffixTime: true,
           rangeName: ["startDate", "endDate"],
         },
         numberrange: {
@@ -464,6 +465,30 @@ export default {
           label: "远程搜索",
           type: "select",
           style: "width:100%",
+          // multiple: true,
+          required: true,
+          loadScroll: true,
+          remote: true,
+          options: (query, page) => {
+            return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
+              return (
+                res.data
+                  .filter((item) => item.username.indexOf(query) > -1)
+                  .map((item) => {
+                    return {
+                      label: item.username,
+                      value: item.id * page,
+                    };
+                  })
+              );
+            });
+          },
+        },
+        remoteMult: {
+          col: 12,
+          label: "远程搜索",
+          type: "select",
+          style: "width:100%",
           multiple: true,
           required: true,
           loadScroll: true,
@@ -545,7 +570,8 @@ export default {
   methods: {
     editOptionReshow() {
       this.model.asyncSelect = 1;
-      this.model.remote = [
+      this.model.remote = { label: "测试", value: "123" }
+      this.model.remoteMult = [
         { label: "测试", value: "123" },
         { label: "测试2", value: "1233" },
       ];
@@ -555,7 +581,8 @@ export default {
     },
   },
   mounted() {
-    this.model.remote = [
+    this.model.remote = { label: "测试", value: "123" }
+    this.model.remoteMult = [
       { label: "测试", value: "123" },
       { label: "测试2", value: "1233" },
     ];

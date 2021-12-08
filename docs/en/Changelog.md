@@ -4,6 +4,14 @@ sidebarDepth: 0
 
 # Changelog
 
+## 1.0.15 <small>2021-10-21</small>
+- #### Optimization
+	- TablePage
+		- The search request is triggered after the component finishes processing the columns.
+- #### Fix
+	- Formauto
+		- Solve the date spelling error caused by attribute `suffixTime`
+
 ## 1.0.14 <small>2021-09-27</small>
 - #### Feature
 	- Support internationalization: Chinese simplified、English.
