@@ -445,10 +445,13 @@ export default class ElFormAuto extends Vue {
 			) {
 				item.value = item.value || [];
 				if (item.type == "timerange") {
-					item.value = [new Date(1970, 1, 1, 0, 0), new Date(1970, 1, 1, 0, 0)];
+					let defaultValue = [new Date(1970, 1, 1, 0, 0), new Date(1970, 1, 1, 0, 0)]
+					item.value = item.value || defaultValue;
 				}
-			} else if (/rate|number|slider|switch/.test(item.type)) {
-				item.value = ~~item.value || 0;
+			} else if (/rate|number|slider/.test(item.type)) {
+				item.value = parseInt(item.value) || 0;
+			} else if (item.type == "switch") {
+				item.value = item.value || false;
 			} else {
 				item.value = item.value || "";
 			}
