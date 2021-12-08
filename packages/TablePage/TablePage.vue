@@ -46,7 +46,7 @@
 			<div class="el-table-page_header">
 				<div>
 					<slot name="selection">
-						<span class="el-table-page_header-selected-text" v-if="$attrs['row-key'] && multipleSelection"">
+						<span class="el-table-page_header-selected-text" v-if="$attrs['row-key'] && multipleSelection">
 							{{$t("tablepage.selection[0]")}}
 							<b>{{multipleSelection.length}}</b>
 							{{$t("tablepage.selection[1]")}}

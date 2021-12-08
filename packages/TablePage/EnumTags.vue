@@ -1,12 +1,15 @@
 <template>
 	<span>
-		<component
-			v-for="(v,i) in values"
-			:is="enumTag"
-			style="margin-right: 5px; margin-bottom: 5px;"
-			:key="`enum_${i}`"
-			v-bind="type[v].props"
-		>{{ type[v].label }}</component>
+		<template v-if="!values.length">-</template>
+		<template v-else>
+			<component
+				v-for="(v,i) in values"
+				:is="enumTag"
+				style="margin-right: 5px; margin-bottom: 5px;"
+				:key="`enum_${i}`"
+				v-bind="type[v].props"
+			>{{ type[v].label }}</component>
+		</template>
 	</span>
 </template>
 

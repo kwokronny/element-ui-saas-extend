@@ -147,8 +147,8 @@
 						<template v-else-if="item.type == 'select'">
 							<el-select v-model="model[name]" v-bind="item.props" v-select-scroll="item" v-on="item.on">
 								<el-option
-									v-for="option in selectOptions(item)"
-									:key="`${name}_${option.value}`"
+									v-for="(option,key) in selectOptions(item)"
+									:key="`${name}_${key}`"
 									:label="option.label"
 									:value="`${option.value}`"
 									:disabled="option.disabled"
