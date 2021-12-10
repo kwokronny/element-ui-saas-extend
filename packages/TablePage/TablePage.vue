@@ -46,7 +46,10 @@
 			<div class="el-table-page_header">
 				<div>
 					<slot name="selection">
-						<span class="el-table-page_header-selected-text" v-if="$attrs['row-key'] && multipleSelection">
+						<span
+							class="el-table-page_header-selected-text"
+							v-if="$attrs['row-key'] && multipleSelection"
+						>
 							{{$t("tablepage.selection[0]")}}
 							<b>{{multipleSelection.length}}</b>
 							{{$t("tablepage.selection[1]")}}
@@ -358,7 +361,7 @@ export default class ElTablePage extends Vue {
 
 	private searchForm: Record<string, ElFormAutoField> = {}
 	private loading: boolean = false;
-	@Prop({ type: Function, required: true }) request!: ((page: number, search?: Record<string, any>, pageSize?: number, from?: string) => Promise<Record<ElTablePageDataMap, any>|Record<string,any>[]>)
+	@Prop({ type: Function, required: true }) request!: ((page: number, search?: Record<string, any>, pageSize?: number, from?: string) => Promise<Record<ElTablePageDataMap, any> | Record<string, any>[]>)
 
 
 	get hasSearchCard(): boolean {
@@ -395,11 +398,11 @@ export default class ElTablePage extends Vue {
 		if (Array.isArray(data)) {
 			this.record = data;
 			this.total = -1;
-		} else if (data && data.record && data.page && data.pageSize && data.total) {
-			this.record = data.record
-			this.page = data.page
-			this.limit = data.pageSize
-			this.total = data.total
+		} else {
+			this.record = data.record || []
+			this.page = data.page || page
+			this.limit = data.pageSize || this.limit
+			this.total = data.total || 0
 		}
 	}
 
