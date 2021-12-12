@@ -10,7 +10,7 @@ export default {
     copy: {
       bind: function(el: DirectiveElement, binding: DirectiveBinding, vnode: VNode): void {
         // let copyText = binding.value;
-        let text = undefined;
+        let text: any = undefined;
         if (typeof binding.value == "string") {
           text = function() {
             return binding.value;

@@ -25,21 +25,21 @@ module.exports = {
       title: "Element UI SaaS 扩展",
       description: "基于 Element UI 对 SaaS 业务开发常见的交互组件。",
     },
-    "/en/": {
-      lang: "en-US",
-      title: "Element UI SaaS Extend",
-      description: "Common interaction component for SaaS business base Element UI.",
-    },
+    // "/en/": {
+    //   lang: "en-US",
+    //   title: "Element UI SaaS Extend",
+    //   description: "Common interaction component for SaaS business base Element UI.",
+    // },
   },
   themeConfig: {
     repo: "kwokronny/element-ui-saas-extend",
     repoLabel: "GitHub",
     locales: {
       "/": {
-        selectText: "选择语言",
-        label: "简体中文",
-        lang: "zh-CN", // 将会被设置为 <html> 的 lang 属性
-        lastUpdated: "最近更新",
+        // selectText: "选择语言",
+        // label: "简体中文",
+        // lang: "zh-CN", // 将会被设置为 <html> 的 lang 属性
+        // lastUpdated: "最近更新",
         sidebar: [
           "/Changelog",
           {
@@ -57,27 +57,27 @@ module.exports = {
           { text: "码云", link: "https://gitee.com/kwokronny/element-ui-saas-extend" },
         ],
       },
-      "/en/": {
-        selectText: "Languages",
-        label: "English",
-        lastUpdated: "Latest Update",
-        nav: [
-          { text: "Anthor", link: "https://kwokronny.top" },
-          { text: "Gitee", link: "https://gitee.com/kwokronny/element-ui-saas-extend" },
-        ],
-        sidebar: [
-          "/en/Changelog",
-          {
-            title: "Development Guide",
-            children: ["/en/Installation", "/en/I18n"],
-          },
-          {
-            title: "Components",
-            children: ["/en/components/Copy", "/en/components/NumberRange", "/en/components/FormAuto", "/en/components/TablePage"],
-          },
-          "/en/Donate",
-        ],
-      },
+    //   "/en/": {
+    //     selectText: "Languages",
+    //     label: "English",
+    //     lastUpdated: "Latest Update",
+    //     nav: [
+    //       { text: "Anthor", link: "https://kwokronny.top" },
+    //       { text: "Gitee", link: "https://gitee.com/kwokronny/element-ui-saas-extend" },
+    //     ],
+    //     sidebar: [
+    //       "/en/Changelog",
+    //       {
+    //         title: "Development Guide",
+    //         children: ["/en/Installation", "/en/I18n"],
+    //       },
+    //       {
+    //         title: "Components",
+    //         children: ["/en/components/Copy", "/en/components/NumberRange", "/en/components/FormAuto", "/en/components/TablePage"],
+    //       },
+    //       "/en/Donate",
+    //     ],
+    //   },
     },
   },
   configureWebpack: {

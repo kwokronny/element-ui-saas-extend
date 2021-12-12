@@ -1,4 +1,4 @@
-import Vue, { VueConstructor } from "vue";
+import Vue from "vue";
 import Element from "element-ui";
 import ElementUISaaSExtend from "../packages/index";
 import { ComponentOptions } from "vue/types/umd";

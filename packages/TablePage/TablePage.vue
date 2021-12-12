@@ -103,7 +103,7 @@
 									<dynamic-slot v-if="column.slot" :name="column.slot" :data="{row, column, index: $index}"></dynamic-slot>
 									<template v-else-if="column.enum">
 										<enum-tags
-											:type="column.enum"
+											:enum="column.enum"
 											:value="row[column.prop]"
 											:enumTag="column.enumTag"
 											:splitChar="column.splitChar"

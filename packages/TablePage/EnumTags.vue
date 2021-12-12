@@ -1,14 +1,13 @@
 <template>
-	<span>
-		<template v-if="!values.length">-</template>
-		<template v-else>
+	<span v-if="enum && values.length">
+		<template v-for="(v,i) in values">
 			<component
-				v-for="(v,i) in values"
+				v-if="enums[v]"
 				:is="enumTag"
 				style="margin-right: 5px; margin-bottom: 5px;"
 				:key="`enum_${i}`"
-				v-bind="type[v].props"
-			>{{ type[v].label }}</component>
+				v-bind="enums[v].props || {}"
+			>{{ enums[v].label || '' }}</component>
 		</template>
 	</span>
 </template>
@@ -20,7 +19,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 @Component({})
 export default class EnumTags extends Vue {
 	@Prop({ type: [Number, String, Array], default: () => [] }) value!: string | string[]
-	@Prop(Object) type!: Record<string, ElAutoOption>
+	@Prop(Object) enum!: Record<string, ElAutoOption>
 	@Prop(String) splitChar!: string
 	@Prop({ type: String, default: "span" }) enumTag!: string
 
