@@ -112,8 +112,14 @@ export declare interface ElFormAutoField {
    */
   multiple?: boolean;
   /**
+   * type为select 且 remote 为 true 时
+   * select 可滚动分页加载
+   * @default true
+   */
+  loadScroll?:boolean;
+  /**
    * type为 datetimerange,timerange,daterange,slider,numberrange 时 必填
-   * 范围选择时返回的范围 值和会按顺序返回rangeName中的值
+   * 范围选择时返回的范围 值和会按顺序返回rangeName中的值
    * rangeName:['startTime','endTime']
    * //output:
    * {

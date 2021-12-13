@@ -3,7 +3,7 @@ import { ElAutoMixinOptions, ElAutoOption } from "types/saas-extend";
 
 export async function transformOptions(options: ElAutoMixinOptions | ((query?: string) => any)): Promise<ElAutoOption[]> {
   if (options instanceof Function) {
-    options = (await options("")) as ElAutoMixinOptions;
+    options = (await options()) as ElAutoMixinOptions;
   }
   const arr: ElAutoOption[] = [];
   const isArray: boolean = Array.isArray(options);

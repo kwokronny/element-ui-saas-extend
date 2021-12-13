@@ -103,7 +103,7 @@
 									<dynamic-slot v-if="column.slot" :name="column.slot" :data="{row, column, index: $index}"></dynamic-slot>
 									<template v-else-if="column.enum">
 										<enum-tags
-											:enum="column.enum"
+											:enums="column.enum"
 											:value="row[column.prop]"
 											:enumTag="column.enumTag"
 											:splitChar="column.splitChar"
@@ -460,7 +460,10 @@ export default class ElTablePage extends Vue {
 	}
 
 	private validColumnsHasChange(sortStorage: ElTablePageColumnSort[]) {
-		return this.columns.every((item: ElTablePageColumn) => !sortStorage.find((i: ElTablePageColumnSort) => i.prop == item.prop)) || sortStorage.every((item: ElTablePageColumnSort) => !this.columns.find((i: ElTablePageColumn) => i.prop == item.prop))
+		if (this.columns.length !== sortStorage.length) {
+			return false
+		}
+		return !this.columns.every((item: ElTablePageColumn) => !sortStorage.find((i: ElTablePageColumnSort) => i.prop == item.prop))
 	}
 
 	private loadCustomColumns() {

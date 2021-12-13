@@ -307,7 +307,7 @@ export default {
         dateRange: ["2021-01-10", "2021-01-13"],
         datetimeRange: ["2021-01-10 11:11:00", "2021-01-12 13:11:00"],
         time: "11:11:00",
-        timeRange: ["11:11:00", "23:12:00"],
+        timeRange: ["11:11:00", "22:12:00"],
         select: 0,
         check: [3],
         radiobutton: 0,

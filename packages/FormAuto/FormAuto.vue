@@ -110,7 +110,7 @@
 									:is="item.type=='radio'?'el-radio':'el-radio-button'"
 									v-for="(option, key) in item.options"
 									:key="`${name}_${key}`"
-									:label="`${option.value}`"
+									:label="option.value"
 									:disabled="item.disabled || option.disabled"
 								>
 									<i v-if="option.icon" :class="option.icon"></i>
@@ -136,7 +136,7 @@
 								<el-checkbox
 									v-for="(option, key) in item.options"
 									:key="`${name}_${key}`"
-									:label="`${option.value}`"
+									:label="option.value"
 									:disabled="item.disabled || option.disabled"
 								>
 									<i v-if="option.icon" :class="option.icon"></i>
@@ -150,7 +150,7 @@
 									v-for="(option,key) in selectOptions(item)"
 									:key="`${name}_${key}`"
 									:label="option.label"
-									:value="`${option.value}`"
+									:value="option.value"
 									:disabled="option.disabled"
 								>
 									<i v-if="option.icon" :class="option.icon"></i>
@@ -317,9 +317,6 @@ export default class ElFormAuto extends Vue {
 					}
 				} else if (field.type == "check" || (field.type == "select" && field.multiple)) {
 					field.type == "check" && this.handleCheckedChange(name, value);
-					value.forEach((v: number, i: number) => { value[i] = `${v}` })
-				} else {
-					value = `${value}`;
 				}
 			}
 			this.model[name] = value;
@@ -344,15 +341,15 @@ export default class ElFormAuto extends Vue {
 					}
 					values.push(`${options[i].value}`);
 				} else {
-					values.push(`${options[i]}`);
+					values.push(options[i]);
 				}
 			}
 			return values;
 		} else if (options && options.label && options.value) {
 			field.echoOptions = [options];
-			return `${options.value}`;
+			return options.value;
 		} else {
-			return options
+			return options;
 		}
 	}
 
@@ -430,7 +427,6 @@ export default class ElFormAuto extends Vue {
 		forEach(this.fields, (item, name) => {
 			item.on = Object.assign({}, item.on);
 			item.props = omit(item, ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "checkAll", "notSubmit", "required", "col", "options"])
-			// item.props = Object.assign({}, item.props);
 			item.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
 			if (item.slot) {
@@ -444,10 +440,9 @@ export default class ElFormAuto extends Vue {
 				(item.type == "slider" && item.props.range === true)
 			) {
 				item.value = item.value || [];
-				if (item.type == "timerange") {
-					let defaultValue = [new Date(1970, 1, 1, 0, 0), new Date(1970, 1, 1, 0, 0)]
-					item.value = item.value || defaultValue;
-				}
+			} else if (item.type == "timerange") {
+				let defaultValue = [new Date(1970, 1, 1, 0, 0), new Date(1970, 1, 1, 0, 0)]
+				item.value = item.value || defaultValue;
 			} else if (/rate|number|slider/.test(item.type)) {
 				item.value = parseInt(item.value) || 0;
 			} else if (item.type == "switch") {
@@ -507,7 +502,7 @@ export default class ElFormAuto extends Vue {
 			}
 
 			let value = this.value[name] == undefined ? item.value : this.value[name]
-			if (item.type == "select" && item.remote) {
+			if (item.type == "select") {
 				value = this.selectEcho(name, value)
 			} else if (item.type == "check") {
 				this.handleCheckedChange(name, value)
@@ -537,7 +532,17 @@ export default class ElFormAuto extends Vue {
 						requiredRule.type = "array";
 						break;
 					case "select":
-						requiredRule.type = item.multiple ? "array" : "string";
+						if (item.multiple) {
+							requiredRule.type = "array";
+						} else {
+							requiredRule.type = "string";
+							requiredRule.transform = function (v) { return `${v}` }
+						}
+						break;
+					case "radio":
+					case "radiobutton":
+						requiredRule.type = "string";
+						requiredRule.transform = function (v) { return `${v}` }
 						break;
 					case "rate":
 						requiredRule.type = "number";
