@@ -26,8 +26,9 @@ describe("FormAuto", () => {
       },
       true
     );
-    hidden = vm.$el.querySelectorAll(".el-form-item__label");
+    let hidden = vm.$el.querySelectorAll(".el-form-item__label");
     expect(hidden.length == 0).to.be.true;
+    done();
   });
 
   it("props:label-width", (done) => {
@@ -55,8 +56,8 @@ describe("FormAuto", () => {
     );
     let label = vm.$el.querySelectorAll(".el-form-item__label");
     expect(label[0].style.width).to.equal("100px");
-    expect(label[0].style.width).to.equal("100px");
-    expect(label[0].style.width).to.equal("120px");
+    expect(label[1].style.width).to.equal("100px");
+    expect(label[2].style.width).to.equal("120px");
     done();
   });
   // hidden is create

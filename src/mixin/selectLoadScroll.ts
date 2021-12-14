@@ -13,7 +13,7 @@ export default {
         let SELECT_INPUT: HTMLInputElement | null = el.querySelector("input");
         if (SELECTWRAP_DOM && binding.value.remote && binding.value.loadScroll) {
           SELECTWRAP_DOM.addEventListener("scroll", function() {
-            let query = SELECT_INPUT?.value || "";
+            let query = (SELECT_INPUT && SELECT_INPUT.value) || "";
             //@ts-ignore
             const condition = this.scrollHeight - this.scrollTop <= this.clientHeight;
             //监听下拉框是否滚动到底部，滚动到底部就加载下一页数据

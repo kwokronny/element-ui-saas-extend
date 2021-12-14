@@ -278,7 +278,7 @@ export default class ElFormAuto extends Vue {
 		forEach(this.fields, (item: ElFormAutoField, name: string) => {
 			if (!item.notSubmit) {
 				data[name] = this.model[name];
-				if (item.rangeName && item.type && (/range$/g.test(item.type) || (item.type == "slider" && item.props?.range == true))) {
+				if (item.rangeName && item.type && (/range$/g.test(item.type) || (item.type == "slider" && item.props && item.props.range == true))) {
 					let [sn, en] = item.rangeName;
 					let [sd, ed] = this.model[name] || [null, null];
 					data[sn] = sd;
@@ -477,14 +477,9 @@ export default class ElFormAuto extends Vue {
 				item.props.valueFormat = "HH:mm:ss";
 			}
 
-			if (
-				this.$ELEMENT?.pickerOptions &&
-				/date/g.test(item.type)
-			) {
-				let pickerOptions =
-					this.$ELEMENT.pickerOptions[
-					/range/g.test(item.type) ? "range" : "date"
-					];
+			if (this.$ELEMENT && this.$ELEMENT.pickerOptions && /date/g.test(item.type)) {
+				let type = /range/g.test(item.type) ? "range" : "date"
+				let pickerOptions = this.$ELEMENT.pickerOptions[type];
 				if (pickerOptions) {
 					item.props.pickerOptions = item.props.pickerOptions || pickerOptions;
 				}

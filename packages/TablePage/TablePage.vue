@@ -240,7 +240,7 @@ export default class ElTablePage extends Vue {
 	}) buttonStyle!: Record<string, any>;
 
 	get defaultButtonStyle(): Record<"size" | "plain" | "round", string | boolean> {
-		return this.buttonStyle || (this.$ELEMENT && this.$ELEMENT.tablePage?.buttonStyle) || {}
+		return this.buttonStyle || (this.$ELEMENT && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage.buttonStyle) || {}
 	}
 
 	// get canCheck():boolean{
@@ -376,7 +376,7 @@ export default class ElTablePage extends Vue {
 	@Prop({ type: Array, default: () => [15, 30, 50, 100] }) pageSizes!: number[];
 
 	get defaultPageLayout(): string {
-		return this.pageLayout || (this.$ELEMENT && this.$ELEMENT.tablePage?.pageLayout) || "total, sizes, prev, pager, next, jumper"
+		return this.pageLayout || (this.$ELEMENT && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage.pageLayout) || "total, sizes, prev, pager, next, jumper"
 	}
 
 	@Watch("request")
