@@ -564,15 +564,21 @@ export default class ElFormAuto extends Vue {
 					item.props.filterable = true;
 					item.props.remote = true;
 					item.page = 1;
-					item.props.remoteMethod = debounce((query?: string, isScroll?: boolean) => {
+					item.loadFinish = false;
+					item.props.remoteMethod = debounce((query: string = "", isScroll?: boolean) => {
+						if (item.loadFinish == true) return
 						if (!isScroll) item.page = 1
 						if (item.page == 1) {
 							item.options = []
 						}
 						item.optionLoading = true;
-						remoteMethod(query, item.page).then((options: ElAutoMixinOptions) => {
+						remoteMethod(query || "", item.page).then((options: ElAutoMixinOptions) => {
 							return transformOptions(options)
 						}).then((options: ElAutoOption[]) => {
+							if (isScroll && options.length == 0) {
+								item.loadFinish = true;
+								return;
+							}
 							item.optionLoading = false;
 							options = (item.options as ElAutoOption[]).concat(options)
 							item.options = options;
