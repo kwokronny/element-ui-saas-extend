@@ -1,19 +1,28 @@
-var webpackConfig = require('./build/webpack.test.js')
+var webpackConfig = require("./build/webpack.test.js");
 
 module.exports = function(config) {
   config.set({
-    frameworks: ['mocha'],
+    frameworks: ["mocha", "sinon-chai"],
 
-    files: ['tests/index.js'],
+    files: ["tests/index.js"],
 
     preprocessors: {
-      'tests/index.js': ['webpack']
+      "tests/index.js": ["webpack"],
     },
 
     webpack: webpackConfig,
 
-    reporters: ['spec'],
+    // coverageReporter: {
+    //   dir: "./coverage",
+    //   reporters: [{ type: "lcov", subdir: "." }, { type: "text-summary" }],
+    // },
+    reporters: ["spec"],
 
-    browsers: ['Chrome']
-  })
-}
+    browsers: ["Chrome"],
+    client: {
+      mocha: {
+        timeout: 4000,
+      },
+    },
+  });
+};

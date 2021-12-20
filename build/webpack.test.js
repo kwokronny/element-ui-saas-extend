@@ -2,7 +2,6 @@ const path = require("path");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 
-
 const webpackConfig = {
   mode: "development",
   entry: {
@@ -16,6 +15,9 @@ const webpackConfig = {
   },
   resolve: {
     extensions: [".ts", ".js", ".vue", ".json"],
+    alias: {
+      vue$: "vue/dist/vue.common.js",
+    },
     modules: ["node_modules"],
   },
   module: {
@@ -40,11 +42,11 @@ const webpackConfig = {
       },
       {
         test: /\.(svg|otf|ttf|woff2?|eot|gif|png|jpe?g)(\?\S*)?$/,
-        loader: 'url-loader',
+        loader: "url-loader",
         query: {
           limit: 10000,
-          name: path.posix.join('static', '[name].[hash:7].[ext]')
-        }
+          name: path.posix.join("static", "[name].[hash:7].[ext]"),
+        },
       },
       {
         test: /\.ts?$/,

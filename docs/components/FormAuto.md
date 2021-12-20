@@ -146,6 +146,7 @@ export default {
         text: {
           col: 12,
           label: "文本框",
+          disabled: true,
           labelTooltip: "labelTooltip属性可以在标签旁增加图标，提示字段含义",
           type: "text",
           required: true,
@@ -264,6 +265,13 @@ export default {
           type: "rate",
           required: true,
         },
+        textarea:{
+          label: "备注",
+          type:"textarea",
+          minlength: 5,
+          maxlength: 10,
+          showWordLimit: true,
+        }
       },
     };
   },
@@ -471,16 +479,14 @@ export default {
           remote: true,
           options: (query, page) => {
             return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
-              return (
-                res.data
-                  .filter((item) => item.username.indexOf(query) > -1)
-                  .map((item) => {
-                    return {
-                      label: item.username,
-                      value: item.id * page,
-                    };
-                  })
-              );
+              return res.data
+                .filter((item) => item.username.indexOf(query) > -1)
+                .map((item) => {
+                  return {
+                    label: item.username,
+                    value: item.id * page,
+                  };
+                });
             });
           },
         },
@@ -495,16 +501,14 @@ export default {
           remote: true,
           options: (query, page) => {
             return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
-              return (
-                res.data
-                  .filter((item) => item.username.indexOf(query) > -1)
-                  .map((item) => {
-                    return {
-                      label: item.username,
-                      value: item.id * page,
-                    };
-                  })
-              );
+              return res.data
+                .filter((item) => item.username.indexOf(query) > -1)
+                .map((item) => {
+                  return {
+                    label: item.username,
+                    value: item.id * page,
+                  };
+                });
             });
           },
         },
@@ -570,7 +574,7 @@ export default {
   methods: {
     editOptionReshow() {
       this.model.asyncSelect = 1;
-      this.model.remote = { label: "测试", value: "123" }
+      this.model.remote = { label: "测试", value: "123" };
       this.model.remoteMult = [
         { label: "测试", value: "123" },
         { label: "测试2", value: "1233" },
@@ -581,7 +585,7 @@ export default {
     },
   },
   mounted() {
-    this.model.remote = { label: "测试", value: "123" }
+    this.model.remote = { label: "测试", value: "123" };
     this.model.remoteMult = [
       { label: "测试", value: "123" },
       { label: "测试2", value: "1233" },

@@ -448,7 +448,7 @@ export default class ElFormAuto extends Vue {
 			} else if (item.type == "switch") {
 				item.value = item.value || false;
 			} else {
-				item.value = item.value || "";
+				item.value = item.value === undefined ? "" : item.value;
 			}
 
 			// 根据字段 type 设置表单占位字符串
