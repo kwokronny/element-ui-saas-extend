@@ -339,7 +339,7 @@ export default class ElFormAuto extends Vue {
 					if (!field.echoOptions.find((option: Record<string, string>) => option.value == options[i].value)) {
 						field.echoOptions.push(Object.assign({}, options[i]))
 					}
-					values.push(`${options[i].value}`);
+					values.push(options[i].value);
 				} else {
 					values.push(options[i]);
 				}

@@ -322,25 +322,36 @@ describe("FormAuto", () => {
       selects: [3, 2],
       cascader: [1, 2],
     });
-    // expect(vm.model.id).to.equal("1");
-    // expect(vm.model.switch).to.true;
-    // expect(vm.model.slider).to.equal(10);
-    // expect(vm.model.text).to.equal("text");
-    // expect(vm.model.password).to.equal("password");
-    // expect(vm.model.textarea).to.equal("textarea");
-    // expect(vm.model.date).to.equal("2018-01-01");
-    // expect(vm.model.datetime).to.equal("2018-01-01 00:00:00");
-    // expect(vm.model.dateRange).to.equal(["2018-01-01", "2018-01-02"]);
-    // expect(vm.model.datetimeRange).to.equal(["2018-01-01 00:00:00", "2018-01-02 00:00:00"]);
-    // expect(vm.model.time).to.equal("00:00:00");
-    // expect(vm.model.timeRange).to.equal(["00:00:00", "01:00:00"]);
-    // expect(vm.model.check).to.equal([2]);
-    // expect(vm.model.radio).to.equal(3);
-    // expect(vm.model.radiobutton).to.equal(2);
-    // expect(vm.model.rate).to.equal(3);
-    // expect(vm.model.select).to.equal(0);
-    // expect(vm.model.selects).to.equal([3, 2]);
-    // expect(vm.model.cascader).to.equal([1, 2]);
+    vm.model = {
+      id: 45,
+      switch: false,
+      slider: 23,
+      text: "textchange",
+      password: "passwordchange",
+      textarea: "textareachange",
+      date: "2019-01-01",
+      datetime: "2019-01-01 00:00:00",
+      dateRange: ["2019-01-01", "2019-01-02"],
+      datetimeRange: ["2019-02-01 10:00:00", "2019-05-02 08:00:00"],
+      time: "06:00:00",
+      timeRange: ["00:00:00", "05:00:00"],
+      radio: 2,
+      radiobutton: 0,
+      check: [3],
+      rate: 3,
+      select: 0,
+      selects: [0, 2],
+      cascader: [1, 2],
+    };
+    await waitImmediate();
+    
+    // expect(vm.$el.querySelector("input[name=id]").value).to.equal("45");
+    // expect(vm.$el.querySelector(".el-switch").classList.contains("is-checked")).to.be.false;
+    // expect(vm.$el.querySelector(".el-slider__bar").style.width).to.equal("23%");
+    // expect(vm.$el.querySelector("input[name=text]").value).to.equal("textchange");
+    // expect(vm.$el.querySelector("input[name=password]").value).to.equal("passwordchange");
+    // expect(vm.$el.querySelector("textarea[name=textarea]").value).to.equal("textareachange");
+    // expect(vm.$el.querySelector("input[name=date]").value).to.equal("2019-01-01");
     // vm.model.switch = false;
     // await waitImmediate();
     // expect(vm.$el.querySelector(".el-switch").classList.contains("is-checked")).to.equal(false);
