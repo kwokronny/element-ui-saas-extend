@@ -103,6 +103,7 @@
 									<dynamic-slot v-if="column.slot" :name="column.slot" :data="{row, column, index: $index}"></dynamic-slot>
 									<template v-else-if="column.enum">
 										<enum-tags
+											:key="$index"
 											:enums="column.enum"
 											:value="row[column.prop]"
 											:enumTag="column.enumTag"
@@ -166,7 +167,7 @@
 					</el-table-column>
 					<el-table-column :label="$t('tablepage.fixed')" width="200px" prop="fixed">
 						<template slot-scope="{row}">
-							<el-radio-group size="mini" v-if="!row.hasChildren" v-model="row.fixed">
+							<el-radio-group size="mini" v-if="!row.hasChildren" v-model="row.fixed" :key="row.prop">
 								<el-radio-button label="left">{{$t("tablepage.fixedLeft")}}</el-radio-button>
 								<el-radio-button :label="false">{{$t("tablepage.fixedNone")}}</el-radio-button>
 								<el-radio-button label="right">{{$t("tablepage.fixedRight")}}</el-radio-button>
@@ -176,7 +177,7 @@
 					</el-table-column>
 					<el-table-column :label="$t('tablepage.hide')" width="120px" prop="hide">
 						<template slot-scope="{row}">
-							<el-switch :inactive-value="true" :active-value="false" v-model="row.hide"></el-switch>
+							<el-switch :inactive-value="true" :active-value="false" :key="row.prop" v-model="row.hide"></el-switch>
 						</template>
 					</el-table-column>
 				</el-table>
@@ -201,7 +202,6 @@ import { Vue, Component, Prop, Ref, Watch, PropSync } from "vue-property-decorat
 import { Table } from "element-ui"
 import { omit, cloneDeep } from "lodash-es"
 import ElTableDraggable from "element-ui-el-table-draggable"
-import { ElAutoOption } from "types/saas-extend.js"
 import { ElFormAutoField } from "../../types/form-auto"
 import { ElTablePageColumn, ElTablePageDataMap } from "types/table-page"
 import { transformOptions, arrayToRecord } from "../util"
@@ -258,9 +258,10 @@ export default class ElTablePage extends Vue {
 	private refresh: boolean = true;
 
 	@Watch("columns", { immediate: true, deep: true })
-	private handleColumnsChange() {
+	private async handleColumnsChange() {
+		this.refresh = false;
 		this.headers = cloneDeep(this.columns)
-		this.headers.forEach((column: ElTablePageColumn) => {
+		await this.headers.forEach(async (column: ElTablePageColumn) => {
 			column.props = omit(column, ["slot", "enum", "filters", "enumTag", "children", "splitChar", "addSearch", "search", "labelTooltip", "copy"])
 
 			if (column.slot && typeof column.slot == "boolean") column.slot = column.prop;
@@ -283,9 +284,8 @@ export default class ElTablePage extends Vue {
 				column.filtersFunc = this.transfromFilter(column.filters)
 			}
 			if (column.enum) {
-				transformOptions(column.enum).then((options: ElAutoOption[]) => {
-					column.enum = arrayToRecord(options, { key: "value", value: "label" })
-				});
+				let options = await transformOptions(column.enum)
+				column.enum = arrayToRecord(options, { key: "value", value: "label" })
 			}
 		})
 		if (this.customColumns) {
@@ -294,6 +294,7 @@ export default class ElTablePage extends Vue {
 		}
 		this.$nextTick(function () {
 			this.search();
+			this.refresh = true;
 		})
 	}
 
@@ -309,7 +310,7 @@ export default class ElTablePage extends Vue {
 				if (typeof current == "string") {
 					let filterFunc = this.localFilter[current] || Vue.filter(current);
 					if (filterFunc) {
-						filterFunc = (value: string) => {
+						return (value: string) => {
 							return filterFunc(prev(value))
 						}
 					} else {
@@ -460,10 +461,10 @@ export default class ElTablePage extends Vue {
 	}
 
 	private validColumnsHasChange(sortStorage: ElTablePageColumnSort[]) {
-		if (this.columns.length !== sortStorage.length) {
+		if (this.headers.length !== sortStorage.length) {
 			return false
 		}
-		return !this.columns.every((item: ElTablePageColumn) => !sortStorage.find((i: ElTablePageColumnSort) => i.prop == item.prop))
+		return this.headers.every((item: ElTablePageColumn) => !sortStorage.find((i: ElTablePageColumnSort) => i.prop == item.prop))
 	}
 
 	private loadCustomColumns() {
@@ -477,9 +478,9 @@ export default class ElTablePage extends Vue {
 				}
 			}
 			this.refresh = false;
-			this.headers = this.columnsSort.map((item: ElTablePageColumnSort) => {
+			this.headers = this.columnsSort.map((item: ElTablePageColumnSort, idx: number) => {
 				let header = this.headers.find((i: ElTablePageColumn) => item.prop == i.prop);
-				return Object.assign(header, item)
+				return Object.assign({}, header, item)
 			})
 			this.$nextTick(function () {
 				this.refresh = true;

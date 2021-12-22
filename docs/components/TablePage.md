@@ -177,6 +177,7 @@ export default {
         {
           label: "注册日期",
           prop: "date",
+          hide: true,
           filters: [["dayjs", "MM-DD dd"]],
           showOverflowTooltip: true,
           width: 200,
@@ -184,6 +185,7 @@ export default {
         {
           label: "状态",
           prop: "status",
+          enumTag:"el-tag",
           enum: [
             { label: "正常", value: "1", type: "primary" },
             { label: "失效", value: "2", type: "warning" },
