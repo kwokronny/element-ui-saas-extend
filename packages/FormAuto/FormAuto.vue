@@ -302,7 +302,7 @@ export default class ElFormAuto extends Vue {
 	 */
 	public setModel(model: Record<string, any>): void {
 		for (let name in model) {
-			if (model[name] === undefined || model[name] === null) break;
+			if (model[name] === undefined || model[name] === null) continue;
 			let value = model[name];
 			let field = this.fields[name];
 			if (field && /radio|select|check/.test(field.type)) {
@@ -315,8 +315,8 @@ export default class ElFormAuto extends Vue {
 					} else {
 						value = values
 					}
-				} else if (field.type == "check" || (field.type == "select" && field.multiple)) {
-					field.type == "check" && this.handleCheckedChange(name, value);
+				} else if (field.type == "check") {
+					this.handleCheckedChange(name, value);
 				}
 			}
 			this.model[name] = value;
@@ -425,6 +425,7 @@ export default class ElFormAuto extends Vue {
 	private generateModel(): void {
 		this.fields = cloneDeep(this.data) as Record<string, ElFormAutoField>;
 		forEach(this.fields, (item, name) => {
+			item.name = name;
 			item.on = Object.assign({}, item.on);
 			item.props = omit(item, ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "checkAll", "notSubmit", "required", "col", "options"])
 			item.type = item.type || "text"
@@ -446,7 +447,7 @@ export default class ElFormAuto extends Vue {
 			} else if (/rate|number|slider/.test(item.type)) {
 				item.value = parseInt(item.value) || 0;
 			} else if (item.type == "switch") {
-				item.value = item.value || false;
+				item.value = item.value === undefined ? false : item.value;
 			} else {
 				item.value = item.value === undefined ? "" : item.value;
 			}
@@ -499,8 +500,6 @@ export default class ElFormAuto extends Vue {
 			let value = this.value[name] == undefined ? item.value : this.value[name]
 			if (item.type == "select") {
 				value = this.selectEcho(name, value)
-			} else if (item.type == "check") {
-				this.handleCheckedChange(name, value)
 			}
 			this.$set(this.model, name, value);
 		})
@@ -586,6 +585,7 @@ export default class ElFormAuto extends Vue {
 				} else if (item.options) {
 					transformOptions(item.options).then((options) => {
 						item.options = options
+						this.handleCheckedChange(item.name, this.value[item.name])
 					})
 				}
 			})

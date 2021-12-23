@@ -133,7 +133,7 @@ export default {
           type: "switch",
           activeValue: 1,
           inactiveValue: 0,
-          value: 1,
+          // value: 0,
           required: true,
         },
         slider: {
@@ -251,34 +251,33 @@ export default {
           label: "单选按钮",
           type: "radiobutton",
           options: defaultOption,
-          size: "small",
           required: true,
         },
         check: {
           label: "复选框",
           type: "check",
           required: true,
-          options: defaultOption,
+          options: { 1: "选项1", 2: "选项2", 3: "选项3" },
         },
         rate: {
           label: "评分",
           type: "rate",
           required: true,
         },
-        textarea:{
+        textarea: {
           label: "备注",
-          type:"textarea",
+          type: "textarea",
           minlength: 5,
           maxlength: 10,
           showWordLimit: true,
-        }
+        },
       },
     };
   },
   mounted() {
     this.model = {
       id: "123",
-      switch: 0,
+      switch: 1,
       text: "文本框",
       password: "password123456",
       date: "2021-01-10",
@@ -288,7 +287,7 @@ export default {
       time: "11:11:00",
       timeRange: ["11:11:00", "23:12:00"],
       select: 0,
-      check: [3],
+      check: ["1", "2", "3"],
       radiobutton: 0,
       radio: 3,
       cascader: [2, 6],
@@ -317,7 +316,7 @@ export default {
         time: "11:11:00",
         timeRange: ["11:11:00", "22:12:00"],
         select: 0,
-        check: [3],
+        check: [1],
         radiobutton: 0,
         radio: 3,
         cascader: [2, 6],

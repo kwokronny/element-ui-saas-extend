@@ -3,6 +3,13 @@ sidebarDepth: 0
 ---
 # 更新日志
 
+## 1.0.21 <small>2021-12-22</small>
+- #### 修复
+	- FormAuto
+		- model赋值问题
+		- check全选回显问题
+		- 优化switch默认值问题
+
 ## 1.0.20 <small>2021-12-22</small>
 - #### 修复
 	- FormAuto 多项选择框回显类型问题
