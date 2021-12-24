@@ -462,7 +462,7 @@ export default class ElTablePage extends Vue {
 
 	private validColumnsHasChange(sortStorage: ElTablePageColumnSort[]) {
 		if (this.headers.length !== sortStorage.length) {
-			return false
+			return true
 		}
 		return this.headers.every((item: ElTablePageColumn) => !sortStorage.find((i: ElTablePageColumnSort) => i.prop == item.prop))
 	}
