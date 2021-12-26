@@ -307,8 +307,9 @@ export default {
       this.model = {
         id: "123",
         switch: 0,
-        text: "文本框",
+        text: null,
         password: "password123456",
+        textarea: null,
         date: "2021-01-10",
         datetime: "2021-01-10 11:11:00",
         dateRange: ["2021-01-10", "2021-01-13"],

@@ -27,7 +27,7 @@
 					:class="{'el-form-item_hidden':item.type=='hidden'}"
 					:key="`col_${name}`"
 				>
-					<el-form-item :prop="name" :label-width="item.labelWidth" :key="`formItem_${name}`">
+					<el-form-item :prop="name"  :label-width="item.labelWidth" :data-prop="name">
 						<span slot="label" v-if="!labelHidden && !item.labelHidden">
 							{{ item.label || "" }}
 							<el-tooltip v-if="item.labelTooltip" :content="item.labelTooltip">
@@ -302,10 +302,9 @@ export default class ElFormAuto extends Vue {
 	 */
 	public setModel(model: Record<string, any>): void {
 		for (let name in model) {
-			if (model[name] === undefined || model[name] === null) continue;
 			let value = model[name];
 			let field = this.fields[name];
-			if (field && /radio|select|check/.test(field.type)) {
+			if (field) {
 				if (field.type == "select" && field.remote) {
 					let values = this.selectEcho(name, value);
 					if (Array.isArray(value)) {
@@ -318,8 +317,8 @@ export default class ElFormAuto extends Vue {
 				} else if (field.type == "check") {
 					this.handleCheckedChange(name, value);
 				}
+				this.model[name] = value;
 			}
-			this.model[name] = value;
 		}
 	}
 
@@ -408,7 +407,7 @@ export default class ElFormAuto extends Vue {
 	 */
 	private handleCheckedChange(name: string, value: string[]): void {
 		if (this.check[name] == undefined) return
-		let checkedCount = value.length;
+		let checkedCount = value.length || 0;
 		let options = this.fields[name].options as ElAutoOption[];
 		let optionsCount = options.length;
 		if (checkedCount > 0 && checkedCount < optionsCount) {

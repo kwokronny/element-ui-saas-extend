@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import FormAuto from "../../packages/FormAuto";
-import Vue from "vue";
+import axios from "axios";
 import { createTest, createVue, triggerClick, triggerEvent, triggerKeyDown, wait, waitImmediate } from "../util";
 
 describe("FormAuto", () => {
@@ -51,7 +51,7 @@ describe("FormAuto", () => {
     cascader: {
       label: "级联框",
       type: "cascader",
-      value: [1, 2],
+      value: [2, 6],
       options: [
         {
           label: "节点1",
@@ -282,7 +282,7 @@ describe("FormAuto", () => {
     triggerEvent(icon, "mouseleave");
   });
 
-  it("props:model", async () => {
+  it("form: model default value and model responsive set", async () => {
     vm = createVue(
       {
         template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
@@ -295,42 +295,45 @@ describe("FormAuto", () => {
       },
       true
     );
-    expect(vm.model).to.deep.equal({
-      id: "1",
-      switch: true,
-      slider: 10,
-      text: "text",
-      password: "password",
-      textarea: "textarea",
-      date: "2018-01-01",
-      datetime: "2018-01-01 00:00:00",
-      dateRange: ["2018-01-01", "2018-01-02"],
-      startDate: "2018-01-01",
-      endDate: "2018-01-02",
-      datetimeRange: ["2018-01-01 00:00:00", "2018-01-02 00:00:00"],
-      startDT: "2018-01-01 00:00:00",
-      endDT: "2018-01-02 00:00:00",
-      time: "00:00:00",
-      timeRange: ["00:00:00", "01:00:00"],
-      startTime: "00:00:00",
-      endTime: "01:00:00",
-      radio: 3,
-      radiobutton: 2,
-      check: [2],
-      rate: 3,
-      select: 0,
-      selects: [3, 2],
-      cascader: [1, 2],
-    });
-    vm.model = {
+    expect(vm.model).to.deep.equal(
+      {
+        id: "1",
+        switch: true,
+        slider: 10,
+        text: "text",
+        password: "password",
+        textarea: "textarea",
+        date: "2018-01-01",
+        datetime: "2018-01-01 00:00:00",
+        dateRange: ["2018-01-01", "2018-01-02"],
+        startDate: "2018-01-01",
+        endDate: "2018-01-02",
+        datetimeRange: ["2018-01-01 00:00:00", "2018-01-02 00:00:00"],
+        startDT: "2018-01-01 00:00:00",
+        endDT: "2018-01-02 00:00:00",
+        time: "00:00:00",
+        timeRange: ["00:00:00", "01:00:00"],
+        startTime: "00:00:00",
+        endTime: "01:00:00",
+        radio: 3,
+        radiobutton: 2,
+        check: [2],
+        rate: 3,
+        select: 0,
+        selects: [3, 2],
+        cascader: [2, 6],
+      },
+      "field value is valid"
+    );
+    let data = {
       id: 45,
       switch: false,
       slider: 23,
       text: "textchange",
       password: "passwordchange",
       textarea: "textareachange",
-      date: "2019-01-01",
-      datetime: "2019-01-01 00:00:00",
+      date: null,
+      datetime: "2019-02-01 10:00:00",
       dateRange: ["2019-01-01", "2019-01-02"],
       datetimeRange: ["2019-02-01 10:00:00", "2019-05-02 08:00:00"],
       time: "06:00:00",
@@ -341,20 +344,74 @@ describe("FormAuto", () => {
       rate: 3,
       select: 0,
       selects: [0, 2],
-      cascader: [1, 2],
+      cascader: [1, 4, 5],
     };
+    vm.model = Object.assign({}, data);
     await waitImmediate();
-    
-    // expect(vm.$el.querySelector("input[name=id]").value).to.equal("45");
-    // expect(vm.$el.querySelector(".el-switch").classList.contains("is-checked")).to.be.false;
-    // expect(vm.$el.querySelector(".el-slider__bar").style.width).to.equal("23%");
-    // expect(vm.$el.querySelector("input[name=text]").value).to.equal("textchange");
-    // expect(vm.$el.querySelector("input[name=password]").value).to.equal("passwordchange");
-    // expect(vm.$el.querySelector("textarea[name=textarea]").value).to.equal("textareachange");
-    // expect(vm.$el.querySelector("input[name=date]").value).to.equal("2019-01-01");
-    // vm.model.switch = false;
-    // await waitImmediate();
-    // expect(vm.$el.querySelector(".el-switch").classList.contains("is-checked")).to.equal(false);
-    // vm.model.slider = 5;
+    expect(vm.$refs.form.model).to.deep.equal(data, "model value is valid");
   });
+
+  it("form: select option and echo value ", async () => {
+    vm = createVue(
+      {
+        template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+        data() {
+          return {
+            model: {},
+            form: {
+              select: {
+                label: "select",
+                type: "select",
+                options: {
+                  0: "option0",
+                  1: "option1",
+                  2: "option2",
+                },
+              },
+              select_a: {
+                label: "select_a",
+                type: "select",
+                options: [
+                  { label: "option0", value: 0 },
+                  { label: "option1", value: 1 },
+                  { label: "option2", value: 2 },
+                ],
+              },
+              remoteSelect: {
+                label: "remoteSelect",
+                type: "select",
+                loadScroll: true,
+                remote: true,
+                options: (query, page) => {
+                  return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
+                    return res.data
+                      .filter((item) => item.username.indexOf(query) > -1)
+                      .map((item) => {
+                        return {
+                          label: item.username,
+                          value: item.id * page,
+                        };
+                      });
+                  });
+                },
+              },
+            },
+          };
+        },
+      },
+      true
+    );
+    await wait(1000);
+    expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(10);
+    let remoteSelect = vm.$el.querySelector(".el-form-item[data-prop=remoteSelect]");
+    let dropDown = remoteSelect.querySelector(".el-select-dropdown .el-select-dropdown__wrap");
+    remoteSelect.querySelector("input").click();
+    await waitImmediate();
+    dropDown.scrollTop = dropDown.clientHeight;
+    console.log(dropDown.scrollTop,dropDown.clientHeight,dropDown.scrollHeight);
+    triggerEvent(dropDown, "scroll");
+    await wait(2000);
+    expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(20);
+  });
+  // it("check reshow");
 });
