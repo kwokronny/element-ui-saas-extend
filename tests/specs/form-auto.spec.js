@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import FormAuto from "../../packages/FormAuto";
-import axios from "axios";
+import userData from "../mock/user.json";
 import { createTest, createVue, triggerClick, triggerEvent, triggerKeyDown, wait, waitImmediate } from "../util";
 
 describe("FormAuto", () => {
@@ -382,17 +382,15 @@ describe("FormAuto", () => {
                 type: "select",
                 loadScroll: true,
                 remote: true,
-                options: (query, page) => {
-                  return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
-                    return res.data
-                      .filter((item) => item.username.indexOf(query) > -1)
-                      .map((item) => {
-                        return {
-                          label: item.username,
-                          value: item.id * page,
-                        };
-                      });
-                  });
+                options: async (query, page) => {
+                  return userData
+                    .filter((item) => item.username.indexOf(query) > -1)
+                    .map((item) => {
+                      return {
+                        label: item.username,
+                        value: item.id * page,
+                      };
+                    });
                 },
               },
             },
@@ -408,10 +406,10 @@ describe("FormAuto", () => {
     remoteSelect.querySelector("input").click();
     await waitImmediate();
     dropDown.scrollTop = dropDown.clientHeight;
-    console.log(dropDown.scrollTop,dropDown.clientHeight,dropDown.scrollHeight);
     triggerEvent(dropDown, "scroll");
-    await wait(2000);
+    await waitImmediate();
     expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(20);
   });
+
   // it("check reshow");
 });

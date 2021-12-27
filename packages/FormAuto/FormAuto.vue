@@ -575,7 +575,7 @@ export default class ElFormAuto extends Vue {
 							item.optionLoading = false;
 							options = (item.options as ElAutoOption[]).concat(options)
 							item.options = options;
-							isScroll && item.page++
+							item.page++
 						}).catch(() => {
 							item.optionLoading = false;
 						});

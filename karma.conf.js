@@ -21,7 +21,7 @@ module.exports = function(config) {
     browsers: ["Chrome"],
     client: {
       mocha: {
-        timeout: 4000,
+        timeout: 10000,
       },
     },
   });
