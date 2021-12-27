@@ -351,32 +351,33 @@ describe("FormAuto", () => {
     expect(vm.$refs.form.model).to.deep.equal(data, "model value is valid");
   });
 
+  //
+  // select: {
+  //   label: "select",
+  //   type: "select",
+  //   options: {
+  //     0: "option0",
+  //     1: "option1",
+  //     2: "option2",
+  //   },
+  // },
+  // select_a: {
+  //   label: "select_a",
+  //   type: "select",
+  //   options: [
+  //     { label: "option0", value: 0 },
+  //     { label: "option1", value: 1 },
+  //     { label: "option2", value: 2 },
+  //   ],
+  // },
   it("form: select option and echo value ", async () => {
     vm = createVue(
       {
-        template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+        template: `<el-form-auto :data="form" inline v-model="model" ref="form"></el-form-auto>`,
         data() {
           return {
             model: {},
             form: {
-              select: {
-                label: "select",
-                type: "select",
-                options: {
-                  0: "option0",
-                  1: "option1",
-                  2: "option2",
-                },
-              },
-              select_a: {
-                label: "select_a",
-                type: "select",
-                options: [
-                  { label: "option0", value: 0 },
-                  { label: "option1", value: 1 },
-                  { label: "option2", value: 2 },
-                ],
-              },
               remoteSelect: {
                 label: "remoteSelect",
                 type: "select",
@@ -401,14 +402,23 @@ describe("FormAuto", () => {
     );
     await wait(1000);
     expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(10);
-    let remoteSelect = vm.$el.querySelector(".el-form-item[data-prop=remoteSelect]");
-    let dropDown = remoteSelect.querySelector(".el-select-dropdown .el-select-dropdown__wrap");
-    remoteSelect.querySelector("input").click();
+    let $formItem = vm.$el.querySelector(".el-form-item[data-prop=remoteSelect]");
+    let dropDown = $formItem.querySelector(".el-select-dropdown .el-select-dropdown__wrap");
+    $formItem.querySelector("input").click();
     await waitImmediate();
     dropDown.scrollTop = dropDown.clientHeight;
     triggerEvent(dropDown, "scroll");
     await waitImmediate();
     expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(20);
+    $formItem.querySelector("input").click();
+    let select = vm.$refs.form.$children[0].$children[0].$children[1];
+    // select.remoteMethod("Bret");
+    // await waitImmediate();
+    select.handleQueryChange("Bret");
+    await waitImmediate();
+    // select.handleQueryChange("");
+    expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(1);
+    // });
   });
 
   // it("check reshow");
