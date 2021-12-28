@@ -27,7 +27,7 @@
 					:class="{'el-form-item_hidden':item.type=='hidden'}"
 					:key="`col_${name}`"
 				>
-					<el-form-item :prop="name"  :label-width="item.labelWidth" :data-prop="name">
+					<el-form-item :prop="name" :label-width="item.labelWidth" :data-prop="name">
 						<span slot="label" v-if="!labelHidden && !item.labelHidden">
 							{{ item.label || "" }}
 							<el-tooltip v-if="item.labelTooltip" :content="item.labelTooltip">
@@ -441,7 +441,7 @@ export default class ElFormAuto extends Vue {
 			) {
 				item.value = item.value || [];
 			} else if (item.type == "timerange") {
-				let defaultValue = [new Date(1970, 1, 1, 0, 0), new Date(1970, 1, 1, 0, 0)]
+				let defaultValue = ["00:00:00", "00:00:00"]
 				item.value = item.value || defaultValue;
 			} else if (/rate|number|slider/.test(item.type)) {
 				item.value = parseInt(item.value) || 0;
@@ -558,7 +558,7 @@ export default class ElFormAuto extends Vue {
 					item.props.remote = true;
 					item.page = 1;
 					item.loadFinish = false;
-					item.props.remoteMethod = (query: string = "", isScroll?: boolean) => {
+					item.props.remoteMethod = debounce((query: string = "", isScroll?: boolean) => {
 						if (item.loadFinish == true) return
 						if (!isScroll) item.page = 1
 						if (item.page == 1) {
@@ -579,8 +579,7 @@ export default class ElFormAuto extends Vue {
 						}).catch(() => {
 							item.optionLoading = false;
 						});
-					}
-					// , 1000, { leading: true });
+					}, 500, { leading: true });
 					item.props.remoteMethod("")
 				} else if (item.options) {
 					transformOptions(item.options).then((options) => {

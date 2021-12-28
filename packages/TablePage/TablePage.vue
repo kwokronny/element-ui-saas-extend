@@ -7,14 +7,7 @@
 			class="el-table-page__search-card"
 		>
 			<slot name="search_prepend"></slot>
-			<el-form-auto
-				ref="SearchForm"
-				v-model="filter"
-				:data="searchForm"
-				inline
-				:show-messeage="false"
-				v-bind="searchProps"
-			>
+			<el-form-auto ref="SearchForm" v-model="filter" :data="searchForm" v-bind="searchProps">
 				<template v-for="search in searchForm" :slot="search.slot" slot-scope="{item,model,name}">
 					<dynamic-slot
 						v-if="search.slot"
@@ -114,11 +107,13 @@
 									<template
 										v-else-if="column.formatter"
 									>{{ column.formatter(row,column,row[column.prop],$index) }}</template>
-									<template v-else>{{ row[column.prop] }}</template>
-									<template v-if="column.copy">
+									<template v-else>
+										{{ row[column.prop] }}
 										<i
+											v-if="column.copy && !column.enum"
+											:key="`copy_${column.prop}_${index}`"
 											class="el-table-page_copy-icon el-icon-copy-document"
-											v-copy="typeof column.copy=='boolean' ? defaultCopy:()=>column.copy(row)"
+											v-copy="row[column.prop]"
 										></i>
 									</template>
 								</template>
@@ -230,7 +225,7 @@ export default class ElTablePage extends Vue {
 	@Ref("TablePage") readonly TablePage!: Table
 	@Ref("SearchForm") readonly SearchForm!: ElFormAuto
 
-	@Prop({ type: Object, default: () => { return {} } }) searchProps!: Record<string, any>;
+	@Prop({ type: Object, default: () => { return { inline: true } } }) searchProps!: Record<string, any>;
 
 	@Prop({
 		type: Object,
@@ -242,10 +237,6 @@ export default class ElTablePage extends Vue {
 	get defaultButtonStyle(): Record<"size" | "plain" | "round", string | boolean> {
 		return this.buttonStyle || (this.$ELEMENT && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage.buttonStyle) || {}
 	}
-
-	// get canCheck():boolean{
-	// 	return !!this.$attrs['row-key'] && this.multipleSelection 
-	// }
 
 	@Prop({ type: String, validator: (value: string) => { return (new RegExp("card|default")).test(value) }, default: "default" }) layoutType!: string
 	get wrapComponment(): string {
@@ -333,13 +324,6 @@ export default class ElTablePage extends Vue {
 		return (value: string) => { return value };
 	}
 
-	private defaultCopy(target: Node) {
-		let container = target.parentNode
-		if (container) {
-			let text = container.textContent || (container as HTMLElement).innerText
-			return text.trim()
-		}
-	};
 
 	// #endregion
 
@@ -389,22 +373,34 @@ export default class ElTablePage extends Vue {
 
 	public resetSearch(): void {
 		this.SearchForm.reset();
-		this.search();
+		this.$nextTick(function () {
+			this.search();
+		})
 	}
 
 	public async search(page: number = 1): Promise<void> {
+		if (this.SearchForm && !await this.SearchForm.validate()) return;
 		this.loading = true;
-		let data = await this.request(page, this.filter, this.limit)
-		this.loading = false;
-		if (Array.isArray(data)) {
-			this.record = data;
-			this.total = -1;
-		} else {
-			this.record = data.record || []
-			this.page = data.page || page
-			this.limit = data.pageSize || this.limit
-			this.total = data.total || 0
+		try {
+			let data = await this.request(page, this.filter, this.limit)
+			this.loading = false;
+			if (Array.isArray(data)) {
+				this.record = data;
+				this.total = -1;
+			} else {
+				this.record = data.record || []
+				this.page = data.page || page
+				this.limit = data.pageSize || this.limit
+				this.total = data.total || 0
+			}
+		} catch (e) {
+			this.loading = false;
+			this.record = []
+			this.page = 1
+			this.limit = this.limit
+			this.total = 0
 		}
+
 	}
 
 	private handlePageChange(page: number) {

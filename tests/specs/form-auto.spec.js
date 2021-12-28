@@ -282,7 +282,7 @@ describe("FormAuto", () => {
     triggerEvent(icon, "mouseleave");
   });
 
-  it("form: model default value and model responsive set", async () => {
+  it("form default value and v-model valid", async () => {
     vm = createVue(
       {
         template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
@@ -351,26 +351,99 @@ describe("FormAuto", () => {
     expect(vm.$refs.form.model).to.deep.equal(data, "model value is valid");
   });
 
-  //
-  // select: {
-  //   label: "select",
-  //   type: "select",
-  //   options: {
-  //     0: "option0",
-  //     1: "option1",
-  //     2: "option2",
-  //   },
-  // },
-  // select_a: {
-  //   label: "select_a",
-  //   type: "select",
-  //   options: [
-  //     { label: "option0", value: 0 },
-  //     { label: "option1", value: 1 },
-  //     { label: "option2", value: 2 },
-  //   ],
-  // },
-  it("form: select option and echo value ", async () => {
+  it("options transfer", async () => {
+    let objectOptions = {
+      0: "option0",
+      1: "option1",
+      2: "option2",
+    };
+    vm = createVue(
+      {
+        template: `<el-form-auto :data="form" inline v-model="model" ref="form"></el-form-auto>`,
+        data() {
+          return {
+            model: {},
+            form: {
+              check: {
+                label: "check",
+                type: "check",
+                options: objectOptions,
+              },
+              select: {
+                label: "select",
+                type: "select",
+                options: [
+                  { label: "option0", value: 0, disabled: true },
+                  { label: "option1", value: 1 },
+                  { label: "option2", value: 2 },
+                ],
+              },
+              radio: {
+                label: "radio",
+                type: "radio",
+                options: ["option1", "option2", "option3"],
+              },
+              asyncSelect: {
+                label: "asyncSelect",
+                type: "select",
+                options: async () => {
+                  return objectOptions;
+                },
+              },
+            },
+          };
+        },
+      },
+      true
+    );
+    let fields = vm.$refs.form.fields;
+    await waitImmediate();
+    expect(Array.isArray(fields.check.options)).to.be.true;
+    expect(fields.check.options.length).to.equal(3);
+    expect(fields.check.options.map((i) => i.value)).to.deep.equal("0,1,2".split(","));
+    expect(fields.select.options.length).to.equal(3);
+    expect(fields.select.options.map((i) => i.value)).to.deep.equal([0, 1, 2]);
+    expect(fields.select.options[0].disabled).to.deep.true;
+    expect(fields.radio.options.map((i) => i.value)).to.deep.equal(["option1", "option2", "option3"]);
+    expect(fields.asyncSelect.options.length).to.equal(3);
+    expect(fields.asyncSelect.options.map((i) => i.value)).to.deep.equal("0,1,2".split(","));
+  });
+
+  it("check reshow", async () => {
+    vm = createVue(
+      {
+        template: `<el-form-auto :data="form" inline v-model="model" ref="form"></el-form-auto>`,
+        data() {
+          return {
+            model: { check: [0, 1] },
+            form: {
+              check: {
+                // notAll: true,
+                label: "check",
+                type: "check",
+                options: [
+                  { label: "option0", value: 0 },
+                  { label: "option1", value: 1 },
+                  { label: "option2", value: 2 },
+                ],
+              },
+            },
+          };
+        },
+      },
+      true
+    );
+    let checkAll = vm.$refs.form.$children[0].$children[0].$children[1];
+    expect(checkAll.indeterminate).to.be.true;
+    vm.model.check = [0, 1, 2];
+    await waitImmediate();
+    expect(checkAll.indeterminate).to.be.false;
+    expect(checkAll.value).to.be.true;
+    // console.log(vm.$refs.form.$children[0].$children[0].$children[1]);
+    // expect(vm.$refs.form.$children[0].$children[0].$children[1].name).to.equal("el-checkbox");
+  });
+
+  it("<el-select> remote search and scroll load", async () => {
     vm = createVue(
       {
         template: `<el-form-auto :data="form" inline v-model="model" ref="form"></el-form-auto>`,
@@ -400,7 +473,7 @@ describe("FormAuto", () => {
       },
       true
     );
-    await wait(1000);
+    await waitImmediate();
     expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(10);
     let $formItem = vm.$el.querySelector(".el-form-item[data-prop=remoteSelect]");
     let dropDown = $formItem.querySelector(".el-select-dropdown .el-select-dropdown__wrap");
@@ -408,18 +481,12 @@ describe("FormAuto", () => {
     await waitImmediate();
     dropDown.scrollTop = dropDown.clientHeight;
     triggerEvent(dropDown, "scroll");
-    await waitImmediate();
+    await wait(550);
     expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(20);
     $formItem.querySelector("input").click();
     let select = vm.$refs.form.$children[0].$children[0].$children[1];
-    // select.remoteMethod("Bret");
-    // await waitImmediate();
     select.handleQueryChange("Bret");
-    await waitImmediate();
-    // select.handleQueryChange("");
+    await wait(550);
     expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(1);
-    // });
   });
-
-  // it("check reshow");
 });
