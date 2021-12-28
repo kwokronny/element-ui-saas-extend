@@ -3,6 +3,15 @@ sidebarDepth: 0
 ---
 # 更新日志
 
+## 1.0.22 <small>2021-12-28</small>
+- #### 新增
+	- FormAuto `type=timerange` 默认值问题修复
+	- TablePage 搜索前验证筛选项
+- #### 优化
+	- FormAuto loadScroll 分页优化
+- #### 修复
+	- TablePage 自定义列是否应用缓存逻辑
+
 ## 1.0.21 <small>2021-12-22</small>
 - #### 修复
 	- FormAuto
