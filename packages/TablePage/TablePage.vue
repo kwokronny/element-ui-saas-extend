@@ -412,14 +412,6 @@ export default class ElTablePage extends Vue {
 	@Prop({ type: Function }) selectable!: ((row: Record<string, any>, index: number) => boolean)
 	@PropSync("selection", { type: Array }) multipleSelection!: any[]
 
-	private mounted() {
-		if (this.multipleSelection && this.multipleSelection.length) {
-			this.multipleSelection.forEach((row: any) => {
-				this.TablePage.toggleRowSelection(row)
-			})
-		}
-	}
-
 	private handleSelectionChange(selection: any[]) {
 		this.multipleSelection = selection
 		this.$emit("selection-change", selection)

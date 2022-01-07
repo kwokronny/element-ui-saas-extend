@@ -1,7 +1,9 @@
-.el-form-auto div.el-form-auto-row {
-  flex-flow: row wrap;
+.el-form-auto .el-form-auto-row {
+  &div {
+    flex-flow: row wrap;
+  }
 
-  .el-form-item_hidden{
+  .el-form-item_hidden {
     display: none;
   }
 }

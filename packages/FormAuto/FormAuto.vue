@@ -387,6 +387,14 @@ export default class ElFormAuto extends Vue {
 	public async validate(): Promise<boolean> {
 		return await this.FormAuto.validate();
 	}
+
+	/**
+	 * @public
+	 * 验证单个字段
+	 */
+	public validateField(props: string[] | string, callback: (errorMessage: string) => void): void {
+		return this.FormAuto && this.FormAuto.validateField(props, callback);
+	}
 	/**
 	 * 复选框 全选
 	 */
