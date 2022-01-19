@@ -3,6 +3,14 @@ sidebarDepth: 0
 ---
 # 更新日志
 
+## 1.0.23 <small>2022-01-19</small>
+- #### 新增
+	- FormAuto vaildate功能
+- #### 优化
+	- FormAuto type:hidden下样式
+- #### 修复
+	- TablePage 移除挂载时选中回显功能
+
 ## 1.0.22 <small>2021-12-28</small>
 - #### 新增
 	- FormAuto `type=timerange` 默认值问题修复
