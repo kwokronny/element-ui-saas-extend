@@ -3,7 +3,7 @@ sidebarDepth: 0
 ---
 # 更新日志
 
-## 1.0.23 <small>2022-01-19</small>
+## 1.0.24 <small>2022-01-20</small>
 - #### 新增
 	- FormAuto vaildate功能
 - #### 优化
