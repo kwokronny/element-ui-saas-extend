@@ -1,10 +1,10 @@
 import Vue from "vue";
-import Element from "element-ui";
-import ElementUISaaSExtend from "../packages/index";
+// import Element from "element-ui";
+// import ElementUISaaSExtend from "../packages/index";
 import { ComponentOptions } from "vue/types/umd";
 
-Vue.use(Element);
-Vue.use(ElementUISaaSExtend);
+// Vue.use(Element);
+// Vue.use(ElementUISaaSExtend);
 
 let id = 0;
 

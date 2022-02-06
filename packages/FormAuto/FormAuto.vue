@@ -589,6 +589,14 @@ export default class ElFormAuto extends Vue {
 						});
 					}, 500, { leading: true });
 					item.props.remoteMethod("")
+					if (!item.on) {
+						item.on = {}
+					}
+					item.on.visibleChange = function (visible) {
+						if (visible == false) {
+							item.props.remoteMethod("")
+						}
+					}
 				} else if (item.options) {
 					transformOptions(item.options).then((options) => {
 						item.options = options
