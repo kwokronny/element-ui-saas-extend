@@ -4,8 +4,8 @@ export default {
     faild: "复制失败!",
   },
   numberrange: {
-    min: "最大值",
-    max: "最小值",
+    min: "最小值",
+    max: "最大值",
   },
   formauto: {
     pleaseInput: "请输入",

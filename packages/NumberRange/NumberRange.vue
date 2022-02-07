@@ -65,6 +65,7 @@ export default class ElNumberRange extends Vue {
 
 	@Watch("value", { immediate: true })
 	private handleValueChange(value: number[]) {
+		console.log(this.minValue)
 		this.minValue = value[0] !== undefined ? `${value[0]}` : ""
 		this.maxValue = value[1] !== undefined ? `${value[1]}` : ""
 		if (this.validateEvent) {
@@ -98,7 +99,15 @@ export default class ElNumberRange extends Vue {
 			}
 		}
 		this.handleMouseEnter();
-		return [this.minValue, this.maxValue]
+		let range: any[] = [undefined, undefined]
+		console.log(this.minValue)
+		if (!isNaN(parseFloat(this.minValue))) {
+			range[0] = parseFloat(this.minValue)
+		}
+		if (!isNaN(parseFloat(this.maxValue))) {
+			range[1] = parseFloat(this.maxValue)
+		}
+		return range
 	}
 
 	private mounted() {

@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import FormAuto from "../../packages/FormAuto";
 import userData from "../mock/user.json";
-import { createTest, createVue, triggerClick, triggerEvent, triggerKeyDown, wait, waitImmediate } from "../util";
+import { createTest, createVue, triggerEvent, wait, waitImmediate } from "../util";
 
 describe("FormAuto", () => {
   let vm;
