@@ -30,6 +30,8 @@
 						v-bind="defaultButtonStyle"
 					>{{$t("tablepage.reset")}}</el-button>
 				</slot>
+				<slot name="search_button_append">
+				</slot>
 			</el-form-auto>
 			<slot name="search_append"></slot>
 		</component>

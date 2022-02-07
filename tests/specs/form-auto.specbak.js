@@ -1,7 +1,9 @@
 import { expect } from "chai";
+import { wait, createTest } from "../peer.js";
+import "../../packages/theme-chalk/lib/form-auto.css";
 import FormAuto from "../../packages/FormAuto";
 import userData from "../mock/user.json";
-import { createTest, createVue, triggerClick, triggerEvent, triggerKeyDown, wait, waitImmediate } from "../util";
+import { mount } from "@vue/test-utils";
 
 describe("FormAuto", () => {
   let vm;
@@ -150,9 +152,8 @@ describe("FormAuto", () => {
   };
 
   it("props:inline", (done) => {
-    vm = createTest(
-      FormAuto,
-      {
+    let wrapper = mount(FormAuto, {
+      propsData: {
         inline: true,
         data: {
           field1: {
@@ -165,19 +166,16 @@ describe("FormAuto", () => {
           },
         },
       },
-      true
-    );
-    let form = vm.$el;
-    expect(form.className.indexOf("el-form--inline") > -1).to.be.true;
-    expect(form.querySelector("span.el-form-auto-row").tagName).to.equal("SPAN");
-    expect(form.querySelectorAll("span.el-form-auto-row .el-col").length).to.equal(0);
+    });
+    expect(wrapper.classes()).to.contain("el-form--inline");
+    expect(wrapper.find("span.el-form-auto-row").exists()).to.be.true;
+    expect(wrapper.findAll("span.el-form-auto-row .el-col").length).to.equal(0);
     done();
   });
 
   it("props:label-hidden", (done) => {
-    vm = createTest(
-      FormAuto,
-      {
+    let wrapper = mount(FormAuto, {
+      propsData: {
         labelHidden: true,
         data: {
           field1: {
@@ -195,9 +193,8 @@ describe("FormAuto", () => {
           },
         },
       },
-      true
-    );
-    let formItems = vm.$el.querySelectorAll(".el-form-item");
+    });
+    let formItems = wrapper.element.querySelectorAll(".el-form-item");
     formItems.forEach((item) => {
       expect(item.querySelector("el-form-item__label")).to.be.null;
     });
@@ -205,9 +202,8 @@ describe("FormAuto", () => {
   });
 
   it("props:label-width", (done) => {
-    vm = createTest(
-      FormAuto,
-      {
+    let wrapper = mount(FormAuto, {
+      propsData: {
         labelWidth: "100px",
         data: {
           field1: {
@@ -225,9 +221,8 @@ describe("FormAuto", () => {
           },
         },
       },
-      true
-    );
-    let label = vm.$el.querySelectorAll(".el-form-item__label");
+    });
+    let label = wrapper.element.querySelectorAll(".el-form-item__label");
     expect(label[0].style.width).to.equal("100px");
     expect(label[1].style.width).to.equal("100px");
     expect(label[2].style.width).to.equal("120px");
@@ -235,22 +230,24 @@ describe("FormAuto", () => {
   });
 
   it("props:gutter", (done) => {
-    vm = createTest(FormAuto, {
-      gutter: 20,
-      data: {
-        field1: {
-          col: 12,
-          label: "field1",
-          type: "text",
-        },
-        field2: {
-          col: 12,
-          label: "field2",
-          type: "text",
+    let wrapper = mount(FormAuto, {
+      propsData: {
+        gutter: 20,
+        data: {
+          field1: {
+            col: 12,
+            label: "field1",
+            type: "text",
+          },
+          field2: {
+            col: 12,
+            label: "field2",
+            type: "text",
+          },
         },
       },
     });
-    let row = vm.$el.querySelector(".el-form-auto-row.el-row.el-row--flex");
+    let row = wrapper.element.querySelector(".el-form-auto-row.el-row.el-row--flex");
     let cols = row.querySelectorAll(".el-col");
     cols.forEach((col) => {
       expect(col.classList.contains("el-col-12")).to.be.true;
@@ -260,10 +257,8 @@ describe("FormAuto", () => {
   });
 
   it("props:data:labelTooltip", async () => {
-    vm = createTest(
-      FormAuto,
-      {
-        gutter: 20,
+    let wrapper = mount(FormAuto, {
+      propsData: {
         data: {
           field1: {
             labelTooltip: "field help tip",
@@ -272,30 +267,28 @@ describe("FormAuto", () => {
           },
         },
       },
-      true
-    );
-    let icon = vm.$el.querySelector(".el-form-item__label .el-tooltip.el-icon-question");
-    expect(icon).to.exist;
-    triggerEvent(icon, "mouseenter");
-    await waitImmediate();
-    expect(document.getElementById(icon.getAttribute("aria-describedby")).textContent).to.equal("field help tip");
-    triggerEvent(icon, "mouseleave");
+    });
+    let icon = wrapper.find(".el-form-item__label .el-tooltip.el-icon-question");
+    expect(icon.exists()).to.be.true;
+    icon.trigger("mouseenter");
+    await wait(0);
+    expect(document.getElementById(icon.attributes("aria-describedby")).textContent).to.equal("field help tip");
+    icon.trigger("mouseleave");
+    await wait(200);
+    expect(document.getElementById(icon.attributes("aria-describedby")).style.display).to.equal("none");
   });
 
   it("form default value and v-model valid", async () => {
-    vm = createVue(
-      {
-        template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
-        data() {
-          return {
-            model: {},
-            form: baseFormData,
-          };
-        },
+    let wrapper = mount({
+      template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+      data() {
+        return {
+          model: {},
+          form: baseFormData,
+        };
       },
-      true
-    );
-    expect(vm.model).to.deep.equal(
+    });
+    expect(wrapper.vm.model).to.deep.equal(
       {
         id: "1",
         switch: true,
@@ -346,145 +339,154 @@ describe("FormAuto", () => {
       selects: [0, 2],
       cascader: [1, 4, 5],
     };
-    vm.model = Object.assign({}, data);
-    await waitImmediate();
-    expect(vm.$refs.form.model).to.deep.equal(data, "model value is valid");
+    wrapper.vm.model = Object.assign({}, data);
+    await wait(0);
+    expect(wrapper.vm.$refs.form.model).to.deep.equal(data, "model value is valid");
   });
 
-  it("options transfer", async () => {
-    let objectOptions = {
-      0: "option0",
-      1: "option1",
-      2: "option2",
-    };
-    vm = createVue(
-      {
-        template: `<el-form-auto :data="form" inline v-model="model" ref="form"></el-form-auto>`,
-        data() {
-          return {
-            model: {},
-            form: {
-              check: {
-                label: "check",
-                type: "check",
-                options: objectOptions,
-              },
-              select: {
-                label: "select",
-                type: "select",
-                options: [
-                  { label: "option0", value: 0, disabled: true },
-                  { label: "option1", value: 1 },
-                  { label: "option2", value: 2 },
-                ],
-              },
-              radio: {
-                label: "radio",
-                type: "radio",
-                options: ["option1", "option2", "option3"],
-              },
-              asyncSelect: {
-                label: "asyncSelect",
-                type: "select",
-                options: async () => {
-                  return objectOptions;
-                },
-              },
-            },
-          };
-        },
-      },
-      true
-    );
-    let fields = vm.$refs.form.fields;
-    await waitImmediate();
-    expect(Array.isArray(fields.check.options)).to.be.true;
-    expect(fields.check.options.length).to.equal(3);
-    expect(fields.check.options.map((i) => i.value)).to.deep.equal("0,1,2".split(","));
-    expect(fields.select.options.length).to.equal(3);
-    expect(fields.select.options.map((i) => i.value)).to.deep.equal([0, 1, 2]);
-    expect(fields.select.options[0].disabled).to.deep.true;
-    expect(fields.radio.options.map((i) => i.value)).to.deep.equal(["option1", "option2", "option3"]);
-    expect(fields.asyncSelect.options.length).to.equal(3);
-    expect(fields.asyncSelect.options.map((i) => i.value)).to.deep.equal("0,1,2".split(","));
-  });
+  // it("options transfer", async () => {
+  //   let objectOptions = {
+  //     0: "option0",
+  //     1: "option1",
+  //     2: "option2",
+  //   };
+  //   vm = createVue(
+  //     {
+  //       template: `<el-form-auto :data="form" inline v-model="model" ref="form"></el-form-auto>`,
+  //       data() {
+  //         return {
+  //           model: {},
+  //           form: {
+  //             check: {
+  //               label: "check",
+  //               type: "check",
+  //               options: objectOptions,
+  //             },
+  //             select: {
+  //               label: "select",
+  //               type: "select",
+  //               options: [
+  //                 { label: "option0", value: 0, disabled: true },
+  //                 { label: "option1", value: 1 },
+  //                 { label: "option2", value: 2 },
+  //               ],
+  //             },
+  //             radio: {
+  //               label: "radio",
+  //               type: "radio",
+  //               options: ["option1", "option2", "option3"],
+  //             },
+  //             asyncSelect: {
+  //               label: "asyncSelect",
+  //               type: "select",
+  //               options: async () => {
+  //                 return objectOptions;
+  //               },
+  //             },
+  //           },
+  //         };
+  //       },
+  //     },
+  //     true
+  //   );
+  //   let fields = vm.$refs.form.fields;
+  //   await waitImmediate();
+  //   expect(Array.isArray(fields.check.options)).to.be.true;
+  //   expect(fields.check.options.length).to.equal(3);
+  //   expect(fields.check.options.map((i) => i.value)).to.deep.equal("0,1,2".split(","));
+  //   expect(fields.select.options.length).to.equal(3);
+  //   expect(fields.select.options.map((i) => i.value)).to.deep.equal([0, 1, 2]);
+  //   expect(fields.select.options[0].disabled).to.deep.true;
+  //   expect(fields.radio.options.map((i) => i.value)).to.deep.equal(["option1", "option2", "option3"]);
+  //   expect(fields.asyncSelect.options.length).to.equal(3);
+  //   expect(fields.asyncSelect.options.map((i) => i.value)).to.deep.equal("0,1,2".split(","));
+  // });
 
-  it("check reshow", async () => {
-    vm = createVue(
-      {
-        template: `<el-form-auto :data="form" inline v-model="model" ref="form"></el-form-auto>`,
-        data() {
-          return {
-            model: { check: [0, 1] },
-            form: {
-              check: {
-                // notAll: true,
-                label: "check",
-                type: "check",
-                options: [
-                  { label: "option0", value: 0 },
-                  { label: "option1", value: 1 },
-                  { label: "option2", value: 2 },
-                ],
-              },
-            },
-          };
-        },
-      },
-      true
-    );
-    let checkAll = vm.$refs.form.$children[0].$children[0].$children[1];
-    expect(checkAll.indeterminate).to.be.true;
-    vm.model.check = [0, 1, 2];
-    await waitImmediate();
-    expect(checkAll.indeterminate).to.be.false;
-    expect(checkAll.value).to.be.true;
-    // console.log(vm.$refs.form.$children[0].$children[0].$children[1]);
-    // expect(vm.$refs.form.$children[0].$children[0].$children[1].name).to.equal("el-checkbox");
-  });
+  // it("check reshow", async () => {
+  //   vm = createVue(
+  //     {
+  //       template: `<el-form-auto :data="form" inline v-model="model" ref="form"></el-form-auto>`,
+  //       data() {
+  //         return {
+  //           model: { check: [0, 1] },
+  //           form: {
+  //             check: {
+  //               // notAll: true,
+  //               label: "check",
+  //               type: "check",
+  //               options: [
+  //                 { label: "option0", value: 0 },
+  //                 { label: "option1", value: 1 },
+  //                 { label: "option2", value: 2 },
+  //               ],
+  //             },
+  //           },
+  //         };
+  //       },
+  //     },
+  //     true
+  //   );
+  //   let checkAll = vm.$refs.form.$children[0].$children[0].$children[1];
+  //   expect(checkAll.indeterminate).to.be.true;
+  //   vm.model.check = [0, 1, 2];
+  //   await waitImmediate();
+  //   expect(checkAll.indeterminate).to.be.false;
+  //   expect(checkAll.value).to.be.true;
+  //   // console.log(vm.$refs.form.$children[0].$children[0].$children[1]);
+  //   // expect(vm.$refs.form.$children[0].$children[0].$children[1].name).to.equal("el-checkbox");
+  // });
 
   it("select remote search", async () => {
-    vm = createVue(
-      {
-        template: `<el-form-auto :data="form" inline v-model="model" ref="form"></el-form-auto>`,
-        data() {
-          return {
-            model: {},
-            form: {
-              remoteSelect: {
-                label: "remoteSelect",
-                type: "select",
-                loadScroll: true,
-                remote: true,
-                options: async (query, page) => {
-                  return userData
-                    .filter((item) => item.username.indexOf(query) > -1)
-                    .map((item) => {
-                      return {
-                        label: item.username,
-                        value: item.id * page,
-                      };
-                    });
-                },
+    let wrapper = mount({
+      template: `<el-form-auto :data="form" inline v-model="model" ref="form"></el-form-auto>`,
+      data() {
+        return {
+          model: {},
+          form: {
+            remoteSelect: {
+              label: "remoteSelect",
+              type: "select",
+              loadScroll: true,
+              remote: true,
+              options: async (query, page) => {
+                return userData
+                  .filter((item) => item.username.indexOf(query) > -1)
+                  .map((item) => {
+                    return {
+                      label: item.username,
+                      value: item.id * page,
+                    };
+                  });
               },
             },
-          };
-        },
+          },
+        };
       },
-      true
-    );
-    await waitImmediate();
-    expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(10);
-    let $formItem = vm.$el.querySelector(".el-form-item[data-prop=remoteSelect]");
+    });
+    await wait(0);
+    expect(wrapper.vm.$refs.form.fields.remoteSelect.options.length).to.equal(10);
+    let select = wrapper.vm.$refs.form.$children[0].$children[0];
+    console.log(select.name);
+    // wrapper.element.click();
+    // wrapper.find(".el-form-item[data-prop=remoteSelect] input").element.value = "Antonette";
+    // wrapper.find(".el-form-item[data-prop=remoteSelect] input").trigger("input");
+    // let select = wrapper.vm.$refs.form.$children[0].$children[0].$children[1];
+
+    select.handleQueryChange("Antonette");
+    expect(wrapper.find("input").element.value).to.equal("Antonette");
+    await wait(550);
+    expect(wrapper.vm.$refs.form.fields.remoteSelect.options.length).to.equal("Antonette");
+
+    // expect(vm.$refs.form.fields.remoteSelect.options[0].label).to.equal("Antonette");
+    // let $formItem = vm.$el.querySelector(".el-form-item[data-prop=remoteSelect]");
     // $formItem.querySelector("input").click();
-    $formItem.querySelector("input").value = "Antonett";
+    // $formItem.querySelector("input").value = "Antonett";
     // $formItem.querySelector("input")
-    triggerEvent($formItem.querySelector("input"), "input", 69);
+    // triggerEvent($formItem.querySelector("input"), "input", 69);
     // vm.find("input").trigger("keydown", { keyCode: "67" });
     // let select = vm.$refs.form.$children[0].$children[0].$children[1];
-    // select.handleQueryChange("Antonette"); 
-    await wait(550);
-    // expect(vm.$refs.form.fields.remoteSelect.options[0].label).to.equal("Antonette");
+    // select.handleQueryChange("Antonette");
+    // await wait(550);
   });
 
   // it("select remote scroll load", async () => {

@@ -566,7 +566,7 @@ export default class ElFormAuto extends Vue {
 					item.props.remote = true;
 					item.page = 1;
 					item.loadFinish = false;
-					item.props.remoteMethod = debounce((query: string = "", isScroll?: boolean) => {
+					item.props.remoteMethod = (query: string = "", isScroll?: boolean) => {
 						if (item.loadFinish == true) return
 						if (!isScroll) item.page = 1
 						if (item.page == 1) {
@@ -587,15 +587,22 @@ export default class ElFormAuto extends Vue {
 						}).catch(() => {
 							item.optionLoading = false;
 						});
-					}, 500, { leading: true });
+					};
 					item.props.remoteMethod("")
 					if (!item.on) {
 						item.on = {}
 					}
-					item.on.visibleChange = function (visible) {
-						if (visible == false) {
-							item.props.remoteMethod("")
+					let originVisibleChangeEvent = item.on["visible-change"] || (() => { })
+					item.on["visible-change"] = function (visible) {
+						originVisibleChangeEvent(visible);
+						if (visible == false && item.options && item.options.length == 0) {
+							item.props.remoteMethod.call(item, "")
 						}
+					}
+					let originClearEvent = item.on.clear || (() => { })
+					item.on.clear = function () {
+						originClearEvent()
+						item.props.remoteMethod.call(item, "")
 					}
 				} else if (item.options) {
 					transformOptions(item.options).then((options) => {
