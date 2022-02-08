@@ -65,13 +65,8 @@ export default class ElNumberRange extends Vue {
 
 	@Watch("value", { immediate: true })
 	private handleValueChange(value: number[]) {
-		console.log(this.minValue)
 		this.minValue = value[0] !== undefined ? `${value[0]}` : ""
 		this.maxValue = value[1] !== undefined ? `${value[1]}` : ""
-		if (this.validateEvent) {
-			this.dispatch('ElFormItem', 'el.form.change', value);
-			this.$emit("change", value)
-		}
 	}
 
 	@Prop(Number) min!: number
@@ -100,13 +95,14 @@ export default class ElNumberRange extends Vue {
 		}
 		this.handleMouseEnter();
 		let range: any[] = [undefined, undefined]
-		console.log(this.minValue)
 		if (!isNaN(parseFloat(this.minValue))) {
 			range[0] = parseFloat(this.minValue)
 		}
 		if (!isNaN(parseFloat(this.maxValue))) {
 			range[1] = parseFloat(this.maxValue)
 		}
+		this.dispatch('ElFormItem', 'el.form.change', range);
+		this.$emit("change", range)
 		return range
 	}
 
@@ -139,8 +135,6 @@ export default class ElNumberRange extends Vue {
 		return this.size || this._elFormItemSize || (this.$ELEMENT || {}).size;
 	}
 
-	@Prop({ type: Boolean, default: true }) validateEvent!: boolean;
-
 	private isActive: boolean = false;
 
 	public focus(): void {
@@ -156,10 +150,8 @@ export default class ElNumberRange extends Vue {
 
 	private handleBlur() {
 		this.isActive = false;
-		if (this.validateEvent) {
-			this.dispatch('ElFormItem', 'el.form.blur');
-			this.$emit("blur")
-		}
+		this.dispatch('ElFormItem', 'el.form.blur');
+		this.$emit("blur")
 	}
 
 	@Prop({ type: Boolean, default: true }) clearable!: string

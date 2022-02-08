@@ -414,7 +414,7 @@ export default class ElFormAuto extends Vue {
 	 * 复选框组 change 事件
 	 */
 	private handleCheckedChange(name: string, value: string[]): void {
-		if (this.check[name] == undefined) return
+		if (this.check[name] == undefined || !value) return
 		let checkedCount = value.length || 0;
 		let options = this.fields[name].options as ElAutoOption[];
 		let optionsCount = options.length;

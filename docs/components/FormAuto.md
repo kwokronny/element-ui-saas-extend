@@ -223,7 +223,7 @@ export default {
           label: "时间范围",
           type: "timerange",
           rangeName: ["startTime", "endTime"],
-          value:["07:00:08","08:00:09"],
+          value: ["07:00:08", "08:00:09"],
           required: true,
           style: "width:100%",
         },
@@ -775,12 +775,12 @@ export default {
 
 ### Method
 
-| 方法名     | 描述                                     | 参数               |
-| :--------- | :--------------------------------------- | :----------------- |
-| reset()    | 重置表单                                 | -                  |
-| validate() | 对整个表单进行校验的方法                 | `Promise<boolean>` |
-| getModel() | 获取表单所有参数                         | name               |
-| setModel() | 设置表单对应参数，表单项不存在的将被无视 | name,value         |
+| 方法名     | 描述                     | 参数               |
+| :--------- | :----------------------- | :----------------- |
+| reset()    | 重置表单                 | -                  |
+| validate() | 对整个表单进行校验的方法 | `Promise<boolean>` |
+| getModel() | 获取表单所有参数         | name               |
+| setModel() | 设置表单对应参数         | name,value         |
 
 ### Slot
 

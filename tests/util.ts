@@ -3,6 +3,8 @@ import Element from "element-ui";
 import ElementUISaaSExtend from "../packages/index";
 import { ComponentOptions } from "vue/types/umd";
 
+import "element-ui/lib/theme-chalk/index.css";
+import "../packages/theme-chalk/lib/index.css";
 Vue.use(Element);
 Vue.use(ElementUISaaSExtend);
 
@@ -73,11 +75,10 @@ export const triggerEvent = function(elm: HTMLElement, name: string, ...opts: an
   } else {
     eventName = "HTMLEvents";
   }
-  const evt = document.createEvent(eventName);
+  const event = document.createEvent(eventName);
 
-  evt.initEvent(name, ...opts);
-  //@ts-ignore
-  elm.dispatchEvent ? elm.dispatchEvent(evt) : elm.fireEvent("on" + name, evt);
+  event.initEvent(name, ...opts);
+  elm.dispatchEvent(event);
 
   return elm;
 };

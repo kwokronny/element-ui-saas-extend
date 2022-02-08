@@ -34,6 +34,7 @@ describe("FormAuto", () => {
       value: true,
     },
     slider: {
+      col: 12,
       label: "滑块",
       type: "slider",
       value: 10,
@@ -548,7 +549,7 @@ describe("FormAuto", () => {
                     });
                 },
                 on: {
-                  ["visible-change"]: (visible)=> {
+                  ["visible-change"]: (visible) => {
                     this.visiblePass = true;
                   },
                 },
@@ -571,7 +572,7 @@ describe("FormAuto", () => {
     expect(vm.visiblePass).to.be.true;
     expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(10);
   });
-  
+
   it("select remote clear refresh options", async () => {
     vm = createVue(
       {
@@ -596,7 +597,8 @@ describe("FormAuto", () => {
                     });
                 },
                 on: {
-                  clear: ()=> {
+                  clear: () => {
+                    // 确认清空事件与重刷options都有效
                     this.clearPass = true;
                   },
                 },
@@ -615,13 +617,128 @@ describe("FormAuto", () => {
     select.$el.click();
     await wait(250);
     expect(vm.$refs.form.fields.remoteSelect.options[0].label).to.equal("Antonette");
-    select.hoverIndex = 0
-    select.selectOption(0)
+    select.hoverIndex = 0;
+    select.selectOption(0);
     select.inputHovering = true;
     await wait(100);
-    vm.$el.querySelector('.el-form-item[data-prop=remoteSelect] .el-input__icon.el-icon-circle-close').click();
+    vm.$el.querySelector(".el-form-item[data-prop=remoteSelect] .el-input__icon.el-icon-circle-close").click();
     await wait(250);
     expect(vm.clearPass).to.be.true;
     expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(10);
+  });
+
+  it("method: reset", async () => {
+    vm = createVue(
+      {
+        template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+        data() {
+          return {
+            model: {},
+            form: baseFormData,
+          };
+        },
+      },
+      true
+    );
+    let data = {
+      id: 45,
+      switch: false,
+      slider: 23,
+      text: "textchange",
+      password: "passwordchange",
+      textarea: "textareachange",
+      date: null,
+      datetime: "2019-02-01 10:00:00",
+      dateRange: ["2019-01-01", "2019-01-02"],
+      datetimeRange: ["2019-02-01 10:00:00", "2019-05-02 08:00:00"],
+      time: "06:00:00",
+      timeRange: ["00:00:00", "05:00:00"],
+      radio: 2,
+      radiobutton: 0,
+      check: [3],
+      rate: 3,
+      select: 0,
+      selects: [0, 2],
+      cascader: [1, 4, 5],
+    };
+    vm.model = Object.assign({}, data);
+    vm.$children[0].reset();
+    await waitImmediate();
+    expect(vm.model).to.deep.equal(
+      {
+        id: "1",
+        switch: true,
+        slider: 10,
+        text: "text",
+        password: "password",
+        textarea: "textarea",
+        date: "2018-01-01",
+        datetime: "2018-01-01 00:00:00",
+        dateRange: ["2018-01-01", "2018-01-02"],
+        startDate: "2018-01-01",
+        endDate: "2018-01-02",
+        datetimeRange: ["2018-01-01 00:00:00", "2018-01-02 00:00:00"],
+        startDT: "2018-01-01 00:00:00",
+        endDT: "2018-01-02 00:00:00",
+        time: "00:00:00",
+        timeRange: ["00:00:00", "01:00:00"],
+        startTime: "00:00:00",
+        endTime: "01:00:00",
+        radio: 3,
+        radiobutton: 2,
+        check: [2],
+        rate: 3,
+        select: 0,
+        selects: [3, 2],
+        cascader: [2, 6],
+      },
+      "field value is valid"
+    );
+  });
+
+  it("method: validate", async () => {
+    let form = Object.assign({}, baseFormData);
+    for (let key in form) {
+      form[key].required = true;
+    }
+    vm = createVue(
+      {
+        template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+        data() {
+          return {
+            model: {},
+            form,
+          };
+        },
+      },
+      true
+    );
+    let data = {
+      id: 45,
+      switch: false,
+      slider: 23,
+      text: "",
+      password: "",
+      textarea: "",
+      date: null,
+      datetime: "",
+      dateRange: [],
+      datetimeRange: [],
+      time: "",
+      timeRange: ["00:00:00", "05:00:00"],
+      radio: 2,
+      radiobutton: 0,
+      check: [],
+      rate: 0,
+      select: 0,
+      selects: [],
+      cascader: [],
+    };
+    vm.model = Object.assign({}, data);
+    let valid = await vm.$refs.form.validate();
+    console.log(valid)
+    // expect(valid).to.be.false;
+    await waitImmediate();
+    expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(10);
   });
 });
