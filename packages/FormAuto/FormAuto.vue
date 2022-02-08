@@ -200,6 +200,7 @@ import { transformOptions } from "../util"
 import DynamicSlot from "../components/DynamicSlot"
 import locale from "../../src/mixin/locale"
 import selectLoadScroll from "../../src/mixin/selectLoadScroll"
+import { ValidateCallback } from "element-ui/types/form";
 
 @Component({
 	name: "ElFormAuto",
@@ -384,8 +385,8 @@ export default class ElFormAuto extends Vue {
 	 * @public
 	 * 异步验证成功后获取表单所有参数
 	 */
-	public async validate(): Promise<boolean> {
-		return await this.FormAuto.validate();
+	public validate(cb?: ValidateCallback): Promise<void> | void {
+		cb ? this.FormAuto.validate(cb) : this.FormAuto.validate();
 	}
 
 	/**

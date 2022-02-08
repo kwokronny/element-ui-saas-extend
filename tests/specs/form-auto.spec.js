@@ -734,11 +734,15 @@ describe("FormAuto", () => {
       selects: [],
       cascader: [],
     };
+    vm.$refs.form.validate((valid) => {
+      expect(valid).to.be.true;
+    });
     vm.model = Object.assign({}, data);
-    let valid = await vm.$refs.form.validate();
-    console.log(valid)
-    // expect(valid).to.be.false;
     await waitImmediate();
-    expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(10);
+    try {
+      await vm.$refs.form.validate();
+    } catch {
+      expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(10);
+    }
   });
 });

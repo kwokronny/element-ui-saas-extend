@@ -59,13 +59,21 @@ export default {
 
 ```vue
 <template>
-  <el-number-range v-model="range" :min="-5" :max="100"></el-number-range>
+  <div>
+    <el-number-range ref="range" v-model="range" :min="-5" :max="100"></el-number-range>
+    <el-button @click="foc">focus</el-button>
+  </div>
 </template>
 <script>
 export default {
   data() {
     return { range: [] };
   },
+  methods:{
+    foc(){
+      this.$refs["range"].focus();
+    }
+  }
 };
 </script>
 ```
