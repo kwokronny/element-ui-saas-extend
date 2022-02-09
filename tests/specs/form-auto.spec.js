@@ -696,7 +696,7 @@ describe("FormAuto", () => {
     );
   });
 
-  it("method: validate", async () => {
+  it("method: validate and validateField", async () => {
     let form = Object.assign({}, baseFormData);
     for (let key in form) {
       form[key].required = true;
@@ -737,12 +737,48 @@ describe("FormAuto", () => {
     vm.$refs.form.validate((valid) => {
       expect(valid).to.be.true;
     });
-    vm.model = Object.assign({}, data);
+    vm.model.password = "";
+    vm.$refs.form.validateField("password");
+    await waitImmediate();
+    expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(1);
+    vm.model = Object.assign({}, vm.model, data);
     await waitImmediate();
     try {
       await vm.$refs.form.validate();
     } catch {
       expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(10);
     }
+  });
+  
+  it("slot", async () => {
+    vm = createVue(
+      {
+        template: `<el-form-auto :data="form" v-model="model" ref="form">
+          <span class="input-slot" slot="input" slot-scope="{item,model,name}">{{name}}_{{model[name]}}_{{item.type}}</span>
+          <span class="default-slot"></span>
+          <span slot="prepend" class="prepend-slot"></span>
+          <span slot="append" class="append-slot"></span>
+        </el-form-auto>`,
+        data() {
+          return {
+            model: {},
+            form:{
+              input:{
+                label: "input",
+                type: "text",
+                value: "test",
+                slot: true
+              }
+            },
+          };
+        },
+      },
+      true
+    );
+    expect(vm.$el.querySelector(".default-slot").parentNode.className).to.equal("el-form-item__content");
+    expect(vm.$el.querySelector(".prepend-slot").nextElementSibling.classList.contains("el-form-auto-row")).to.be.true
+    expect(vm.$el.querySelector(".append-slot").previousElementSibling.classList.contains("el-form-auto-row")).to.be.true
+    expect(vm.$el.querySelector(".el-form-item[data-prop=input] span.input-slot")).to.exist;
+    expect(vm.$el.querySelector(".el-form-item[data-prop=input] span.input-slot").textContent).to.equal("input_test_text");
   });
 });

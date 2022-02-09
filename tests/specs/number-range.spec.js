@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import NumberRange from "../../packages/NumberRange";
-import { createTest, createVue, triggerEvent, wait, waitImmediate } from "../util";
+import { createTest, createVue, triggerEvent, waitImmediate } from "../util";
 
 describe("NumberRange", () => {
   it("props:size", async () => {
