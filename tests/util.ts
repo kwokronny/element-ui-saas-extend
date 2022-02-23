@@ -2,11 +2,30 @@ import Vue from "vue";
 import Element from "element-ui";
 import ElementUISaaSExtend from "../packages/index";
 import { ComponentOptions } from "vue/types/umd";
+import numeral from "numeral"
+import dayjs from "dayjs"
 
 import "element-ui/lib/theme-chalk/index.css";
 import "../packages/theme-chalk/lib/index.css";
 Vue.use(Element);
 Vue.use(ElementUISaaSExtend);
+
+
+Vue.filter("numeral", function(value, format) {
+  return numeral(value).format(format);
+});
+
+Vue.filter("date", function(value) {
+  return dayjs(value).format("YYYY-MM-DD");
+});
+
+Vue.filter("datetime", function(value) {
+  return dayjs(value).format("YYYY-MM-DD HH:mm:ss");
+});
+
+Vue.filter("dayjs", function(value, format) {
+  return dayjs(value).format(format);
+});
 
 let id = 0;
 

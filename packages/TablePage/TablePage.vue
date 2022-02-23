@@ -30,8 +30,7 @@
 						v-bind="defaultButtonStyle"
 					>{{$t("tablepage.reset")}}</el-button>
 				</slot>
-				<slot name="search_button_append">
-				</slot>
+				<slot name="search_button_append"></slot>
 			</el-form-auto>
 			<slot name="search_append"></slot>
 		</component>
@@ -94,6 +93,12 @@
 										<i class="el-icon-question"></i>
 									</el-tooltip>
 								</template>
+								<template slot="header" slot-scope="scope">
+									{{scope.column.label || " "}}
+									<el-tooltip v-if="column.labelTooltip" :content="column.labelTooltip">
+										<i class="el-icon-question"></i>
+									</el-tooltip>
+								</template>
 								<template slot-scope="{row, $index}">
 									<dynamic-slot v-if="column.slot" :name="column.slot" :data="{row, column, index: $index}"></dynamic-slot>
 									<template v-else-if="column.enum">
@@ -122,6 +127,10 @@
 							</el-table-column>
 						</template>
 					</template>
+					<!-- <el-table-column
+						v-if="$slot['row-key'] && multipleSelection"
+						type="expand"
+					></el-table-column> -->
 				</el-table>
 			</div>
 			<slot name="table_append"></slot>
@@ -381,9 +390,11 @@ export default class ElTablePage extends Vue {
 	}
 
 	public async search(page: number = 1): Promise<void> {
-		if (this.SearchForm && !await this.SearchForm.validate()) return;
 		this.loading = true;
 		try {
+			if (this.SearchForm) {
+				await this.SearchForm.validate()
+			}
 			let data = await this.request(page, this.filter, this.limit)
 			this.loading = false;
 			if (Array.isArray(data)) {
