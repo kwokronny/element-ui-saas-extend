@@ -74,6 +74,11 @@
 					v-loading="loading"
 					@selection-change="handleSelectionChange"
 				>
+					<el-table-column v-if="$scopedSlots['expand']" type="expand" fixed="left">
+						<template slot-scope="{row, $index}">
+							<dynamic-slot name="expand" :data="{row, index: $index}"></dynamic-slot>
+						</template>
+					</el-table-column>
 					<el-table-column
 						v-if="$attrs['row-key'] && multipleSelection"
 						:selectable="selectable"
@@ -87,12 +92,6 @@
 								:key="`column_${column.prop}_${index}`"
 								v-bind="column.props"
 							>
-								<template slot="header" slot-scope="scope">
-									{{scope.column.label || " "}}
-									<el-tooltip v-if="column.labelTooltip" :content="column.labelTooltip">
-										<i class="el-icon-question"></i>
-									</el-tooltip>
-								</template>
 								<template slot="header" slot-scope="scope">
 									{{scope.column.label || " "}}
 									<el-tooltip v-if="column.labelTooltip" :content="column.labelTooltip">
@@ -127,10 +126,6 @@
 							</el-table-column>
 						</template>
 					</template>
-					<!-- <el-table-column
-						v-if="$slot['row-key'] && multipleSelection"
-						type="expand"
-					></el-table-column> -->
 				</el-table>
 			</div>
 			<slot name="table_append"></slot>

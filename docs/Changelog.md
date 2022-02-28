@@ -3,9 +3,19 @@ sidebarDepth: 0
 ---
 # 更新日志
 
+## 1.0.25 <small>2022-02-28</small>
+- #### 新增
+	- TablePage 支持`<el-table>`的 expand 展开行功能
+	
+- #### 优化
+	- FormAuto 
+		- vaildate 功能优化
+		- select 远程搜索无数据时再次展开选项时，重置远程搜索关键词
+
+
 ## 1.0.24 <small>2022-01-20</small>
 - #### 新增
-	- FormAuto vaildate功能
+	- FormAuto vaildateField功能
 - #### 优化
 	- FormAuto type:hidden下样式
 - #### 修复
@@ -13,11 +23,11 @@ sidebarDepth: 0
 
 ## 1.0.22 <small>2021-12-28</small>
 - #### 新增
-	- FormAuto `type=timerange` 默认值问题修复
 	- TablePage 搜索前验证筛选项
 - #### 优化
 	- FormAuto loadScroll 分页优化
 - #### 修复
+	- FormAuto `type=timerange` 默认值问题
 	- TablePage 自定义列是否应用缓存逻辑
 
 ## 1.0.21 <small>2021-12-22</small>
@@ -79,7 +89,6 @@ sidebarDepth: 0
 	- TablePage 
 		- 自定义列调整未保存关闭窗口后重新打开应该恢复打开前的数据。
 
-## 1.0.13 <small>2021-09-27</small>
 ## 1.0.12 <small>2021-09-27</small>
 - #### 修复
 	- TablePage 切换 pageSize 问题。

@@ -18,7 +18,15 @@ pageClass: component-page
 
 ```vue
 <template>
-  <el-table-page row-key="id" ref="TablePage" border stripe :columns="columns" :request="getList"></el-table-page>
+  <el-table-page row-key="id" ref="TablePage" stripe :columns="columns" :request="getList">
+    <template slot="expand" slot-scope="props">
+      <el-form label-position="left" inline class="demo-table-expand">
+        <el-form-item label="姓名">
+          <span>{{ props.row }}</span>
+        </el-form-item>
+      </el-form>
+    </template>
+  </el-table-page>
 </template>
 <script>
 export default {
@@ -644,6 +652,7 @@ export default {
 | :------------------- | :--------------------------------------------- |
 | search_prepend       | 搜索上方插槽                                   |
 | search_button        | 搜索按钮自定义插槽                             |
+| search_button_append | 搜索按钮右侧自定义插槽                         |
 | search_append        | 搜索下方插槽                                   |
 | middle               | 搜索框与表格框中间插槽                         |
 | selection            | 表格左上方已选状态插槽，将覆盖原已选状态设计   |
@@ -662,3 +671,4 @@ export default {
 | :--------------- | :------------------------------------------------ |
 | `search-${slot}` | 自定义表单项的内容，参数为 { field, model, name } |
 | `${slot}`        | 自定义列的内容，参数为 { row,column,index }       |
+| expand           | 展开行内容，参数为 { row, index }                  |
