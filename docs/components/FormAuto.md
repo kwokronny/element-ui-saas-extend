@@ -146,7 +146,7 @@ export default {
         text: {
           col: 12,
           label: "文本框",
-          disabled: true,
+          // disabled: true,
           labelTooltip: "labelTooltip属性可以在标签旁增加图标，提示字段含义",
           type: "text",
           required: true,
@@ -308,7 +308,7 @@ export default {
       this.model = {
         id: "123",
         switch: 0,
-        text: null,
+        text: "文本",
         password: "password123456",
         textarea: null,
         date: "2021-01-10",
@@ -333,7 +333,7 @@ export default {
       });
     },
     getValidModel() {
-      this.$refs["EditForm"].validate().then((valid) => {
+      this.$refs["EditForm"].validate((valid) => {
         if (valid) {
           this.$msgbox({
             title: "表单返回数据",
@@ -775,12 +775,13 @@ export default {
 
 ### Method
 
-| 方法名     | 描述                     | 参数               |
-| :--------- | :----------------------- | :----------------- |
-| reset()    | 重置表单                 | -                  |
-| validate() | 对整个表单进行校验的方法 | `Promise<boolean>` |
-| getModel() | 获取表单所有参数         | name               |
-| setModel() | 设置表单对应参数         | name,value         |
+| 方法名          | 描述                     | 参数                                                 |
+| :-------------- | :----------------------- | :--------------------------------------------------- |
+| reset()         | 重置表单                 | -                                                    |
+| validate()      | 对整个表单进行校验的方法 | `Promise<void> | (valid:boolean)=>void`              |
+| validateField() | 对整个表单进行校验的方法 | `(prop:string,callback:(errMsg:string)=>void)=>void` |
+| getModel()      | 获取表单所有参数         | name                                                 |
+| setModel()      | 设置表单对应参数         | name,value                                           |
 
 ### Slot
 

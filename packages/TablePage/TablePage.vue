@@ -74,7 +74,7 @@
 					v-loading="loading"
 					@selection-change="handleSelectionChange"
 				>
-					<el-table-column v-if="$scopedSlots['expand']" type="expand" fixed="left">
+					<el-table-column v-if="$scopedSlots['expand']" type="expand">
 						<template slot-scope="{row, $index}">
 							<dynamic-slot name="expand" :data="{row, index: $index}"></dynamic-slot>
 						</template>
@@ -385,11 +385,11 @@ export default class ElTablePage extends Vue {
 	}
 
 	public async search(page: number = 1): Promise<void> {
-		this.loading = true;
 		try {
 			if (this.SearchForm) {
 				await this.SearchForm.validate()
 			}
+			this.loading = true;
 			let data = await this.request(page, this.filter, this.limit)
 			this.loading = false;
 			if (Array.isArray(data)) {

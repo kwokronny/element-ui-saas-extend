@@ -18,15 +18,7 @@ pageClass: component-page
 
 ```vue
 <template>
-  <el-table-page row-key="id" ref="TablePage" stripe :columns="columns" :request="getList">
-    <template slot="expand" slot-scope="props">
-      <el-form label-position="left" inline class="demo-table-expand">
-        <el-form-item label="姓名">
-          <span>{{ props.row }}</span>
-        </el-form-item>
-      </el-form>
-    </template>
-  </el-table-page>
+  <el-table-page row-key="id" ref="TablePage" :columns="columns" :request="getList"></el-table-page>
 </template>
 <script>
 export default {
@@ -143,7 +135,7 @@ export default {
 
 ```vue
 <template>
-  <el-table-page border stripe :columns="columns" custom-columns="table_test1" :request="getList"></el-table-page>
+  <el-table-page :columns="columns" custom-columns="table_test1" :request="getList"></el-table-page>
 </template>
 <script>
 export default {
@@ -449,7 +441,17 @@ export default {
 
 ```vue
 <template>
-  <el-table-page ref="TablePage" border stripe :columns="columns" :request="getList" row-key="id" :selection.sync="selection" custom-columns="table_test2">
+  <el-table-page ref="TablePage" :columns="columns" :request="getList" row-key="id" :selection.sync="selection" custom-columns="table_test2">
+    <template slot="expand" slot-scope="{row,index}">
+      <el-form label-position="left" class="demo-table-expand">
+        <el-form-item label="姓名">
+          <span>{{ row.name }}</span>
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <span>{{ row.email }}</span>
+        </el-form-item>
+      </el-form>
+    </template>
     <template slot="option" slot-scope="{ row, column, index }">
       <el-button type="primary" round size="mini">编辑</el-button>
       <el-button type="danger" round size="mini">删除</el-button>
@@ -463,6 +465,8 @@ export default {
     <template slot="search_button">
       <el-button @click="search">搜索</el-button>
       <el-button @click="reset">重置</el-button>
+    </template>
+    <template slot="search_button_append">
       <el-button>增加按钮</el-button>
     </template>
     <template slot="search_append">
@@ -515,7 +519,6 @@ export default {
         {
           label: "姓名",
           prop: "name",
-          fixed: "left",
           search: {
             type: "text",
             slot: "name",
