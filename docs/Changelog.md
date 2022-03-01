@@ -3,7 +3,7 @@ sidebarDepth: 0
 ---
 # 更新日志
 
-## 1.0.25 <small>2022-02-28</small>
+## 1.0.25 <small>2022-03-01</small>
 - #### 新增
 	- TablePage 支持`<el-table>`的 expand 展开行功能
 	
@@ -11,6 +11,11 @@ sidebarDepth: 0
 	- FormAuto 
 		- vaildate 功能优化
 		- select 远程搜索无数据时再次展开选项时，重置远程搜索关键词
+
+- #### 修复
+	- NumberRange 
+		- 部分文案错误
+		- 非数字导致回值问题
 
 
 ## 1.0.24 <small>2022-01-20</small>
