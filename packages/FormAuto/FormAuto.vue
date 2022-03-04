@@ -145,7 +145,12 @@
 							</el-checkbox-group>
 						</template>
 						<template v-else-if="item.type == 'select'">
-							<el-select v-model="model[name]" v-bind="item.props" v-select-scroll="item" v-on="item.on">
+							<el-select
+								v-model="model[name]"
+								v-select-scroll="item.loadScroll && item.props?item.props.remoteMethod:null"
+								v-bind="item.props"
+								v-on="item.on"
+							>
 								<el-option
 									v-for="(option,key) in selectOptions(item)"
 									:key="`${name}_${key}`"
@@ -156,7 +161,11 @@
 									<i v-if="option.icon" :class="option.icon"></i>
 									<span>{{ option.label }}</span>
 								</el-option>
-								<el-option v-if="item.optionLoading" value="el-formauto-option-loading">加载中</el-option>
+								<el-option
+									disabled
+									v-if="item.remoteParams && item.remoteParams.optionLoading"
+									value="el-formauto-option-loading"
+								>加载中</el-option>
 							</el-select>
 						</template>
 						<template v-else-if="item.type == 'cascader'">
@@ -565,28 +574,36 @@ export default class ElFormAuto extends Vue {
 					let remoteMethod = item.options;
 					item.props.filterable = true;
 					item.props.remote = true;
-					item.page = 1;
-					item.loadFinish = false;
-					item.props.remoteMethod = (query: string = "", isScroll?: boolean) => {
-						if (item.loadFinish == true) return
-						if (!isScroll) item.page = 1
-						if (item.page == 1) {
+					item.remoteParams = {
+						query: "",
+						page: 1,
+						loadFinish: false,
+						optionLoading: false,
+					};
+					item.props.remoteMethod = (query?: string) => {
+						if (item.remoteParams.query != query) {
+							item.remoteParams.query = query;
+							item.remoteParams.page = 1;
+							item.remoteParams.loadFinish = false;
+						} 
+						if (item.remoteParams.page == 1) {
 							item.options = []
 						}
-						item.optionLoading = true;
-						remoteMethod(query || "", item.page).then((options: ElAutoMixinOptions) => {
+						if (item.remoteParams.loadFinish) return
+						item.remoteParams.optionLoading = true;
+						remoteMethod(item.remoteParams.query || "", item.remoteParams.page).then((options: ElAutoMixinOptions) => {
 							return transformOptions(options)
 						}).then((options: ElAutoOption[]) => {
-							if (isScroll && options.length == 0) {
-								item.loadFinish = true;
+							if (options.length == 0) {
+								item.remoteParams.loadFinish = true;
 								return;
 							}
-							item.optionLoading = false;
+							item.remoteParams.optionLoading = false;
 							options = (item.options as ElAutoOption[]).concat(options)
 							item.options = options;
-							item.page++
+							item.remoteParams.page++
 						}).catch(() => {
-							item.optionLoading = false;
+							item.remoteParams.optionLoading = false;
 						});
 					};
 					item.props.remoteMethod("")
@@ -595,7 +612,7 @@ export default class ElFormAuto extends Vue {
 					}
 					let originVisibleChangeEvent = item.on["visible-change"] || (() => { })
 					item.on["visible-change"] = function (visible) {
-						originVisibleChangeEvent(visible);
+						originVisibleChangeEvent(visible)
 						if (visible == false && item.options && item.options.length == 0) {
 							item.props.remoteMethod.call(item, "")
 						}

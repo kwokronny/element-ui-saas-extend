@@ -3,6 +3,13 @@ sidebarDepth: 0
 ---
 # 更新日志
 
+## 1.0.26 <small>2022-03-04</small>
+- #### 新增
+	<!-- - FormAuto 触发remoteMethod -->
+	
+- #### 优化
+	- FormAuto 优化实现 select 组件 loadScroll 滚动加载
+
 ## 1.0.25 <small>2022-03-01</small>
 - #### 新增
 	- TablePage 支持`<el-table>`的 expand 展开行功能
