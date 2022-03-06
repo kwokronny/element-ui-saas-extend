@@ -333,8 +333,17 @@ export default class ElFormAuto extends Vue {
 	}
 
 	/**
-	 * 
+	 * 更新options
 	 */
+	public refreshOptions(fieldName: string) {
+		let field = this.fields[fieldName];
+		if (field && field.props.remoteMethod) {
+			this.$nextTick(function () {
+				field.props.remoteMethod();
+			});
+		}
+	}
+
 	private selectEcho(name: string, options: any): any {
 		let field = this.fields[name];
 		if (!field) return options;
@@ -585,7 +594,7 @@ export default class ElFormAuto extends Vue {
 							item.remoteParams.query = query;
 							item.remoteParams.page = 1;
 							item.remoteParams.loadFinish = false;
-						} 
+						}
 						if (item.remoteParams.page == 1) {
 							item.options = []
 						}
@@ -594,7 +603,7 @@ export default class ElFormAuto extends Vue {
 						remoteMethod(item.remoteParams.query || "", item.remoteParams.page).then((options: ElAutoMixinOptions) => {
 							return transformOptions(options)
 						}).then((options: ElAutoOption[]) => {
-							if (options.length == 0) {
+							if (options.length == 0 && item.remoteParams.page > 1) {
 								item.remoteParams.loadFinish = true;
 								return;
 							}
@@ -623,10 +632,14 @@ export default class ElFormAuto extends Vue {
 						item.props.remoteMethod.call(item, "")
 					}
 				} else if (item.options) {
-					transformOptions(item.options).then((options) => {
-						item.options = options
-						this.handleCheckedChange(item.name, this.value[item.name])
-					})
+					let remoteMethod = item.options;
+					item.props.remoteMethod = () => {
+						transformOptions(remoteMethod).then((options) => {
+							item.options = options
+							this.handleCheckedChange(item.name, this.value[item.name])
+						})
+					}
+					item.props.remoteMethod()
 				}
 			})
 		}

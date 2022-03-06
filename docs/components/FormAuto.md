@@ -468,28 +468,21 @@ export default {
               });
             });
           },
+          on: {
+            change: () => {
+              this.$refs["EditForm"].refreshOptions("remote");
+            },
+          },
         },
         remote: {
           col: 12,
           label: "远程搜索",
           type: "select",
           style: "width:100%",
-          // multiple: true,
           required: true,
           loadScroll: true,
           remote: true,
-          options: (query, page) => {
-            return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
-              return res.data
-                .filter((item) => item.username.indexOf(query) > -1)
-                .map((item) => {
-                  return {
-                    label: item.username,
-                    value: item.id * page,
-                  };
-                });
-            });
-          },
+          options: this.getOptions,
         },
         remoteMult: {
           col: 12,
@@ -569,6 +562,21 @@ export default {
             },
           ],
         },
+        remoteCheck: {
+          label: "复选框",
+          type: "check",
+          required: true,
+          options: () => {
+            return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
+              return res.data.map((item) => {
+                return {
+                  label: item.username,
+                  value: item.id,
+                }
+              });
+            });
+          },
+        }
       },
     };
   },
@@ -580,6 +588,19 @@ export default {
         { label: "测试", value: "123" },
         { label: "测试2", value: "1233" },
       ];
+    },
+    getOptions(query, page) {
+      console.log(this.model.asyncSelect);
+      return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query:this.model.asyncSelect, page } }).then((res) => {
+        return res.data
+          .filter((item) => item.username.indexOf(query) > -1)
+          .map((item) => {
+            return {
+              label: item.username,
+              value: item.id * page,
+            };
+          });
+      });
     },
     reset() {
       this.$refs["EditForm"].reset();
