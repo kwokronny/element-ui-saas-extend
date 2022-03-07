@@ -3,9 +3,9 @@ sidebarDepth: 0
 ---
 # 更新日志
 
-## 1.0.26 <small>2022-03-04</small>
+## 1.0.26 <small>2022-03-07</small>
 - #### 新增
-	<!-- - FormAuto 触发remoteMethod -->
+	- FormAuto 增加 refreshOptions 方式，可用于联动更新选项
 	
 - #### 优化
 	- FormAuto 优化实现 select 组件 loadScroll 滚动加载

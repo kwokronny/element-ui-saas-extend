@@ -116,7 +116,7 @@ export declare interface ElFormAutoField {
    * select 可滚动分页加载
    * @default true
    */
-  loadScroll?:boolean;
+  loadScroll?: boolean;
   /**
    * type为 datetimerange,timerange,daterange,slider,numberrange 时 必填
    * 范围选择时返回的范围 值和会按顺序返回rangeName中的值
@@ -152,6 +152,7 @@ export declare class ElFormAuto extends ElForm {
   /** 所有表单项标签是否隐藏 */
   labelHidden: boolean;
   reset(): void;
+  refreshOptions(field: string): void;
   getModel(): Record<string, any>;
   setModel(model: Record<string, any>): void;
 }

@@ -637,6 +637,9 @@ export default class ElFormAuto extends Vue {
 						transformOptions(remoteMethod).then((options) => {
 							item.options = options
 							this.handleCheckedChange(item.name, this.value[item.name])
+							this.$nextTick(function(){
+								this.FormAuto.clearValidate(item.name)
+							})
 						})
 					}
 					item.props.remoteMethod()

@@ -572,11 +572,11 @@ export default {
                 return {
                   label: item.username,
                   value: item.id,
-                }
+                };
               });
             });
           },
-        }
+        },
       },
     };
   },
@@ -591,7 +591,7 @@ export default {
     },
     getOptions(query, page) {
       console.log(this.model.asyncSelect);
-      return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query:this.model.asyncSelect, page } }).then((res) => {
+      return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query: this.model.asyncSelect, page } }).then((res) => {
         return res.data
           .filter((item) => item.username.indexOf(query) > -1)
           .map((item) => {
@@ -774,13 +774,13 @@ export default {
 | number        | &lt;el-input-number&gt;                     | 计数器           |
 | numberrange   | &lt;el-number-range&gt;                     | 数值范围         |
 | date          | &lt;el-date-picker type="date"&gt;          | 日期选择         |
-| year          | &lt;el-date-picker type="year"&gt;          | 日期选择         |
-| month         | &lt;el-date-picker type="month"&gt;         | 日期选择         |
-| week          | &lt;el-date-picker type="week"&gt;          | 日期选择         |
-| dates         | &lt;el-date-picker type="dates"&gt;         | 日期选择         |
+| year          | &lt;el-date-picker type="year"&gt;          | 年份选择         |
+| month         | &lt;el-date-picker type="month"&gt;         | 月份选择         |
+| week          | &lt;el-date-picker type="week"&gt;          | 周选择           |
+| dates         | &lt;el-date-picker type="dates"&gt;         | 多日期选择       |
 | datetime      | &lt;el-date-picker type="datetime"&gt;      | 日期时间选择     |
 | daterange     | &lt;el-date-picker type="daterange"&gt;     | 日期范围选择     |
-| monthrange    | &lt;el-date-picker type="date"&gt;          | 日期选择         |
+| monthrange    | &lt;el-date-picker type="date"&gt;          | 月份范围选择     |
 | datetimerange | &lt;el-date-picker type="datetimerange"&gt; | 日期时间范围选择 |
 | time          | &lt;el-time-picker&gt;                      | 时间选择         |
 | timerange     | &lt;el-time-picker is-range&gt;             | 时间范围选择     |
@@ -796,13 +796,14 @@ export default {
 
 ### Method
 
-| 方法名          | 描述                     | 参数                                                 |
-| :-------------- | :----------------------- | :--------------------------------------------------- |
-| reset()         | 重置表单                 | -                                                    |
-| validate()      | 对整个表单进行校验的方法 | `Promise<void> | (valid:boolean)=>void`              |
-| validateField() | 对整个表单进行校验的方法 | `(prop:string,callback:(errMsg:string)=>void)=>void` |
-| getModel()      | 获取表单所有参数         | name                                                 |
-| setModel()      | 设置表单对应参数         | name,value                                           |
+| 方法名           | 描述                     | 参数                                                 |
+| :--------------- | :----------------------- | :--------------------------------------------------- |
+| reset()          | 重置表单                 | -                                                    |
+| refreshOptions() | 刷新选项                 | `(fieldName: string)=>void`                          |
+| validate()       | 对整个表单进行校验的方法 | `Promise<void> | (valid:boolean)=>void`              |
+| validateField()  | 对整个表单进行校验的方法 | `(prop:string,callback:(errMsg:string)=>void)=>void` |
+| getModel()       | 获取表单所有参数         | name                                                 |
+| setModel()       | 设置表单对应参数         | name,value                                           |
 
 ### Slot
 
