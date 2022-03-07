@@ -202,13 +202,13 @@
 <script lang="ts">
 import { Vue, Component, Prop, Ref, Watch, Model } from "vue-property-decorator";
 import { Form } from "element-ui";
-import { forEach, cloneDeep, debounce, uniqBy, omit } from "lodash-es";
+import { forEach, cloneDeep, uniqBy, omit } from "lodash-es";
 import { ElFormAutoField } from "../../types/form-auto";
 import { ElAutoMixinOptions, ElAutoOption } from "../../types/saas-extend"
 import { transformOptions } from "../util"
 import DynamicSlot from "../components/DynamicSlot"
 import locale from "../../src/mixin/locale"
-import selectLoadScroll from "../../src/mixin/selectLoadScroll"
+import selectScroll from "../../src/mixin/selectScroll"
 import { ValidateCallback } from "element-ui/types/form";
 
 @Component({
@@ -218,7 +218,7 @@ import { ValidateCallback } from "element-ui/types/form";
 			slotRoot: this
 		}
 	},
-	mixins: [locale, selectLoadScroll],
+	mixins: [locale, selectScroll],
 	components: {
 		DynamicSlot
 	}
