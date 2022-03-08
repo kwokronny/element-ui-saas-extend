@@ -332,16 +332,15 @@ export default {
         message: `<pre>${JSON.stringify(this.model, undefined, 3)}</pre>`,
       });
     },
-    getValidModel() {
-      this.$refs["EditForm"].validate((valid) => {
-        if (valid) {
-          this.$msgbox({
-            title: "表单返回数据",
-            dangerouslyUseHTMLString: true,
-            message: `<pre>${JSON.stringify(this.model, undefined, 3)}</pre>`,
-          });
-        }
-      });
+    async getValidModel() {
+      try{
+        await this.$refs["EditForm"].validate()
+        this.$msgbox({
+          title: "表单返回数据",
+          dangerouslyUseHTMLString: true,
+          message: `<pre>${JSON.stringify(this.model, undefined, 3)}</pre>`,
+        });
+      }catch{ }
     },
   },
 };

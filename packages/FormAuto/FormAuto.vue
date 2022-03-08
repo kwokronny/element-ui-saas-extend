@@ -403,8 +403,8 @@ export default class ElFormAuto extends Vue {
 	 * @public
 	 * 异步验证成功后获取表单所有参数
 	 */
-	public validate(cb?: ValidateCallback): Promise<void> | void {
-		cb ? this.FormAuto.validate(cb) : this.FormAuto.validate();
+	public validate(cb?: ValidateCallback): Promise<boolean> | void {
+		return cb ? this.FormAuto.validate(cb) : this.FormAuto.validate();
 	}
 
 	/**
@@ -589,7 +589,7 @@ export default class ElFormAuto extends Vue {
 						loadFinish: false,
 						optionLoading: false,
 					};
-					item.props.remoteMethod = (query?: string) => {
+					item.props.remoteMethod = (query: string = "") => {
 						if (item.remoteParams.query != query) {
 							item.remoteParams.query = query;
 							item.remoteParams.page = 1;
@@ -629,6 +629,7 @@ export default class ElFormAuto extends Vue {
 					let originClearEvent = item.on.clear || (() => { })
 					item.on.clear = function () {
 						originClearEvent()
+						item.remoteParams.query = "clear";
 						item.props.remoteMethod.call(item, "")
 					}
 				} else if (item.options) {
@@ -637,7 +638,7 @@ export default class ElFormAuto extends Vue {
 						transformOptions(remoteMethod).then((options) => {
 							item.options = options
 							this.handleCheckedChange(item.name, this.value[item.name])
-							this.$nextTick(function(){
+							this.$nextTick(function () {
 								this.FormAuto.clearValidate(item.name)
 							})
 						})

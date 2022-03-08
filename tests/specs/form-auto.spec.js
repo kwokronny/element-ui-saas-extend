@@ -586,6 +586,7 @@ describe("FormAuto", () => {
                 label: "remoteSelectClear",
                 type: "select",
                 remote: true,
+                clearable: true,
                 options: async (query, page) => {
                   return userData
                     .filter((item) => item.username.indexOf(query) > -1)
@@ -716,7 +717,6 @@ describe("FormAuto", () => {
     let data = {
       id: 45,
       switch: false,
-      slider: 23,
       text: "",
       password: "",
       textarea: "",
@@ -726,8 +726,6 @@ describe("FormAuto", () => {
       datetimeRange: [],
       time: "",
       timeRange: ["00:00:00", "05:00:00"],
-      radio: 2,
-      radiobutton: 0,
       check: [],
       rate: 0,
       select: 0,
@@ -741,12 +739,14 @@ describe("FormAuto", () => {
     vm.$refs.form.validateField("password");
     await waitImmediate();
     expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(1);
-    vm.model = Object.assign({}, vm.model, data);
+    vm.model = Object.assign({}, data);
     await waitImmediate();
     try {
       await vm.$refs.form.validate();
-    } catch {
-      expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(10);
+      expect(true).to.be.false;
+      console.log(1)
+    } catch(e) {
+      expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(11);
     }
   });
   

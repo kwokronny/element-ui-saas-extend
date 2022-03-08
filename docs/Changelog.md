@@ -3,6 +3,12 @@ sidebarDepth: 0
 ---
 # 更新日志
 
+## 1.0.27 <small>2022-03-08</small>
+- #### 修复
+	- FormAuto 
+		- validate函数 try/catch 无效问题
+		- select 无数据时刷新数据问题及清空选项时刷新数据问题修复
+
 ## 1.0.26 <small>2022-03-07</small>
 - #### 新增
 	- FormAuto 增加 refreshOptions 方式，可用于联动更新选项
