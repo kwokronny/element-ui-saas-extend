@@ -338,9 +338,8 @@ export default class ElFormAuto extends Vue {
 	public refreshOptions(fieldName: string) {
 		let field = this.fields[fieldName];
 		if (field && field.props.remoteMethod) {
-			this.$nextTick(function () {
-				field.props.remoteMethod();
-			});
+			field.remoteParams.query = "refresh"
+			field.props.remoteMethod();
 		}
 	}
 

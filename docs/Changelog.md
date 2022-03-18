@@ -3,6 +3,10 @@ sidebarDepth: 0
 ---
 # 更新日志
 
+## 1.0.28 <small>2022-03-18</small>
+- #### 修复
+	- FormAuto 方法 refreshOptions 在部分情况下未触发。
+
 ## 1.0.27 <small>2022-03-08</small>
 - #### 修复
 	- FormAuto 
