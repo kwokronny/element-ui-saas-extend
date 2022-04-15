@@ -602,14 +602,15 @@ export default class ElFormAuto extends Vue {
 						remoteMethod(item.remoteParams.query || "", item.remoteParams.page).then((options: ElAutoMixinOptions) => {
 							return transformOptions(options)
 						}).then((options: ElAutoOption[]) => {
+							item.remoteParams.optionLoading = false;
 							if (options.length == 0 && item.remoteParams.page > 1) {
 								item.remoteParams.loadFinish = true;
 								return;
 							}
-							item.remoteParams.optionLoading = false;
 							options = (item.options as ElAutoOption[]).concat(options)
-							item.options = options;
-							item.remoteParams.page++
+							item.options = options; 
+							item.remoteParams.page++;
+
 						}).catch(() => {
 							item.remoteParams.optionLoading = false;
 						});
@@ -629,20 +630,17 @@ export default class ElFormAuto extends Vue {
 					item.on.clear = function () {
 						originClearEvent()
 						item.remoteParams.query = "clear";
+						item.echoOptions = []
 						item.props.remoteMethod.call(item, "")
 					}
 				} else if (item.options) {
-					let remoteMethod = item.options;
-					item.props.remoteMethod = () => {
-						transformOptions(remoteMethod).then((options) => {
-							item.options = options
-							this.handleCheckedChange(item.name, this.value[item.name])
-							this.$nextTick(function () {
-								this.FormAuto.clearValidate(item.name)
-							})
+					transformOptions(item.options).then((options) => {
+						item.options = options
+						this.handleCheckedChange(item.name, this.value[item.name])
+						this.$nextTick(function () {
+							this.FormAuto.clearValidate(item.name)
 						})
-					}
-					item.props.remoteMethod()
+					})
 				}
 			})
 		}

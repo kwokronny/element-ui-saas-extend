@@ -64,9 +64,13 @@ export default {
         el._vClipboard = clipboard;
       },
       update: function(el: DirectiveElement, binding: DirectiveBinding): void {
-        el._vClipboard.text = function() {
-          return binding.value;
-        };
+        if (typeof binding.value == "string") {
+          el._vClipboard.text = function() {
+            return binding.value;
+          };
+        } else if (typeof binding.value == "function") {
+          el._vClipboard.text = binding.value;
+        }
       },
       unbind: function(el: DirectiveElement, binding: DirectiveBinding): void {
         if (el._vClipboard) {

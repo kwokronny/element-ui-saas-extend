@@ -333,14 +333,14 @@ export default {
       });
     },
     async getValidModel() {
-      try{
-        await this.$refs["EditForm"].validate()
+      try {
+        await this.$refs["EditForm"].validate();
         this.$msgbox({
           title: "表单返回数据",
           dangerouslyUseHTMLString: true,
           message: `<pre>${JSON.stringify(this.model, undefined, 3)}</pre>`,
         });
-      }catch{ }
+      } catch {}
     },
   },
 };
@@ -493,7 +493,9 @@ export default {
           loadScroll: true,
           remote: true,
           options: (query, page) => {
+            console.log(page)
             return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
+              if (page > 2) return [];
               return res.data
                 .filter((item) => item.username.indexOf(query) > -1)
                 .map((item) => {
