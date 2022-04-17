@@ -338,8 +338,9 @@ export default class ElFormAuto extends Vue {
 	public refreshOptions(fieldName: string) {
 		let field = this.fields[fieldName];
 		if (field && field.props.remoteMethod) {
-			field.remoteParams.query = "refresh"
-			field.props.remoteMethod();
+			field.remoteParams.query = "refresh";
+			field.echoOptions = [];
+			field.remoteMethod();
 		}
 	}
 
@@ -588,7 +589,7 @@ export default class ElFormAuto extends Vue {
 						loadFinish: false,
 						optionLoading: false,
 					};
-					item.props.remoteMethod = (query: string = "") => {
+					item.remoteMethod = (query: string = "") => {
 						if (item.remoteParams.query != query) {
 							item.remoteParams.query = query;
 							item.remoteParams.page = 1;
@@ -608,14 +609,14 @@ export default class ElFormAuto extends Vue {
 								return;
 							}
 							options = (item.options as ElAutoOption[]).concat(options)
-							item.options = options; 
-							item.remoteParams.page++;
-
+							item.options = options;
+							item.remoteParams.page = item.remoteParams.page + 1;
 						}).catch(() => {
 							item.remoteParams.optionLoading = false;
 						});
 					};
-					item.props.remoteMethod("")
+					item.props.remoteMethod = item.remoteMethod;
+					item.props.remoteMethod("");
 					if (!item.on) {
 						item.on = {}
 					}
@@ -634,13 +635,17 @@ export default class ElFormAuto extends Vue {
 						item.props.remoteMethod.call(item, "")
 					}
 				} else if (item.options) {
-					transformOptions(item.options).then((options) => {
-						item.options = options
-						this.handleCheckedChange(item.name, this.value[item.name])
-						this.$nextTick(function () {
-							this.FormAuto.clearValidate(item.name)
+					let remoteMethod = item.options;
+					item.remoteMethod = () => {
+						transformOptions(remoteMethod).then((options) => {
+							item.options = options
+							this.handleCheckedChange(item.name, this.value[item.name])
+							this.$nextTick(function () {
+								this.FormAuto.clearValidate(item.name)
+							})
 						})
-					})
+					}
+					item.remoteMethod()
 				}
 			})
 		}

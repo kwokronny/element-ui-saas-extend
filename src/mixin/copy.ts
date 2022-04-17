@@ -11,12 +11,12 @@ export default {
       bind: function(el: DirectiveElement, binding: DirectiveBinding, vnode: VNode): void {
         // let copyText = binding.value;
         let text: any = undefined;
-        if (typeof binding.value == "string") {
-          text = function() {
-            return binding.value;
-          };
-        } else if (typeof binding.value == "function") {
+        if (typeof binding.value == "function") {
           text = binding.value;
+        } else {
+          text = function() {
+            return `${binding.value}`;
+          };
         }
         let clipboard = new window.ClipboardJS(el, {
           text,
@@ -64,12 +64,12 @@ export default {
         el._vClipboard = clipboard;
       },
       update: function(el: DirectiveElement, binding: DirectiveBinding): void {
-        if (typeof binding.value == "string") {
-          el._vClipboard.text = function() {
-            return binding.value;
-          };
-        } else if (typeof binding.value == "function") {
+        if (typeof binding.value == "function") {
           el._vClipboard.text = binding.value;
+        } else {
+          el._vClipboard.text = function() {
+            return `${binding.value}`;
+          };
         }
       },
       unbind: function(el: DirectiveElement, binding: DirectiveBinding): void {

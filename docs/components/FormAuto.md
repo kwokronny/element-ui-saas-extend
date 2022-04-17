@@ -493,9 +493,7 @@ export default {
           loadScroll: true,
           remote: true,
           options: (query, page) => {
-            console.log(page)
             return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
-              if (page > 2) return [];
               return res.data
                 .filter((item) => item.username.indexOf(query) > -1)
                 .map((item) => {
@@ -591,8 +589,9 @@ export default {
       ];
     },
     getOptions(query, page) {
-      console.log(this.model.asyncSelect);
+      // console.log(this.model.asyncSelect);
       return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query: this.model.asyncSelect, page } }).then((res) => {
+        if (page > 2) return [];
         return res.data
           .filter((item) => item.username.indexOf(query) > -1)
           .map((item) => {
