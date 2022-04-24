@@ -201,11 +201,11 @@
 <script lang="ts">
 import { Vue, Component, Prop, Ref, Watch, PropSync } from "vue-property-decorator"
 import { Table } from "element-ui"
-import { omit, cloneDeep } from "lodash-es"
+import { omit, cloneDeep, keyBy } from "lodash-es"
 import ElTableDraggable from "element-ui-el-table-draggable"
 import { ElFormAutoField } from "../../types/form-auto"
 import { ElTablePageColumn, ElTablePageDataMap } from "types/table-page"
-import { transformOptions, arrayToRecord } from "../util"
+import { transformOptions } from "../util"
 import ElFormAuto from "../FormAuto";
 import EnumTags from "./EnumTags.vue";
 import DynamicSlot from "../components/DynamicSlot"
@@ -282,7 +282,7 @@ export default class ElTablePage extends Vue {
 			}
 			if (column.enum) {
 				let options = await transformOptions(column.enum)
-				column.enum = arrayToRecord(options, { key: "value", value: "label" })
+				column.enum = keyBy(options, "value")
 			}
 		})
 		if (this.customColumns) {

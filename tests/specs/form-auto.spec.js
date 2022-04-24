@@ -782,3 +782,6 @@ describe("FormAuto", () => {
     expect(vm.$el.querySelector(".el-form-item[data-prop=input] span.input-slot").textContent).to.equal("input_test_text");
   });
 });
+
+
+// TODO: 编写 全选 复选框

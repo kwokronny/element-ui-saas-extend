@@ -128,7 +128,7 @@
 							>{{$t("formauto.checkAll")}}</el-checkbox>
 							<el-checkbox-group
 								v-model="model[name]"
-								style="display: inline-block"
+								style="display: inline"
 								@change="handleCheckedChange(name,$event)"
 								v-bind="item.props"
 								v-on="item.on"
@@ -255,8 +255,6 @@ export default class ElFormAuto extends Vue {
 	 */
 	@Prop({ type: Number, default: 15 }) readonly gutter!: number;
 
-	private acceptValue: boolean = false;
-
 	private fields: Record<string, ElFormAutoField> = {};
 	private model: Record<string, any> = {};
 	private check: Record<string, boolean | number> = {};
@@ -272,12 +270,10 @@ export default class ElFormAuto extends Vue {
 		value && this.setModel(value);
 	}
 
-
 	@Watch("model", { immediate: true, deep: true })
 	private onModelChange() {
 		this.$emit("input", this.getModel());
 	}
-
 
 	/**
 	 * @public
@@ -300,7 +296,6 @@ export default class ElFormAuto extends Vue {
 				}
 			}
 		});
-		// console.log(Object.assign({}, this.value, data))
 		return Object.assign({}, this.value, data);
 	}
 
@@ -327,8 +322,8 @@ export default class ElFormAuto extends Vue {
 				} else if (field.type == "check") {
 					this.handleCheckedChange(name, value);
 				}
-				this.model[name] = value;
 			}
+			this.model[name] = value;
 		}
 	}
 
@@ -422,8 +417,8 @@ export default class ElFormAuto extends Vue {
 		if (this.check[name] === true) {
 			let options = this.fields[name].options as Array<ElAutoOption>;
 			if (Array.isArray(options)) {
-				options.forEach((item) => {
-					!item.disabled && this.model[name].push(`${item.value}`);
+				options.forEach((item: Record<string, any>) => {
+					!item.disabled && this.model[name].push(item.value);
 				});
 			}
 		}
@@ -497,6 +492,7 @@ export default class ElFormAuto extends Vue {
 			if (/datetime/g.test(item.type)) {
 				item.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
 				item.props.format = "yyyy-MM-dd HH:mm:ss";
+				item.props.defaultTime = item.props.defaultTime || ["00:00:00", "23:59:59"]
 			} else if (/date/g.test(item.type)) {
 				item.props.valueFormat = "yyyy-MM-dd";
 				item.props.format = "yyyy-MM-dd";
@@ -508,7 +504,7 @@ export default class ElFormAuto extends Vue {
 				let type = /range/g.test(item.type) ? "range" : "date"
 				let pickerOptions = this.$ELEMENT.pickerOptions[type];
 				if (pickerOptions) {
-					item.props.pickerOptions = item.props.pickerOptions || pickerOptions;
+					item.props.pickerOptions = Object.assign({}, pickerOptions, item.props.pickerOptions);
 				}
 			}
 

@@ -3,6 +3,13 @@ sidebarDepth: 0
 ---
 # 更新日志
 
+## 1.0.29 <small>2022-04-24</small>
+- #### 修复
+	- FormAuto 
+		- select 的回显选项在清空或 刷新Options 时清空
+		- datetimerange 增加默认 defaultTime 属性
+		- check 的全选与选项样式问题
+
 ## 1.0.28 <small>2022-03-18</small>
 - #### 修复
 	- FormAuto 方法 refreshOptions 在部分情况下未触发。

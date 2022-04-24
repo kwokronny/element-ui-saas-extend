@@ -24,11 +24,3 @@ export async function transformOptions(options: ElAutoMixinOptions | ((query?: s
   }
   return arr;
 }
-
-export function arrayToRecord(arr: any[], { key, value }: { key: string | "__index"; value: string }): Record<string, any> {
-  const map: Record<string, any> = {};
-  arr.forEach((item) => {
-    map[`${item[key]}`] = Object.assign({ label: `${item[value]}` }, item);
-  });
-  return map;
-}
