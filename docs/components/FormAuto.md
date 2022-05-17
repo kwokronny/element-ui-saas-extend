@@ -534,6 +534,7 @@ export default {
           col: 12,
           label: "级联框",
           type: "cascader",
+          props: { label: "name", value: "id", children: "childrenList" },
           options: () => {
             return axios.get("/element-ui-saas-extend/json/cascader.json").then((res) => {
               return res.data;

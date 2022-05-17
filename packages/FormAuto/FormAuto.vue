@@ -170,8 +170,9 @@
 						</template>
 						<template v-else-if="item.type == 'cascader'">
 							<el-cascader
+								v-if="Array.isArray(item.options)"
 								v-model="model[name]"
-								:options="Array.isArray(item.options) ? item.options : []"
+								:options="item.options"
 								v-bind="item.props"
 								v-on="item.on"
 							></el-cascader>
@@ -633,7 +634,7 @@ export default class ElFormAuto extends Vue {
 				} else if (item.options) {
 					let remoteMethod = item.options;
 					item.remoteMethod = () => {
-						transformOptions(remoteMethod).then((options) => {
+						transformOptions(remoteMethod, item.type != 'cascader').then((options) => {
 							item.options = options
 							this.handleCheckedChange(item.name, this.value[item.name])
 							this.$nextTick(function () {

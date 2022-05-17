@@ -1,9 +1,10 @@
 import omit from "lodash-es/omit";
 import { ElAutoMixinOptions, ElAutoOption } from "types/saas-extend";
 
-export async function transformOptions(options: ElAutoMixinOptions | ((query?: string) => any)): Promise<ElAutoOption[]> {
+export async function transformOptions(options: ElAutoMixinOptions | ((query?: string) => any), transition: boolean = true): Promise<any> {
   if (options instanceof Function) {
     options = (await options()) as ElAutoMixinOptions;
+    if (!transition) return options;
   }
   const arr: ElAutoOption[] = [];
   const isArray: boolean = Array.isArray(options);
