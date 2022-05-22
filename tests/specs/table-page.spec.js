@@ -84,8 +84,9 @@ describe("TablePage", () => {
       expect(ths.map((node) => node.textContent.trim()).filter((o) => o)).to.eql(["姓名", "邮箱", "积分", "余额", "注册日期", "状态", "标签"]);
       done();
     });
+
     // it("row length", () => {
-    //   expect(vm.$el.querySelectorAll('.el-table__body-wrapper tbody tr')).to.length(15);
+    //   expect(vm.$el.querySelectorAll(".el-table__body-wrapper tbody tr")).to.length(15);
     // });
   });
 });

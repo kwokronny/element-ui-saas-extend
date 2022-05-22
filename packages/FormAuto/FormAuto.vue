@@ -466,6 +466,8 @@ export default class ElFormAuto extends Vue {
 			} else if (item.type == "timerange") {
 				let defaultValue = ["00:00:00", "00:00:00"]
 				item.value = item.value || defaultValue;
+			} else if (item.type == "datetimerange") {
+				item.props.defaultTime = item.props.defaultTime || ["00:00:00", "23:59:59"]
 			} else if (/rate|number|slider/.test(item.type)) {
 				item.value = parseInt(item.value) || 0;
 			} else if (item.type == "switch") {
@@ -493,7 +495,6 @@ export default class ElFormAuto extends Vue {
 			if (/datetime/g.test(item.type)) {
 				item.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
 				item.props.format = "yyyy-MM-dd HH:mm:ss";
-				item.props.defaultTime = item.props.defaultTime || ["00:00:00", "23:59:59"]
 			} else if (/date/g.test(item.type)) {
 				item.props.valueFormat = "yyyy-MM-dd";
 				item.props.format = "yyyy-MM-dd";

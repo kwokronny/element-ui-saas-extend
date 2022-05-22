@@ -1,6 +1,7 @@
 import TablePage from "./TablePage/index";
 import FormAuto from "./FormAuto/index";
 import NumberRange from "./NumberRange/index";
+import TableButton from "./TableButton/index";
 import { VueConstructor } from "vue/types/umd";
 import locale from "../src/locale";
 import localeMixin from "../src/mixin/locale";
@@ -18,6 +19,7 @@ const install = (Vue: VueConstructor, options: any = {}) => {
   Vue.component("ElNumberRange", NumberRange);
   Vue.component("ElFormAuto", FormAuto);
   Vue.component("ElTablePage", TablePage);
+  Vue.component("ElTableButton", TableButton);
 };
 
 if (typeof window !== "undefined" && window.Vue) {
