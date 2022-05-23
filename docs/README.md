@@ -21,12 +21,11 @@ footer: MIT Licensed | kwokronny.top
 
 ```vue
 <template>
-  <el-table-button>
-    <el-button type="primary">新增</el-button>
-    <el-button type="primary">编辑</el-button>
-    <el-button type="warning">禁用</el-button>
-    <el-button type="danger">删除</el-button>
-    <el-button type="danger" slot="more">more</el-button>
+  <el-table-button :button-prop="{size:'mini'}" :max-limit="0" more-text="操作">
+    <el-button size="mini" type="primary">新增</el-button>
+    <el-button size="mini" type="primary">编辑</el-button>
+    <el-button size="mini" type="warning">禁用</el-button>
+    <el-button size="mini" type="danger">删除</el-button>
   </el-table-button>
 </template>
 ```

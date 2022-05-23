@@ -3,11 +3,10 @@ import { Vue, Component, Prop } from "vue-property-decorator";
 import { VNode } from "vue";
 
 @Component({
-  name: "TableButton",
+  name: "ButtonGroup",
 })
 export default class TableButton extends Vue {
-  @Prop({ type: Number, default: 2 }) maxLimit!: number;
-
+  @Prop({ type: Number, default: 3 }) maxLimit!: number;
   @Prop({ type: String, default: "..." }) moreText!: string;
   @Prop({
     type: Object,
@@ -25,41 +24,54 @@ export default class TableButton extends Vue {
     // @ts-ignore
     let moreBtn = this.$slots && this.$slots.more;
 
-    let ellipsisBtn: VNode[] = [
-      h(
-        "span",
-        {
-          directives: [
+    let ellipsisBtn: VNode[] = moreBtn
+      ? [
+          h(
+            "span",
             {
-              name: "popover",
-              arg: "ElTableButtonPopover",
+              directives: [
+                {
+                  name: "popover",
+                  arg: "ElTableButtonPopover",
+                },
+              ],
             },
-          ],
-          props: Object.assign({}, { type: "default" }),
-        },
-        moreBtn
-      ),
-    ] || [
-      h(
-        "el-button",
-        {
-          directives: [
+            moreBtn
+          ),
+        ]
+      : [
+          h(
+            "el-button",
             {
-              name: "popover",
-              arg: "ElTableButtonPopover",
+              directives: [
+                {
+                  name: "popover",
+                  arg: "ElTableButtonPopover",
+                },
+              ],
+              props: Object.assign({}, this.buttonProp),
             },
-          ],
-          props: Object.assign({}, { type: "default" }),
-        },
-        this.moreText
-      ),
-    ];
+            this.moreText
+          ),
+        ];
     let needPopover = slots.length > this.maxLimit;
-    ellipsisBtn.push(h("el-popover", { ref: "ElTableButtonPopover" }, [h("div", slots.slice(this.maxLimit, slots.length))]));
+    ellipsisBtn.push(
+      h(
+        "el-popover",
+        {
+          ref: "ElTableButtonPopover",
+          props: {
+            width: 100,
+            popperClass: "el-table-button__popover",
+          },
+        },
+        [h("div", slots.slice(this.maxLimit, slots.length))]
+      )
+    );
     let view = slots.slice(0, this.maxLimit);
     if (needPopover) {
       view = view.concat(ellipsisBtn);
     }
-    return h("div", view);
+    return h("div", { class: "el-table-button" }, view);
   }
 }

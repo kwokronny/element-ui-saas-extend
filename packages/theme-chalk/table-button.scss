@@ -1,0 +1,10 @@
+.el-table-button {
+  &__popover {
+    min-width: 80px;
+    .el-button {
+      display: block;
+      margin: 4px 0;
+      width: 100%;
+    }
+  }
+}
