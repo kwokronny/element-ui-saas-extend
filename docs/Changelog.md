@@ -3,6 +3,10 @@ sidebarDepth: 0
 ---
 # 更新日志
 
+## 1.0.31 <small>2022-05-23</small>
+- #### 修复
+	- FormAuto 中 `DatePicker` 因对 `defaultTime` 属性导致清空日期后组件报错
+
 ## 1.0.30 <small>2022-05-18</small>
 - #### 修复
 	- FormAuto 中 `Cascader 级联框` 因对 options 值统一导致的 该组件 `props` 属性失效
