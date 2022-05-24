@@ -168,6 +168,9 @@ export default {
           label: "级联框",
           type: "cascader",
           required: true,
+          props: {
+            emitPath: true,
+          },
           options: [
             {
               label: "节点1",

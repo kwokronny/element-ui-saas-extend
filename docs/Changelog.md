@@ -3,8 +3,10 @@ sidebarDepth: 0
 ---
 # 更新日志
 
-## 1.0.31 <small>2022-05-23</small>
+
+## 1.0.31 <small>2022-05-24</small>
 - #### 修复
+	- FormAuto 中 `Cascader` 对 `props.emitPath` 属性处理其返回不同类型的值对应的 require 必填验证规则类型
 	- FormAuto 中 `DatePicker` 因对 `defaultTime` 属性导致清空日期后组件报错
 
 ## 1.0.30 <small>2022-05-18</small>
