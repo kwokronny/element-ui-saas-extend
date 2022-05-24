@@ -546,8 +546,12 @@ export default class ElFormAuto extends Vue {
 					case "daterange":
 					case "timerange":
 					case "datetimerange":
-					case "cascader":
 						requiredRule.type = "array";
+						break;
+					case "cascader":
+						if (item.props.props && item.props.props.emitPath == true) {
+							requiredRule.type = "array";
+						}
 						break;
 					case "select":
 						if (item.multiple) {
