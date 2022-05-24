@@ -15,20 +15,21 @@ jobs:
       with:
         node-version: '14.16.1'
         registry-url: 'https://registry.npmjs.org'
-    - name: Get version
+    - run: yarn install
+    - run: yarn build
+    - run: yarn remove element-ui vue -D
+    - run: yarn add element-ui vue -P
+    - name: Get Version
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-    - run: echo ${{ steps.get_version.outputs.VERSION }}
-    # - run: yarn install
-    # - run: yarn build
-    # - run: yarn remove element-ui vue -D
-    # - run: yarn add element-ui vue -P
+    - run: npm version ${{ steps.get_version.outputs.VERSION }}  
+    - name: Publish Package 
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+      run: npm publish --access public
 
     # - name: Get version
     #   id: get_version
     #   run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
     # - run: echo ${{ steps.get_version.outputs.VERSION }}
-    # - name: Publish Package 
-    #   env:
-    #     NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
-    #   run: npm publish --access public
+  
