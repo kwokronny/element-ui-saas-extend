@@ -32,4 +32,7 @@ export default {
     cancel: "Cancel",
     save: "Save",
   },
+  morepopover: {
+    more: "more",
+  },
 };

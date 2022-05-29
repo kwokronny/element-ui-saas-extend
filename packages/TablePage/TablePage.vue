@@ -233,6 +233,9 @@ export default class ElTablePage extends Vue {
 
 	@Prop({ type: Object, default: () => { return { inline: true } } }) searchProps!: Record<string, any>;
 
+	@Prop({ type: Boolean, default: false }) showOverflowTooltip!: boolean;
+
+
 	@Prop({
 		type: Object,
 		validator: (value: Record<string, boolean | string>) => {
@@ -284,6 +287,7 @@ export default class ElTablePage extends Vue {
 				let options = await transformOptions(column.enum)
 				column.enum = keyBy(options, "value")
 			}
+			column.showOverflowTooltip = column.showOverflowTooltip || this.showOverflowTooltip;
 		})
 		if (this.customColumns) {
 			// 从localStorage获取存储的自定义列配置

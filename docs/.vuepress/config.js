@@ -48,7 +48,7 @@ module.exports = {
           },
           {
             title: "组件",
-            children: ["/components/Copy", "/components/NumberRange", "/components/FormAuto", "/components/TablePage"],
+            children: ["/components/Copy", "/components/NumberRange", "/components/MorePopover", "/components/FormAuto", "/components/TablePage"],
           },
           "/Donate",
         ],

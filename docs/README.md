@@ -17,17 +17,3 @@ footer: MIT Licensed | kwokronny.top
 
 由于近期工作主要偏向 SaaS 业务开发，在表单和表格的交互上的开发有很高重复性，为减少重复工作量，决定整理个针对 SaaS 业务的预设组件库。项目在 Element UI 套件的基础上开发，就作为他的扩展组件库吧。
 
-::: demo
-
-```vue
-<template>
-  <el-table-button :button-prop="{size:'mini'}" :max-limit="0" more-text="操作">
-    <el-button size="mini" type="primary">新增</el-button>
-    <el-button size="mini" type="primary">编辑</el-button>
-    <el-button size="mini" type="warning">禁用</el-button>
-    <el-button size="mini" type="danger">删除</el-button>
-  </el-table-button>
-</template>
-```
-
-:::

@@ -1,0 +1,13 @@
+.el-more-popover {
+  &__popover {
+    min-width: 100px;
+    max-width: 300px;
+  }
+  .el-more-popover__more-btn {
+    cursor: pointer;
+    font-size: 14px;
+    i {
+      margin: 0 4px;
+    }
+  }
+}
