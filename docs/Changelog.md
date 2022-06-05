@@ -3,6 +3,9 @@ sidebarDepth: 0
 ---
 # 更新日志
 
+## 1.0.32 <small>2022-05-25</small>
+- #### 修复
+	- FormAuto 中对 `Cascader` 配置规则规则时错误
 
 ## 1.0.31 <small>2022-05-24</small>
 - #### 修复

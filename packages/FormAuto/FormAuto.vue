@@ -549,7 +549,7 @@ export default class ElFormAuto extends Vue {
 						requiredRule.type = "array";
 						break;
 					case "cascader":
-						if (item.props.props && item.props.props.emitPath == true) {
+						if (item.props && item.props.emitPath == true) {
 							requiredRule.type = "array";
 						}
 						break;
