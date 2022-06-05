@@ -3,6 +3,13 @@ sidebarDepth: 0
 ---
 # 更新日志
 
+## 1.0.33 <small>2022-06-05</small>
+- #### 新增
+	- 新增 MorePopover 组件
+	- TablePage 增加 `showOverflowTooltip` 属性
+- #### 优化
+	- TablePage 列属性同时设置了 copy 和 showOverflowTooltip 属性时样式交互
+
 ## 1.0.32 <small>2022-05-25</small>
 - #### 修复
 	- FormAuto 中对 `Cascader` 配置规则规则时错误

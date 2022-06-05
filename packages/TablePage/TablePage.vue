@@ -100,7 +100,7 @@
 								</template>
 								<template slot-scope="{row, $index}">
 									<dynamic-slot v-if="column.slot" :name="column.slot" :data="{row, column, index: $index}"></dynamic-slot>
-									<template v-else-if="column.enum">
+									<template v-else-if="column.enum && typeof column.enum == 'object'">
 										<enum-tags
 											:key="$index"
 											:enums="column.enum"
@@ -114,13 +114,13 @@
 										v-else-if="column.formatter"
 									>{{ column.formatter(row,column,row[column.prop],$index) }}</template>
 									<template v-else>
-										{{ row[column.prop] }}
 										<i
-											v-if="column.copy && !column.enum"
+											v-if="column.copy"
 											:key="`copy_${column.prop}_${index}`"
 											class="el-table-page_copy-icon el-icon-copy-document"
 											v-copy="row[column.prop]"
 										></i>
+										{{ row[column.prop] }}
 									</template>
 								</template>
 							</el-table-column>
@@ -235,7 +235,6 @@ export default class ElTablePage extends Vue {
 
 	@Prop({ type: Boolean, default: false }) showOverflowTooltip!: boolean;
 
-
 	@Prop({
 		type: Object,
 		validator: (value: Record<string, boolean | string>) => {
@@ -287,7 +286,7 @@ export default class ElTablePage extends Vue {
 				let options = await transformOptions(column.enum)
 				column.enum = keyBy(options, "value")
 			}
-			column.showOverflowTooltip = column.showOverflowTooltip || this.showOverflowTooltip;
+			column.props.showOverflowTooltip = column.props.showOverflowTooltip || this.showOverflowTooltip;
 		})
 		if (this.customColumns) {
 			// 从localStorage获取存储的自定义列配置
@@ -356,7 +355,7 @@ export default class ElTablePage extends Vue {
 
 	private searchForm: Record<string, ElFormAutoField> = {}
 	private loading: boolean = false;
-	@Prop({ type: Function, required: true }) request!: ((page: number, search?: Record<string, any>, pageSize?: number, from?: string) => Promise<Record<ElTablePageDataMap, any> | Record<string, any>[]>)
+	@Prop({ type: Function, required: true }) request!: ((page: number, search?: Record<string, any>, pageSize?: number) => Promise<Record<ElTablePageDataMap, any> | Record<string, any>[]>)
 
 
 	get hasSearchCard(): boolean {

@@ -96,7 +96,7 @@ export default {
   margin: 0 5px;
   cursor: pointer;
   text-decoration: none;
-  font-size: 12px;
+  font-size: 14px;
 }
 .table-button-popover {
   width: 60px;
@@ -120,7 +120,7 @@ export default {
     <el-tag slot="more" type="info" style="margin:5px">更多</el-tag>
   </el-more-popover>
   <br />
-  <el-more-popover class="table-option" :limit="2" popover-class="table-button-popover">
+  <el-more-popover class="table-option" :limit="2" trigger="hover" popover-class="table-button-popover">
     <a>新增</a>
     <a>编辑</a>
     <a>禁用</a>
@@ -196,11 +196,12 @@ export default {
 
 ### Props
 
-| 参数          | 描述         | 类型     | 可选值 | 默认值 |
-| :------------ | :----------- | :------- | :----- | ------ |
-| limit         | 其余的按钮   | `number` | -      | 3      |
-| more-text     | 更多按钮文案 | `string` | -      | 更多   |
-| popover-class | 更多按钮文案 | `string` | -      | -      |
+| 参数          | 描述             | 类型     | 可选值                   | 默认值 |
+| :------------ | :--------------- | :------- | :----------------------- | ------ |
+| limit         | 其余的按钮       | `number` | -                        | 3      |
+| more-text     | 更多按钮文案     | `string` | -                        | 更多   |
+| popover-class | 更多按钮文案     | `string` | -                        | -      |
+| trigger       | popover 触发方式 | `string` | click/focus/hover/manual | click  |
 
 ### Slot
 

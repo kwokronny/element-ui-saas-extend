@@ -9,6 +9,7 @@ import { t } from "../../src/locale";
 export default class MorePopover extends Vue {
   @Prop({ type: Number, default: 3 }) limit!: number;
   @Prop({ type: String, default: t("morepopover.more") }) moreText!: string;
+  @Prop({ type: String, default: "click" }) trigger!: string;
   @Prop({ type: String, default: "" }) popoverClass!: string;
 
   private render(h: CreateElement) {
@@ -42,6 +43,7 @@ export default class MorePopover extends Vue {
         {
           ref: "ElMorePopover",
           props: {
+            trigger: this.trigger,
             popperClass: popoverClass.join(" "),
           },
         },

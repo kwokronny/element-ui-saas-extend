@@ -5,7 +5,7 @@ export declare class ElTablePage extends ElTable {
   /** 表单项配置 */
   columns: ElTablePageColumn[];
   /** el-row 属性 gutter 栅格间格 */
-  request: (page: number, search: Record<string, any>, pageSize: number, from: "search" | "request_change" | "page_change") => Record<ElTablePageDataMap, any>;
+  request: (page: number, search: Record<string, any>, pageSize: number) => Promise<Record<ElTablePageDataMap, any> | Record<string, any>[]>;
   pageSize: number;
   pageLayout: string;
   pageSizes: number[];
