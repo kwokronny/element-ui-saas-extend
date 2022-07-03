@@ -1,5 +1,6 @@
 import TablePage from "./TablePage/index";
 import FormAuto from "./FormAuto/index";
+import FormTable from "./FormTable/index";
 import NumberRange from "./NumberRange/index";
 import MorePopover from "./MorePopover/index";
 import { VueConstructor } from "vue/types/umd";
@@ -18,6 +19,7 @@ const install = (Vue: VueConstructor, options: any = {}) => {
   Vue.prototype.$ELEMENT = Object.assign({}, Vue.prototype.$ELEMENT, options);
   Vue.component("ElNumberRange", NumberRange);
   Vue.component("ElFormAuto", FormAuto);
+  Vue.component("ElFormTable", FormAuto);
   Vue.component("ElTablePage", TablePage);
   Vue.component("ElMorePopover", MorePopover);
 };

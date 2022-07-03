@@ -165,6 +165,7 @@
 									disabled
 									v-if="item.remoteParams && item.remoteParams.optionLoading"
 									value="el-formauto-option-loading"
+									label="加载中"
 								>加载中</el-option>
 							</el-select>
 						</template>
