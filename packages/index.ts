@@ -19,7 +19,7 @@ const install = (Vue: VueConstructor, options: any = {}) => {
   Vue.prototype.$ELEMENT = Object.assign({}, Vue.prototype.$ELEMENT, options);
   Vue.component("ElNumberRange", NumberRange);
   Vue.component("ElFormAuto", FormAuto);
-  Vue.component("ElFormTable", FormAuto);
+  Vue.component("ElFormTable", FormTable);
   Vue.component("ElTablePage", TablePage);
   Vue.component("ElMorePopover", MorePopover);
 };

@@ -17,6 +17,7 @@ module.exports = {
   title: "Element SaaS 扩展",
   description: "基于 Element UI 对 SaaS 业务开发常见的交互组件",
   plugins: ["demo-container"],
+  port: 7227,
   base: "/element-ui-saas-extend/",
   dest: "./dist",
   locales: {
@@ -48,12 +49,12 @@ module.exports = {
           },
           {
             title: "组件",
-            children: ["/components/Copy", "/components/NumberRange", "/components/MorePopover", "/components/FormAuto", "/components/TablePage"],
+            children: ["/components/Copy", "/components/NumberRange", "/components/MorePopover", "/components/FormAuto", "/components/FormTable", "/components/TablePage"],
           },
           "/Donate",
         ],
         nav: [
-          { text: "作者", link: "https://kwokronny.top" },
+          { text: "作者", link: "https://kwokronny.com" },
           { text: "码云", link: "https://gitee.com/kwokronny/element-ui-saas-extend" },
         ],
       },
