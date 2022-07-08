@@ -130,12 +130,13 @@
 								v-select-scroll="item.loadScroll && item.props?item.props.remoteMethod:null"
 								v-bind="item.props"
 								v-on="item.on"
+								@change="handleSelectChange(item,name,$index,$event)"
 							>
 								<el-option
-									v-for="(option,key) in item.options"
+									v-for="(option,key) in selectOptions(item,name,$index)"
 									:key="`${name}_${key}`"
 									:label="option.label"
-									:value="option.value"
+									:value="option"
 									:disabled="option.disabled"
 								>
 									<i v-if="option.icon" :class="option.icon"></i>
@@ -234,18 +235,19 @@ export default class ElFormTable extends Vue {
 		this.$emit("input", this.valueArr);
 	}
 
-	private selectEcho(name: string, options: any): any {
-		let field = this.fields[name];
-		if (!field) return options;
+	private echoOptions: Record<string, any> = {}
+
+	private selectEcho(name: string, idx: number, options: any): any {
+		if (!this.echoOptions[name]) {
+			this.echoOptions[name] = { [idx]: [] }
+		}
 		if (Array.isArray(options)) {
-			if (!field.echoOptions) {
-				field.echoOptions = []
-			}
+			let echoOptions = this.echoOptions[name][idx];
 			let values: string[] = []
 			for (let i = 0; i < options.length; i++) {
 				if (options[i] && options[i].label && options[i].value) {
-					if (!field.echoOptions.find((option: Record<string, string>) => option.value == options[i].value)) {
-						field.echoOptions.push(Object.assign({}, options[i]))
+					if (!echoOptions.find((option: Record<string, string>) => option.value == options[i].value)) {
+						echoOptions.push(Object.assign({}, options[i]))
 					}
 					values.push(options[i].value);
 				} else {
@@ -254,19 +256,28 @@ export default class ElFormTable extends Vue {
 			}
 			return values;
 		} else if (options && options.label && options.value) {
-			field.echoOptions = [options];
+			this.echoOptions[name][idx] = [options];
 			return options.value;
 		} else {
 			return options;
 		}
 	}
 
-	private selectOptions(field: ElFormAutoField, idx: number) {
-		if (Array.isArray(field.options) && field.remote) {
-			let echoOpitons = field.echoOptions[idx] || []
-			return uniqBy(echoOpitons.concat(field.options), "value")
+	private selectOptions(field: ElFormAutoField, name: string, idx: number) {
+		if (Array.isArray(field.options) && field.remote && this.echoOptions[name]) {
+			let echoOpitons = this.echoOptions[name][idx] || []
+			return uniqBy(field.options.concat(echoOpitons), "value")
 		}
 		return field.options
+	}
+
+	private handleSelectChange(field: ElFormAutoField, name: string, idx: number, option) {
+		this.selectEcho(name, idx, option);
+		let value: any = null;
+		if (field.on && field.on.change) {
+			value = field.on.change(option, option.value, name, idx);
+		}
+		return value || option.value;
 	}
 
 	private handleAddItem() {
@@ -364,6 +375,11 @@ export default class ElFormTable extends Vue {
 			// value = this.selectEcho(name, value)
 			// }
 			this.defaultValue[name] = item.value;
+			if (this.valueArr && this.valueArr.length && item.type == "select") {
+				this.valueArr.forEach((item: Record<string, any>, idx: number) => {
+					item[name] = this.selectEcho(name, idx, item[name])
+				})
+			}
 			// this.$set(this.model, name, value);
 		})
 		if (this.valueArr.length < 1) {
@@ -420,9 +436,8 @@ export default class ElFormTable extends Vue {
 					let originVisibleChangeEvent = item.on["visible-change"] || (() => { })
 					item.on["visible-change"] = function (visible) {
 						originVisibleChangeEvent(visible)
-						if (visible == false && item.options && item.options.length == 0) {
-							item.props.remoteMethod.call(item, "")
-						}
+						item.remoteParams.query = "switch_select";
+						item.props.remoteMethod.call(item, "")
 					}
 					let originClearEvent = item.on.clear || (() => { })
 					item.on.clear = function () {
@@ -437,9 +452,9 @@ export default class ElFormTable extends Vue {
 						transformOptions(remoteMethod, item.type != 'cascader').then((options) => {
 							item.options = options
 							// this.handleCheckedChange(item.name, this.value[item.name])
-							// this.$nextTick(function () {
-							// this.FormAuto.clearValidate(item.name)
-							// })
+							this.$nextTick(function () {
+								// this.FormT.clearValidate(item.name)
+							})
 						})
 					}
 					item.remoteMethod()

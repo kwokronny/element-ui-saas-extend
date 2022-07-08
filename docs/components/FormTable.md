@@ -129,10 +129,8 @@ export declare type ElAutoMixinOptions = Record<string | number, string | number
 
 ```vue
 <template>
-  <el-form-auto :data="form" ref="EditForm" v-model="model" label-width="90px">
-    <el-button type="primary" @click="editOptionReshow">远程搜索选项回显</el-button>
-    <el-button type="primary" @click="reset">重置</el-button>
-  </el-form-auto>
+  <el-form-table :data="form" ref="EditForm" v-model="model" label-width="90px">
+  </el-form-table>
 </template>
 <script>
 export default {
@@ -140,28 +138,6 @@ export default {
     return {
       model: [],
       form: {
-        asyncSelect: {
-          col: 12,
-          label: "渲染框",
-          type: "select",
-          style: "width:100%",
-          filterable: true,
-          options: () => {
-            return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
-              return res.data.map((item) => {
-                return {
-                  label: item.username,
-                  value: item.id,
-                };
-              });
-            });
-          },
-          on: {
-            change: () => {
-              this.$refs["EditForm"].refreshOptions("remote");
-            },
-          },
-        },
         remote: {
           col: 12,
           label: "远程搜索",
@@ -170,7 +146,18 @@ export default {
           required: true,
           loadScroll: true,
           remote: true,
-          options: this.getOptions,
+          options: (query, page) => {
+            return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
+              return res.data
+                .filter((item) => item.username.indexOf(query) > -1)
+                .map((item) => {
+                  return {
+                    label: item.username,
+                    value: item.id * page,
+                  };
+                });
+            });
+          },
         },
         remoteMult: {
           col: 12,
@@ -230,41 +217,6 @@ export default {
             });
           },
           style: "width:100%",
-        },
-        radio: {
-          col: 12,
-          label: "单选框",
-          type: "radio",
-          notAll: true,
-          options: ["单选1", "单选2", "单选3"],
-        },
-        check: {
-          label: "复选框",
-          type: "check",
-          options: [
-            "复选1",
-            "复选2",
-            {
-              label: "带图标复选3",
-              value: 3,
-              icon: "el-icon-help",
-            },
-          ],
-        },
-        remoteCheck: {
-          label: "复选框",
-          type: "check",
-          required: true,
-          options: () => {
-            return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
-              return res.data.map((item) => {
-                return {
-                  label: item.username,
-                  value: item.id,
-                };
-              });
-            });
-          },
         },
       },
     };
