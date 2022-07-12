@@ -2,17 +2,15 @@
 	<el-form
 		class="el-form-table"
 		ref="FormTable"
-		:model="{model:valueArr}"
+		:model="{model: value}"
 		:rules="rules"
+		v-bind="$attrs"
 		:validate-on-rule-change="false"
 	>
 		<div class="el-form-table__option">
-			<el-button
-				@click="handleAddItem()"
-				:disabled="itemLimit>-1 && this.valueArr.length >= itemLimit"
-			>添加</el-button>
+			<el-button @click="handleAddItem()" :disabled="itemLimit>-1 && this.value.length >= itemLimit">添加</el-button>
 		</div>
-		<el-table :data="valueArr" border>
+		<el-table :data="value" border>
 			<el-table-column
 				v-for="(item,name) in fields"
 				:prop="name"
@@ -136,7 +134,7 @@
 									v-for="(option,key) in selectOptions(item,name,$index)"
 									:key="`${name}_${key}`"
 									:label="option.label"
-									:value="option"
+									:value="option.value"
 									:disabled="option.disabled"
 								>
 									<i v-if="option.icon" :class="option.icon"></i>
@@ -146,8 +144,8 @@
 									disabled
 									v-if="item.remoteParams && item.remoteParams.optionLoading"
 									value="el-formauto-option-loading"
-									label="加载中"
-								>加载中</el-option>
+									:label="$t('formauto.selectLoading')"
+								>{{$t('formauto.selectLoading')}}</el-option>
 							</el-select>
 						</template>
 						<template v-else-if="item.type == 'cascader'">
@@ -182,57 +180,120 @@
 </template>
 
 <script lang="ts">
+import { Form } from "element-ui";
+import { Vue, Component, Prop, Model, Watch, Ref } from "vue-property-decorator";
 import { cloneDeep, forEach, omit, uniqBy } from "lodash-es";
-import { transformOptions } from "../util";
 import { ElAutoMixinOptions, ElAutoOption } from "types/saas-extend";
-import { Vue, Component, Prop, Model, Watch } from "vue-property-decorator";
 import { ElFormAutoField } from "../../types/form-auto";
+import { transformOptions } from "../util";
+import locale from "../../src/mixin/locale"
+import selectScroll from "../../src/mixin/selectScroll"
+import DynamicSlot from "../components/DynamicSlot"
+import { ValidateCallback } from "element-ui/types/form";
 
-@Component({})
+@Component({
+	name: "ElFormTable",
+	provide() {
+		return {
+			slotRoot: this
+		}
+	},
+	mixins: [locale, selectScroll],
+	components: {
+		DynamicSlot
+	}
+})
 export default class ElFormTable extends Vue {
 
+	@Prop({ type: Number, default: -1 }) readonly itemLimit!: number;
 
-	private mounted() {
-		this.generateModel();
-		this.generateRule();
+	@Ref("FormAuto") readonly FormAuto!: Form;
+
+
+	private fields: Record<string, ElFormAutoField> = {};
+	private rules: Record<string, any> = {};
+
+	@Prop(Object) readonly data!: Record<string, ElFormAutoField>;
+	@Watch("data", { immediate: true, deep: true })
+	private onDataChange(data: Record<string, ElFormAutoField>) {
+		data && (this.generateRule(), this.generateModel())
 	}
 
 	@Model("input", { type: Array, default: () => [] }) value!: Record<string, any>[];
 
-	/**
-	 * 表单项配置
-	 * @type FormAutoFields
-	 */
-	@Prop(Object) readonly data!: Record<string, ElFormAutoField>;
-	@Prop({ type: Number, default: -1 }) readonly itemLimit!: number;
-	private fields: Record<string, ElFormAutoField> = {};
-	private rules: Record<string, any> = {};
-	private check: Record<string, boolean | number> = {};
-
-	/**
- * 复选框 全选
- */
-	// private checkAll(name: string): void {
-	// 	this.model[name] = [];
-	// 	if (this.check[name] === true) {
-	// 		let options = this.fields[name].options as Array<ElAutoOption>;
-	// 		if (Array.isArray(options)) {
-	// 			options.forEach((item: Record<string, any>) => {
-	// 				!item.disabled && this.model[name].push(item.value);
-	// 			});
-	// 		}
-	// 	}
-	// }
-
-	@Watch("value", { immediate: true })
-	private valueChange(value: Record<string, any>[]) {
-		this.valueArr = value || [];
+	@Watch("value", { immediate: true, deep: true })
+	private onValueChange(model: Record<string, any>[]) {
+		this.$emit("input", this.getModel());
 	}
 
-	private valueArr: Record<string, any>[] = [];
-	@Watch("valueArr", { deep: true })
-	private valueArrChange() {
-		this.$emit("input", this.valueArr);
+	// private valueArr: Record<string, any>[] = [];
+	// @Watch("valueArr", { deep: true })
+	// private onValueArrChange() {
+	// 	this.$emit("input", this.getModel());
+	// }
+
+	/**
+	 * @public
+	 * 获取表单所有参数
+	 */
+	public getModel(): Record<string, any>[] {
+		for (let i = 0; i < this.value.length; i++) {
+			let model = this.value[i]
+			for (let name in model) {
+				// if (!item.notSubmit) {
+				let field = this.fields[name]
+				if (field) {
+					if (field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
+						let [sn, en] = field.rangeName;
+						let [sd, ed] = model[name] || [null, null];
+						model[sn] = sd;
+						model[en] = ed;
+						if (sd && ed && field.type == "daterange" && field.suffixTime == true) {
+							model[sn] += " 00:00:00";
+							model[en] += " 23:59:59";
+						}
+					} else if (field.type == "select" && field.remote) {
+						let value = this.selectEcho(name, i, model[name]);
+						if (value) {
+							model[name] = value;
+						}
+					}
+				}
+				// }
+			}
+		}
+		return this.value
+	}
+
+
+
+	/**
+	 * 更新options
+	 */
+	public refreshOptions(fieldName: string) {
+		let field = this.fields[fieldName];
+		if (field && field.props.remoteMethod) {
+			field.remoteParams.query = "refresh";
+			field.echoOptions = [];
+			field.remoteMethod();
+		}
+	}
+
+
+	/**
+	 * @public
+	 * 异步验证成功后获取表单所有参数
+	 */
+	public validate(cb?: ValidateCallback): Promise<boolean> | void {
+		return cb ? this.FormAuto.validate(cb) : this.FormAuto.validate();
+	}
+
+	/**
+	 * @public
+	 * 验证单个字段
+	 */
+	public validateField(props: string[] | string, callback: (errorMessage: string) => void): void {
+		return this.FormAuto && this.FormAuto.validateField(props, callback);
 	}
 
 	private echoOptions: Record<string, any> = {}
@@ -256,36 +317,36 @@ export default class ElFormTable extends Vue {
 			}
 			return values;
 		} else if (options && options.label && options.value) {
-			this.echoOptions[name][idx] = [options];
+			this.echoOptions[name][idx] = [Object.assign({}, options)];
 			return options.value;
 		} else {
-			return options;
+			return false;
 		}
 	}
 
 	private selectOptions(field: ElFormAutoField, name: string, idx: number) {
 		if (Array.isArray(field.options) && field.remote && this.echoOptions[name]) {
 			let echoOpitons = this.echoOptions[name][idx] || []
-			return uniqBy(field.options.concat(echoOpitons), "value")
+			return uniqBy(echoOpitons.concat(field.options), "value")
 		}
 		return field.options
 	}
 
-	private handleSelectChange(field: ElFormAutoField, name: string, idx: number, option) {
-		this.selectEcho(name, idx, option);
-		let value: any = null;
+	private handleSelectChange(field: ElFormAutoField, name: string, idx: number, value: string | number) {
+		let option = (field.options as ElAutoOption[]).find((option: ElAutoOption) => option.value == value);
+		option && this.selectEcho(name, idx, option);
 		if (field.on && field.on.change) {
-			value = field.on.change(option, option.value, name, idx);
+			field.on.change(value);
 		}
-		return value || option.value;
+		return value
 	}
 
 	private handleAddItem() {
-		this.valueArr.push(Object.assign({}, this.defaultValue));
+		this.value.push(Object.assign({}, this.defaultValue));
 	}
 
 	private handleRemoveItem(index: number) {
-		this.valueArr.splice(index, 1);
+		this.value.splice(index, 1);
 	}
 
 	private defaultValue: Record<string, any> = {};
@@ -375,14 +436,17 @@ export default class ElFormTable extends Vue {
 			// value = this.selectEcho(name, value)
 			// }
 			this.defaultValue[name] = item.value;
-			if (this.valueArr && this.valueArr.length && item.type == "select") {
-				this.valueArr.forEach((item: Record<string, any>, idx: number) => {
-					item[name] = this.selectEcho(name, idx, item[name])
+			if (this.value && this.value.length && item.type == "select") {
+				this.value.forEach((item: Record<string, any>, idx: number) => {
+					let value = this.selectEcho(name, idx, item[name])
+					if (value) {
+						item[name] = value
+					}
 				})
 			}
 			// this.$set(this.model, name, value);
 		})
-		if (this.valueArr.length < 1) {
+		if (this.value.length < 1) {
 			this.handleAddItem()
 		}
 		this.asyncOptionsRequest()

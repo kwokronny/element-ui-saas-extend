@@ -624,7 +624,7 @@ export default {
 
 支持对表单项自定义动态插槽，通过设置 slot 属性，可设置`boolean`、`string`类型，设置为 true 时，slot 名为属性的字段名，slot 为字符串类型时，多个字段可复用一个插槽，插槽携带参数如下：
 
-- `field` 字段属性
+- `item` 字段属性
 - `model` 表单 model
 - `name` 字段名
 
@@ -633,12 +633,12 @@ export default {
 ```vue
 <template>
   <el-form-auto :data="form" v-model="model" label-width="90px">
-    <template slot-scope="{ field, model, name }" slot="upload">
+    <template slot-scope="{ item, model, name }" slot="upload">
       <el-upload action="https://jsonplaceholder.typicode.com/upload" v-model="model[name]" :on-success="uploadSuccess">
         <el-button round type="primary" icon="el-icon-upload">上传文件</el-button>
       </el-upload>
     </template>
-    <template slot-scope="{ field, model, name }" slot="color">
+    <template slot-scope="{ item, model, name }" slot="color">
       <el-color-picker v-model="model[name]"></el-color-picker>
     </template>
     <div>表单字段: {{ model }}</div>
@@ -761,7 +761,6 @@ export default {
 | 表单相关设置    |                                                                                              |                                 |        |
 | col             | 占用栅格                                                                                     | `number`                        | 24     |
 | required        | 是否必填                                                                                     | `boolean`                       | false  |
-| notSubmit       | 是否                                                                                         | `boolean`                       | false  |
 | bindShow        | 绑定显示                                                                                     | `(model)=>boolean`              | -      |
 | addRules        | 追加验证规则                                                                                 | `array`                         | -      |
 
@@ -803,8 +802,8 @@ export default {
 | refreshOptions() | 刷新选项                 | `(fieldName: string)=>void`                          |
 | validate()       | 对整个表单进行校验的方法 | `Promise<void> | (valid:boolean)=>void`              |
 | validateField()  | 对整个表单进行校验的方法 | `(prop:string,callback:(errMsg:string)=>void)=>void` |
-| getModel()       | 获取表单所有参数         | name                                                 |
-| setModel()       | 设置表单对应参数         | name,value                                           |
+| getModel()       | 获取表单所有参数         |                                                      |
+| setModel()       | 设置表单对应参数         | `Record<string,any>`                                 |
 
 ### Slot
 

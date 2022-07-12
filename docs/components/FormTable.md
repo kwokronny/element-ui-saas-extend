@@ -12,7 +12,10 @@ pageClass: component-page
 
 ```vue
 <template>
-  <el-form-table :data="form" ref="EditForm" v-model="model"> </el-form-table>
+  <div>
+    <el-form-table :data="form" ref="EditForm" v-model="model"></el-form-table>
+    <el-button @click="getModel">测试</el-button>
+  </div>
 </template>
 <script>
 export default {
@@ -59,7 +62,7 @@ export default {
             {
               pattern: /^(?=.*[a-zA-Z])(?=.*\d)[^]{8,16}$/,
               message: "需要8位~16位以内，包含字母与数字的字符",
-              trigger: "change"
+              trigger: "change",
             },
           ],
         },
@@ -72,7 +75,7 @@ export default {
             {
               pattern: /^(?:(?:\+|00)86)?1[3-9]\d{9}$/,
               message: "请输入正确手机号",
-              trigger: "change"
+              trigger: "change",
             },
           ],
         },
@@ -81,21 +84,7 @@ export default {
   },
   methods: {
     getModel() {
-      this.$msgbox({
-        title: "表单返回数据",
-        dangerouslyUseHTMLString: true,
-        message: `<pre>${JSON.stringify(this.model, undefined, 3)}</pre>`,
-      });
-    },
-    async getValidModel() {
-      try {
-        await this.$refs["EditForm"].validate();
-        this.$msgbox({
-          title: "表单返回数据",
-          dangerouslyUseHTMLString: true,
-          message: `<pre>${JSON.stringify(this.model, undefined, 3)}</pre>`,
-        });
-      } catch {}
+      this.model=[{binduserId:3},{binduserId:{label:"test",value:"a3"}}]
     },
   },
 };
@@ -129,33 +118,36 @@ export declare type ElAutoMixinOptions = Record<string | number, string | number
 
 ```vue
 <template>
-  <el-form-table :data="form" ref="EditForm" v-model="model" label-width="90px">
-  </el-form-table>
+  <div>
+    <el-form-table :data="form" ref="EditForm" v-model="model"> </el-form-table>
+    <div>表单字段: {{ model }}</div>
+  </div>
 </template>
 <script>
 export default {
   data() {
+    let self = this;
     return {
       model: [],
       form: {
         remote: {
           col: 12,
-          label: "远程搜索",
+          label: "远程搜索(选过不可再选)",
           type: "select",
           style: "width:100%",
           required: true,
-          loadScroll: true,
           remote: true,
           options: (query, page) => {
             return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
-              return res.data
-                .filter((item) => item.username.indexOf(query) > -1)
-                .map((item) => {
-                  return {
+              return res.data.reduce((arr, item) => {
+                if (self.model.findIndex((model) => model.remote == (item.id * page)) < 0) {
+                  arr.push({
                     label: item.username,
                     value: item.id * page,
-                  };
-                });
+                  });
+                }
+                return arr
+              }, []);
             });
           },
         },
@@ -209,6 +201,78 @@ export default {
         remoteCascader: {
           col: 12,
           label: "级联框",
+          type: "daterange",
+          rangeName: ["startDate","endDate"],
+          style: "width:100%",
+        },
+      },
+    };
+  },
+  methods: {
+    reset() {
+      this.$refs["EditForm"].reset();
+    },
+  },
+};
+</script>
+```
+
+:::
+
+## 自定义动态插槽
+
+支持对表单项自定义动态插槽，通过设置 slot 属性，可设置`boolean`、`string`类型，设置为 true 时，slot 名为属性的字段名，slot 为字符串类型时，多个字段可复用一个插槽，插槽携带参数如下：
+
+- `field` 字段属性
+- `model` 表单 model
+- `name` 字段名
+
+::: demo
+
+```vue
+<template>
+  <div>
+    <el-form-table :data="form" ref="EditForm" v-model="model">
+      <template slot-scope="{ item, model, name }" slot="customSlot"> 自定义 <el-input v-model="model[name]" style="width:100px"></el-input> </template>
+    </el-form-table>
+  </div>
+</template>
+<script>
+export default {
+  data() {
+    return {
+      model: [],
+      form: {
+        remote: {
+          col: 12,
+          label: "远程搜索",
+          type: "select",
+          style: "width:100%",
+          required: true,
+          loadScroll: true,
+          remote: true,
+          options: (query, page) => {
+            return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
+              return res.data
+                .filter((item) => item.username.indexOf(query) > -1)
+                .map((item) => {
+                  return {
+                    label: item.username,
+                    value: item.id * page,
+                  };
+                });
+            });
+          },
+        },
+        customSlot: {
+          col: 12,
+          label: "自定义",
+          type: "plain",
+          slot: true,
+        },
+        remoteCascader: {
+          col: 12,
+          label: "级联框",
           type: "cascader",
           props: { label: "name", value: "id", children: "childrenList" },
           options: () => {
@@ -222,14 +286,6 @@ export default {
     };
   },
   methods: {
-    editOptionReshow() {
-      this.model.asyncSelect = 1;
-      this.model.remote = { label: "测试", value: "123" };
-      this.model.remoteMult = [
-        { label: "测试", value: "123" },
-        { label: "测试2", value: "1233" },
-      ];
-    },
     getOptions(query, page) {
       // console.log(this.model.asyncSelect);
       return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query: this.model.asyncSelect, page } }).then((res) => {
@@ -246,116 +302,6 @@ export default {
     },
     reset() {
       this.$refs["EditForm"].reset();
-    },
-  },
-  mounted() {
-    this.model.remote = { label: "测试", value: "123" };
-    this.model.remoteMult = [
-      { label: "测试", value: "123" },
-      { label: "测试2", value: "1233" },
-    ];
-  },
-};
-</script>
-```
-
-:::
-
-## 自定义动态插槽
-
-支持对表单项自定义动态插槽，通过设置 slot 属性，可设置`boolean`、`string`类型，设置为 true 时，slot 名为属性的字段名，slot 为字符串类型时，多个字段可复用一个插槽，插槽携带参数如下：
-
-- `field` 字段属性
-- `model` 表单 model
-- `name` 字段名
-
-:::demo
-
-```vue
-<template>
-  <el-form-auto :data="form" v-model="model" label-width="90px">
-    <template slot-scope="{ field, model, name }" slot="upload">
-      <el-upload action="https://jsonplaceholder.typicode.com/upload" v-model="model[name]" :on-success="uploadSuccess">
-        <el-button round type="primary" icon="el-icon-upload">上传文件</el-button>
-      </el-upload>
-    </template>
-    <template slot-scope="{ field, model, name }" slot="color">
-      <el-color-picker v-model="model[name]"></el-color-picker>
-    </template>
-    <div>表单字段: {{ model }}</div>
-  </el-form-auto>
-</template>
-<script>
-export default {
-  data() {
-    return {
-      form: {
-        user: {
-          col: 12,
-          label: "选择用户",
-          labelTooltip: "自定义的组件，可直接使用",
-          type: "component",
-          component: "user-selector",
-          on: {
-            select: (item) => {
-              this.model.id = item.id;
-              this.model.name = item.name;
-              this.model.phone = item.phone;
-              this.model.email = item.email;
-            },
-          },
-        },
-        id: {
-          col: 12,
-          label: "用户ID",
-          notSubmit: true,
-          type: "plain",
-          value: "未选择",
-        },
-        name: {
-          col: 12,
-          label: "姓名",
-          type: "plain",
-          notSubmit: true,
-          value: "未选择",
-        },
-        phone: {
-          col: 12,
-          label: "手机",
-          type: "plain",
-          value: "未选择",
-          notSubmit: true,
-        },
-        email: {
-          col: 12,
-          label: "邮箱",
-          type: "plain",
-          value: "未选择",
-        },
-        color1: {
-          col: 12,
-          label: "颜色1",
-          type: "text",
-          slot: "color",
-        },
-        color2: {
-          col: 12,
-          label: "颜色2",
-          type: "text",
-          slot: "color",
-        },
-        upload: {
-          label: "上传",
-          slot: true,
-          type: "text",
-        },
-      },
-      model: {},
-    };
-  },
-  methods: {
-    uploadSuccess(res, file, filelist) {
-      this.model.upload = res.path;
     },
   },
 };
@@ -395,12 +341,8 @@ export default {
 | suffixTime      | type 为 daterange 选填，为日期范围增加 00:00:00 - 23:59:59                                   | `boolean`                       | false  |
 | options         | 控件选项，type 为 check/radio/select 必填，详情可参考 [options 设置](#options-设置)          | `object` / `array` / `Promise`  | []     |
 | remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                       | false  |
-| notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                       | false  |
 | 表单相关设置    |                                                                                              |                                 |        |
-| col             | 占用栅格                                                                                     | `number`                        | 24     |
 | required        | 是否必填                                                                                     | `boolean`                       | false  |
-| notSubmit       | 是否                                                                                         | `boolean`                       | false  |
-| bindShow        | 绑定显示                                                                                     | `(model)=>boolean`              | -      |
 | addRules        | 追加验证规则                                                                                 | `array`                         | -      |
 
 ### type Enum
@@ -431,7 +373,6 @@ export default {
 | switch        | &lt;el-switch&gt;                           | 开关             |
 | cascader      | &lt;el-cascader&gt;                         | 多级选择框       |
 | rate          | &lt;el-rate&gt;                             | 评分             |
-| component     | &lt;component :is=""&gt;                    | 自定义组件       |
 
 ### Method
 
@@ -441,14 +382,13 @@ export default {
 | refreshOptions() | 刷新选项                 | `(fieldName: string)=>void`                          |
 | validate()       | 对整个表单进行校验的方法 | `Promise<void> | (valid:boolean)=>void`              |
 | validateField()  | 对整个表单进行校验的方法 | `(prop:string,callback:(errMsg:string)=>void)=>void` |
-| getModel()       | 获取表单所有参数         | name                                                 |
-| setModel()       | 设置表单对应参数         | name,value                                           |
+| getModel()       | 获取表单所有参数         |                                                      |
+| pushModel()      | 设置表单对应参数         | `Record<string,any>`                                 |
 
 ### Slot
 
 | 插槽    | 描述                     |
 | :------ | :----------------------- |
-| -       | 按钮插槽                 |
 | prepend | 表单内首部插槽           |
 | append  | 表单尾部，按钮之前插槽   |
 

@@ -165,8 +165,8 @@
 									disabled
 									v-if="item.remoteParams && item.remoteParams.optionLoading"
 									value="el-formauto-option-loading"
-									label="加载中"
-								>加载中</el-option>
+									:label="$t('formauto.selectLoading')"
+								>{{$t('formauto.selectLoading')}}</el-option>
 							</el-select>
 						</template>
 						<template v-else-if="item.type == 'cascader'">
@@ -284,7 +284,7 @@ export default class ElFormAuto extends Vue {
 	public getModel(): Record<string, any> {
 		let data: Record<string, any> = {};
 		forEach(this.fields, (item: ElFormAutoField, name: string) => {
-			if (!item.notSubmit) {
+			// if (!item.notSubmit) {
 				data[name] = this.model[name];
 				if (item.rangeName && item.type && (/range$/g.test(item.type) || (item.type == "slider" && item.props && item.props.range == true))) {
 					let [sn, en] = item.rangeName;
@@ -296,7 +296,7 @@ export default class ElFormAuto extends Vue {
 						data[en] += " 23:59:59";
 					}
 				}
-			}
+			// }
 		});
 		return Object.assign({}, this.value, data);
 	}

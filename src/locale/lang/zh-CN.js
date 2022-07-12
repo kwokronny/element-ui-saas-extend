@@ -10,6 +10,7 @@ export default {
   formauto: {
     pleaseInput: "请输入",
     pleaseSelect: "请选择",
+    selectLoading: "加载中...",
     checkAll: "全选",
     min: "最小",
     max: "最大",

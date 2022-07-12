@@ -40,6 +40,6 @@ export declare class ElFormAuto extends ElForm {
   labelHidden: boolean;
   reset(): void;
   refreshOptions(field: string): void;
-  getModel(): Record<string, any>;
-  setModel(model: Record<string, any>): void;
+  getModel(): Record<string, any>[];
+  setModel(model: Record<string, any>[]): void;
 }

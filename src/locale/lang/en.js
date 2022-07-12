@@ -10,6 +10,7 @@ export default {
   formauto: {
     pleaseInput: "Please input ",
     pleaseSelect: "Please select ",
+    selectLoading: "Loading...",
     checkAll: "Check all",
     min: "Min ",
     max: "Max ",

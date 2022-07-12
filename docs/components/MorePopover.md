@@ -200,7 +200,7 @@ export default {
 | :------------ | :--------------- | :------- | :----------------------- | ------ |
 | limit         | 其余的按钮       | `number` | -                        | 3      |
 | more-text     | 更多按钮文案     | `string` | -                        | 更多   |
-| popover-class | 更多按钮文案     | `string` | -                        | -      |
+| popover-class | 为 popover 添加类名    | `string` | -                        | -      |
 | trigger       | popover 触发方式 | `string` | click/focus/hover/manual | click  |
 
 ### Slot
