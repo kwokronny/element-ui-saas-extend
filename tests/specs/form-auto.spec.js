@@ -205,36 +205,6 @@ describe("FormAuto", () => {
     done();
   });
 
-  it("props:label-width", (done) => {
-    vm = createTest(
-      FormAuto,
-      {
-        labelWidth: "100px",
-        data: {
-          field1: {
-            label: "field1",
-            type: "text",
-          },
-          field2: {
-            label: "field2",
-            type: "text",
-          },
-          field3: {
-            label: "field3",
-            labelWidth: "120px",
-            type: "text",
-          },
-        },
-      },
-      true
-    );
-    let label = vm.$el.querySelectorAll(".el-form-item__label");
-    expect(label[0].style.width).to.equal("100px");
-    expect(label[1].style.width).to.equal("100px");
-    expect(label[2].style.width).to.equal("120px");
-    done();
-  });
-
   it("props:gutter", (done) => {
     vm = createTest(FormAuto, {
       gutter: 20,
@@ -718,6 +688,7 @@ describe("FormAuto", () => {
     );
     let data = {
       id: 45,
+      slider: 0,
       switch: false,
       text: "",
       password: "",
@@ -746,8 +717,8 @@ describe("FormAuto", () => {
     try {
       await vm.$refs.form.validate();
       expect(true).to.be.false;
-      console.log(1)
     } catch(e) {
+      console.log(vm.$el.querySelectorAll(".el-form-item__error"))
       expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(11);
     }
   });

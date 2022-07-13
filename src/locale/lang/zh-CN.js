@@ -36,4 +36,8 @@ export default {
   morepopover: {
     more: "更多",
   },
+  formtable: {
+    add: "添加",
+    remove: "删除",
+  },
 };

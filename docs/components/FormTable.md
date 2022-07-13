@@ -223,7 +223,7 @@ export default {
 
 支持对表单项自定义动态插槽，通过设置 slot 属性，可设置`boolean`、`string`类型，设置为 true 时，slot 名为属性的字段名，slot 为字符串类型时，多个字段可复用一个插槽，插槽携带参数如下：
 
-- `field` 字段属性
+- `item` 字段属性
 - `model` 表单 model
 - `name` 字段名
 

@@ -308,6 +308,7 @@ export default {
       this.model = {
         id: "123",
         switch: 0,
+        // slider: 23,
         text: "文本",
         password: "password123456",
         textarea: null,
@@ -740,7 +741,6 @@ export default {
 | v-model         | 表单数据对象               | `object`                                                  | -      | {}     |
 | data            | 表单项配置                 | [Record&lt;name:string,FormAutoField&gt;](#FormAutoField) | -      | {}     |
 | gutter          | &lt;el-row&gt; 属性 gutter | `number`                                                  | -      | 15     |
-| label-hidden    | 所有表单项标签是否隐藏     | `boolean`                                                 | -      | false  |
 | `[prop:string]` | 继承 el-form 所有 Prop     | `any`                                                     | -      | -      |
 
 ### FormAutoField

@@ -354,7 +354,7 @@ export default class ElFormAuto extends Vue {
 	 */
 	public getModel(): Record<string, any> {
 		let model = this.model
-		for (let name in model) {
+		for (let name in this.fields) {
 			let field = this.fields[name]
 			if (field) {
 				if (Array.isArray(model[name]) && model[name].length > 0 && field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
@@ -373,6 +373,8 @@ export default class ElFormAuto extends Vue {
 					}
 				} else if (field.type == "check") {
 					this.handleCheckedChange(name, model[name]);
+				} else if (model[name] === undefined && this.defaultValue[name] !== undefined) {
+					model[name] = this.defaultValue[name]
 				}
 			}
 		}
@@ -557,6 +559,8 @@ export default class ElFormAuto extends Vue {
 					case "slider":
 						if (item.props && item.props.range == true) {
 							requiredRule.type = "array";
+						} else {
+							requiredRule.type = "number";
 						}
 						break;
 					case "select":

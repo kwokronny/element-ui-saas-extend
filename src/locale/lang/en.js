@@ -36,4 +36,8 @@ export default {
   morepopover: {
     more: "more",
   },
+  formtable: {
+    add: "Add",
+    remove: "Remove",
+  },
 };

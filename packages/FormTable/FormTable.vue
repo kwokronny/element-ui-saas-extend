@@ -8,7 +8,7 @@
 		:validate-on-rule-change="false"
 	>
 		<div class="el-form-table__option">
-			<el-button @click="handleAddItem()" :disabled="itemLimit>-1 && this.value.length >= itemLimit">添加</el-button>
+			<el-button @click="handleAddItem()" :disabled="itemLimit>-1 && this.value.length >= itemLimit">{{$t("formtable.add")}}</el-button>
 		</div>
 		<el-table :data="value" border>
 			<el-table-column
@@ -170,9 +170,9 @@
 					</el-form-item>
 				</template>
 			</el-table-column>
-			<el-table-column prop="options" label="操作" width="80">
+			<el-table-column prop="options" label="" width="80" fixed="right">
 				<template slot-scope="{ $index }">
-					<el-button type="text" @click="handleRemoveItem($index)">删除</el-button>
+					<el-button type="text" @click="handleRemoveItem($index)">{{$t("formtable.remove")}}</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -233,7 +233,7 @@ export default class ElFormTable extends Vue {
 	public getModel(): Record<string, any>[] {
 		for (let i = 0; i < this.value.length; i++) {
 			let model = this.value[i]
-			for (let name in model) {
+			for (let name in this.fields) {
 				// if (!item.notSubmit) {
 				let field = this.fields[name]
 				if (field) {
@@ -251,6 +251,8 @@ export default class ElFormTable extends Vue {
 						if (value) {
 							model[name] = value;
 						}
+					} else if (model[name] === undefined && this.defaultValue[name] !== undefined) {
+						model[name] = this.defaultValue[name]
 					}
 				}
 			}
@@ -529,6 +531,13 @@ export default class ElFormTable extends Vue {
 					case "cascader":
 						if (item.props && item.props.emitPath == true) {
 							requiredRule.type = "array";
+						}
+						break;
+					case "slider":
+						if (item.props && item.props.range == true) {
+							requiredRule.type = "array";
+						} else {
+							requiredRule.type = "number";
 						}
 						break;
 					case "select":
