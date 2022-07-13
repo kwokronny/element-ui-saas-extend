@@ -582,12 +582,20 @@ export default {
   },
   methods: {
     editOptionReshow() {
-      this.model.asyncSelect = 1;
-      this.model.remote = { label: "测试", value: "123" };
-      this.model.remoteMult = [
-        { label: "测试", value: "123" },
-        { label: "测试2", value: "1233" },
-      ];
+      this.$refs["EditForm"].setModel({
+        asyncSelect: 1,
+        remote: { label: "回显测试", value: "echo_show" },
+        remoteMult: [
+          { label: "测试", value: "123" },
+          { label: "测试2", value: "1233" },
+        ],
+      });
+      // this.model.asyncSelect = 1;
+      // this.model.remote = { label: "回显测试", value: "123" };
+      // this.model.remoteMult = [
+      //   { label: "测试", value: "123" },
+      //   { label: "测试2", value: "1233" },
+      // ];
     },
     getOptions(query, page) {
       // console.log(this.model.asyncSelect);
@@ -815,9 +823,9 @@ export default {
 
 ### Scope Slot
 
-| 插槽名称   | 描述                                              |
-| :--------- | :------------------------------------------------ |
-| 自定义名称 | 自定义表单项的内容，参数为 { field, model, name } |
+| 插槽名称   | 描述                                             |
+| :--------- | :----------------------------------------------- |
+| 自定义名称 | 自定义表单项的内容，参数为 { item, model, name } |
 
 ### Event
 

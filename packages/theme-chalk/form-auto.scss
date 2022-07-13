@@ -5,4 +5,8 @@
   .el-form-auto-row .el-form-item_hidden {
     display: none;
   }
+
+  .el-checkbox + .el-checkbox-group {
+    margin-left: 30px;
+  }
 }

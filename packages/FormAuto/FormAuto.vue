@@ -6,7 +6,6 @@
 		:rules="rules"
 		:validate-on-rule-change="false"
 		:inline="inline"
-		:label-width="labelWidth"
 		v-bind="$attrs"
 		v-on="$listeners"
 	>
@@ -118,12 +117,11 @@
 								</component>
 							</el-radio-group>
 						</template>
-						<template v-else-if="item.type == 'check'">
+						<template v-else-if="item.type == 'check' && Array.isArray(item.options)">
 							<el-checkbox
 								v-if="!item.notAll"
 								:indeterminate="check[name] == 2"
 								v-model="check[name]"
-								style="margin-right: 30px"
 								@change="checkAll(name)"
 							>{{$t("formauto.checkAll")}}</el-checkbox>
 							<el-checkbox-group
@@ -144,7 +142,7 @@
 								</el-checkbox>
 							</el-checkbox-group>
 						</template>
-						<template v-else-if="item.type == 'select'">
+						<template v-else-if="item.type == 'select' && Array.isArray(item.options)">
 							<el-select
 								v-model="model[name]"
 								v-select-scroll="item.loadScroll && item.props?item.props.remoteMethod:null"
@@ -152,7 +150,7 @@
 								v-on="item.on"
 							>
 								<el-option
-									v-for="(option,key) in selectOptions(item)"
+									v-for="(option,key) in selectOptions(item,name)"
 									:key="`${name}_${key}`"
 									:label="option.label"
 									:value="option.value"
@@ -169,9 +167,8 @@
 								>{{$t('formauto.selectLoading')}}</el-option>
 							</el-select>
 						</template>
-						<template v-else-if="item.type == 'cascader'">
+						<template v-else-if="item.type == 'cascader' && Array.isArray(item.options)">
 							<el-cascader
-								v-if="Array.isArray(item.options)"
 								v-model="model[name]"
 								:options="item.options"
 								v-bind="item.props"
@@ -194,7 +191,7 @@
 		</component>
 		<slot name="append"></slot>
 		<component :is="inline ? 'span' : 'div'" v-if="$slots">
-			<el-form-item :label-width="inline ? '0px' : labelWidth">
+			<el-form-item>
 				<!-- @slot 按钮插槽-->
 				<slot></slot>
 			</el-form-item>
@@ -228,19 +225,11 @@ import { ValidateCallback } from "element-ui/types/form";
 export default class ElFormAuto extends Vue {
 
 	@Ref("FormAuto") readonly FormAuto!: Form;
-
-
-	@Model("input", { type: Object, default: () => { return {} } }) readonly value!: Record<string, any>;
-
 	/**
 	 * 行内表单模式
 	 * @default false
 	 */
 	@Prop({ type: Boolean, default: false }) readonly inline!: boolean;
-	/**
-	 * 表单域标签的宽度
-	 */
-	@Prop(String) readonly labelWidth!: string;
 	/**
 	 * 表单域标签是否隐藏
 	 * @default false
@@ -258,8 +247,6 @@ export default class ElFormAuto extends Vue {
 	@Prop({ type: Number, default: 15 }) readonly gutter!: number;
 
 	private fields: Record<string, ElFormAutoField> = {};
-	private model: Record<string, any> = {};
-	private check: Record<string, boolean | number> = {};
 	private rules: Record<string, any> = {};
 
 	@Watch("data", { immediate: true, deep: true })
@@ -267,184 +254,14 @@ export default class ElFormAuto extends Vue {
 		data && (this.generateRule(), this.generateModel())
 	}
 
-	@Watch("value", { immediate: true, deep: true })
-	private onValueChange(value: Record<string, any>) {
-		value && this.setModel(value);
-	}
+	@Model("input", { type: Object, default: () => { return {} } }) model!: Record<string, any>;
 
 	@Watch("model", { immediate: true, deep: true })
 	private onModelChange() {
 		this.$emit("input", this.getModel());
 	}
 
-	/**
-	 * @public
-	 * 获取表单所有参数
-	 */
-	public getModel(): Record<string, any> {
-		let data: Record<string, any> = {};
-		forEach(this.fields, (item: ElFormAutoField, name: string) => {
-			// if (!item.notSubmit) {
-				data[name] = this.model[name];
-				if (item.rangeName && item.type && (/range$/g.test(item.type) || (item.type == "slider" && item.props && item.props.range == true))) {
-					let [sn, en] = item.rangeName;
-					let [sd, ed] = this.model[name] || [null, null];
-					data[sn] = sd;
-					data[en] = ed;
-					if (sd && ed && item.type == "daterange" && item.suffixTime == true) {
-						data[sn] += " 00:00:00";
-						data[en] += " 23:59:59";
-					}
-				}
-			// }
-		});
-		return Object.assign({}, this.value, data);
-	}
-
-	/**
-	 * @public
-	 * 设置表单对应参数，表单项不存在的将被无视
-	 *
-	 * @param {object} model 表单项对应值数据 例如：{key:value,...}
-	 */
-	public setModel(model: Record<string, any>): void {
-		for (let name in model) {
-			let value = model[name];
-			let field = this.fields[name];
-			if (field) {
-				if (field.type == "select" && field.remote) {
-					let values = this.selectEcho(name, value);
-					if (Array.isArray(value)) {
-						values.forEach((v: string, i: number) => {
-							value[i] = v;
-						})
-					} else {
-						value = values
-					}
-				} else if (field.type == "check") {
-					this.handleCheckedChange(name, value);
-				}
-			}
-			this.model[name] = value;
-		}
-	}
-
-	/**
-	 * 更新options
-	 */
-	public refreshOptions(fieldName: string) {
-		let field = this.fields[fieldName];
-		if (field && field.props.remoteMethod) {
-			field.remoteParams.query = "refresh";
-			field.echoOptions = [];
-			field.remoteMethod();
-		}
-	}
-
-	private selectEcho(name: string, options: any): any {
-		let field = this.fields[name];
-		if (!field) return options;
-		if (Array.isArray(options)) {
-			if (!field.echoOptions) {
-				field.echoOptions = []
-			}
-			let values: string[] = []
-			for (let i = 0; i < options.length; i++) {
-				if (options[i] && options[i].label && options[i].value) {
-					if (!field.echoOptions.find((option: Record<string, string>) => option.value == options[i].value)) {
-						field.echoOptions.push(Object.assign({}, options[i]))
-					}
-					values.push(options[i].value);
-				} else {
-					values.push(options[i]);
-				}
-			}
-			return values;
-		} else if (options && options.label && options.value) {
-			field.echoOptions = [options];
-			return options.value;
-		} else {
-			return options;
-		}
-	}
-
-	private selectOptions(field: ElFormAutoField) {
-		if (Array.isArray(field.options) && field.remote) {
-			let echoOpitons = field.echoOptions || []
-			return uniqBy(echoOpitons.concat(field.options), "value")
-		}
-		return field.options
-	}
-
-	/**
-	 * @public
-	 * 重置表单
-	 */
-	public reset(): void {
-		this.generateModel();
-		for (let name in this.fields) {
-			let field = this.fields[name];
-			this.model[name] = field.value;
-			if (field.type == "check" && field.checkAll) {
-				this.check[name] = false;
-			}
-		}
-		if (this.FormAuto) {
-			this.$nextTick(function () {
-				this.FormAuto.resetFields();
-			})
-		}
-	}
-
-	/**
-	 * @public
-	 * 异步验证成功后获取表单所有参数
-	 */
-	public validate(cb?: ValidateCallback): Promise<boolean> | void {
-		return cb ? this.FormAuto.validate(cb) : this.FormAuto.validate();
-	}
-
-	/**
-	 * @public
-	 * 验证单个字段
-	 */
-	public validateField(props: string[] | string, callback: (errorMessage: string) => void): void {
-		return this.FormAuto && this.FormAuto.validateField(props, callback);
-	}
-	/**
-	 * 复选框 全选
-	 */
-	private checkAll(name: string): void {
-		this.model[name] = [];
-		if (this.check[name] === true) {
-			let options = this.fields[name].options as Array<ElAutoOption>;
-			if (Array.isArray(options)) {
-				options.forEach((item: Record<string, any>) => {
-					!item.disabled && this.model[name].push(item.value);
-				});
-			}
-		}
-	}
-
-	/**
-	 * 复选框组 change 事件
-	 */
-	private handleCheckedChange(name: string, value: string[]): void {
-		if (this.check[name] == undefined || !value) return
-		let checkedCount = value.length || 0;
-		let options = this.fields[name].options as ElAutoOption[];
-		let optionsCount = options.length;
-		if (checkedCount > 0 && checkedCount < optionsCount) {
-			this.check[name] = 2;
-		} else {
-			this.check[name] = checkedCount === optionsCount;
-		}
-	}
-
-	private asyncOptions: ElFormAutoField[] = [] //统一处理options
-	/**
-	 * 规范生成 model 
-	 */
+	private defaultValue: Record<string, any> = {};
 	private generateModel(): void {
 		this.fields = cloneDeep(this.data) as Record<string, ElFormAutoField>;
 		forEach(this.fields, (item, name) => {
@@ -521,15 +338,198 @@ export default class ElFormAuto extends Vue {
 					this.$set(this.check, name, false);
 				}
 			}
-
-			let value = this.value[name] == undefined ? item.value : this.value[name]
-			if (item.type == "select") {
-				value = this.selectEcho(name, value)
-			}
-			this.$set(this.model, name, value);
+			this.defaultValue[name] = item.value;
+			this.$set(this.model, name, this.model[name] === undefined ? item.value : this.model[name]);
+		})
+		this.getModel();
+		this.$nextTick(function () {
+			this.FormAuto.clearValidate()
 		})
 		this.asyncOptionsRequest()
 	}
+
+	/**
+	 * @public
+	 * 获取表单所有参数
+	 */
+	public getModel(): Record<string, any> {
+		let model = this.model
+		for (let name in model) {
+			let field = this.fields[name]
+			if (field) {
+				if (Array.isArray(model[name]) && model[name].length > 0 && field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
+					let [sn, en] = field.rangeName;
+					let [sd, ed] = model[name] || [null, null];
+					if (sd && ed && field.type == "daterange" && field.suffixTime == true) {
+						sd += " 00:00:00";
+						ed += " 23:59:59";
+					}
+					this.$set(this.model, sn, sd)
+					this.$set(this.model, en, ed)
+				} else if (field.type == "select" && field.remote) {
+					let value = this.selectEcho(name, model[name]);
+					if (value) {
+						model[name] = value;
+					}
+				} else if (field.type == "check") {
+					this.handleCheckedChange(name, model[name]);
+				}
+			}
+		}
+		return this.model
+	}
+
+	/**
+	 * @public
+	 * 设置表单对应参数，表单项不存在的将被无视
+	 *
+	 * @param {object} model 表单项对应值数据 例如：{key:value,...}
+	 */
+	public setModel(model: Record<string, any>): void {
+		for (let name in model) {
+			this.$set(this.model, name, model[name] || this.defaultValue[name])
+		}
+	}
+	// 	for (let name in model) {
+	// 		let value = model[name];
+	// 		let field = this.fields[name];
+	// 		if (field) {
+	// 			if (field.type == "select" && field.remote) {
+	// 				let values = this.selectEcho(name, value);
+	// 				if (Array.isArray(value)) {
+	// 					values.forEach((v: string, i: number) => {
+	// 						value[i] = v;
+	// 					})
+	// 				} else {
+	// 					value = values
+	// 				}
+	// 			} else if (field.type == "check") {
+	// 				this.handleCheckedChange(name, value);
+	// 			}
+	// 		}
+	// 		this.model[name] = value;
+	// 	}
+	// }
+
+	/**
+	 * 更新options
+	 */
+	public refreshOptions(fieldName: string) {
+		let field = this.fields[fieldName];
+		if (field && field.props.remoteMethod) {
+			field.remoteParams.query = "refresh";
+			field.echoOptions = [];
+			field.remoteMethod();
+		}
+	}
+
+	private echoOptions: Record<string, any> = {}
+
+	private selectEcho(name: string, options: any): any {
+		if (!this.echoOptions[name]) {
+			this.echoOptions[name] = []
+		}
+		if (Array.isArray(options) && options.length > 0) {
+			let echoOptions = this.echoOptions[name];
+			let values: Array<string | number> = []
+			let isChange = false;
+			for (let i = 0; i < options.length; i++) {
+				if (options[i] && options[i].label && options[i].value) {
+					if (!echoOptions.find((option: Record<string, string>) => option.value == options[i].value)) {
+						echoOptions.push(Object.assign({}, options[i]))
+					}
+					isChange = true;
+					values.push(options[i].value);
+				} else {
+					values.push(options[i]);
+				}
+			}
+			return isChange ? values : false
+		} else if (options && options.label && options.value) {
+			this.echoOptions[name] = [Object.assign({}, options)];
+			return options.value;
+		} else {
+			return false;
+		}
+	}
+
+	private selectOptions(field: ElFormAutoField, name: string) {
+		if (Array.isArray(field.options) && field.remote && this.echoOptions[name]) {
+			let echoOpitons = this.echoOptions[name] || []
+			return uniqBy(echoOpitons.concat(field.options), "value")
+		}
+		return field.options
+	}
+
+	/**
+	 * @public
+	 * 重置表单
+	 */
+	public reset(): void {
+		this.generateModel();
+		for (let name in this.fields) {
+			let field = this.fields[name];
+			this.model[name] = this.defaultValue[name];
+			if (field.type == "check" && field.checkAll) {
+				this.check[name] = false;
+			}
+		}
+		if (this.FormAuto) {
+			this.$nextTick(function () {
+				this.FormAuto.resetFields();
+			})
+		}
+	}
+
+	/**
+	 * @public
+	 * 异步验证成功后获取表单所有参数
+	 */
+	public validate(cb?: ValidateCallback): Promise<boolean> | void {
+		return cb ? this.FormAuto.validate(cb) : this.FormAuto.validate();
+	}
+
+	/**
+	 * @public
+	 * 验证单个字段
+	 */
+	public validateField(props: string[] | string, callback: (errorMessage: string) => void): void {
+		return this.FormAuto && this.FormAuto.validateField(props, callback);
+	}
+
+	// #region 复选框全选相关处理
+	private check: Record<string, boolean | number> = {};
+	/**
+	 * 复选框 全选
+	 */
+	private checkAll(name: string): void {
+		this.model[name] = [];
+		if (this.check[name] === true) {
+			let options = this.fields[name].options as Array<ElAutoOption>;
+			if (Array.isArray(options)) {
+				options.forEach((item: Record<string, any>) => {
+					!item.disabled && this.model[name].push(item.value);
+				});
+			}
+		}
+	}
+
+	/**
+	 * 复选框组 change 事件
+	 */
+	private handleCheckedChange(name: string, value: string[]): void {
+		if (this.check[name] == undefined || !value) return
+		let checkedCount = value.length || 0;
+		let options = this.fields[name].options as ElAutoOption[];
+		let optionsCount = options.length;
+		if (checkedCount > 0 && checkedCount < optionsCount) {
+			this.check[name] = 2;
+		} else {
+			this.check[name] = checkedCount === optionsCount;
+		}
+	}
+	// #endregion
+
 
 	private generateRule(): void {
 		this.rules = {};
@@ -551,6 +551,11 @@ export default class ElFormAuto extends Vue {
 						break;
 					case "cascader":
 						if (item.props && item.props.emitPath == true) {
+							requiredRule.type = "array";
+						}
+						break;
+					case "slider":
+						if (item.props && item.props.range == true) {
 							requiredRule.type = "array";
 						}
 						break;
@@ -579,6 +584,7 @@ export default class ElFormAuto extends Vue {
 		});
 	}
 
+	private asyncOptions: ElFormAutoField[] = [] //统一处理options
 	private asyncOptionsRequest(): void {
 		if (this.asyncOptions.length) {
 			this.asyncOptions.forEach((item) => {
@@ -642,10 +648,7 @@ export default class ElFormAuto extends Vue {
 					item.remoteMethod = () => {
 						transformOptions(remoteMethod, item.type != 'cascader').then((options) => {
 							item.options = options
-							this.handleCheckedChange(item.name, this.value[item.name])
-							this.$nextTick(function () {
-								this.FormAuto.clearValidate(item.name)
-							})
+							this.handleCheckedChange(item.name, this.model[item.name])
 						})
 					}
 					item.remoteMethod()

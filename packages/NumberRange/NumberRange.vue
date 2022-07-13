@@ -65,8 +65,8 @@ export default class ElNumberRange extends Vue {
 
 	@Watch("value", { immediate: true })
 	private handleValueChange(value: number[]) {
-		this.minValue = value[0] !== undefined ? `${value[0]}` : ""
-		this.maxValue = value[1] !== undefined ? `${value[1]}` : ""
+		this.minValue = value && value[0] !== undefined ? `${value[0]}` : ""
+		this.maxValue = value && value[1] !== undefined ? `${value[1]}` : ""
 	}
 
 	@Prop(Number) min!: number

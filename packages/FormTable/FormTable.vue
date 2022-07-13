@@ -182,7 +182,7 @@
 <script lang="ts">
 import { Form } from "element-ui";
 import { Vue, Component, Prop, Model, Watch, Ref } from "vue-property-decorator";
-import { cloneDeep, forEach, omit, uniqBy } from "lodash-es";
+import { clone, cloneDeep, forEach, omit, uniqBy } from "lodash-es";
 import { ElAutoMixinOptions, ElAutoOption } from "types/saas-extend";
 import { ElFormAutoField } from "../../types/form-auto";
 import { transformOptions } from "../util";
@@ -226,12 +226,6 @@ export default class ElFormTable extends Vue {
 		this.$emit("input", this.getModel());
 	}
 
-	// private valueArr: Record<string, any>[] = [];
-	// @Watch("valueArr", { deep: true })
-	// private onValueArrChange() {
-	// 	this.$emit("input", this.getModel());
-	// }
-
 	/**
 	 * @public
 	 * 获取表单所有参数
@@ -243,15 +237,15 @@ export default class ElFormTable extends Vue {
 				// if (!item.notSubmit) {
 				let field = this.fields[name]
 				if (field) {
-					if (field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
+					if (Array.isArray(model[name]) && model[name].length > 0 && field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
 						let [sn, en] = field.rangeName;
-						let [sd, ed] = model[name] || [null, null];
-						model[sn] = sd;
-						model[en] = ed;
+						let [sd, ed] = model[name];
 						if (sd && ed && field.type == "daterange" && field.suffixTime == true) {
-							model[sn] += " 00:00:00";
-							model[en] += " 23:59:59";
+							sd += " 00:00:00";
+							ed += " 23:59:59";
 						}
+						this.$set(model, sn, sd)
+						this.$set(model, en, ed)
 					} else if (field.type == "select" && field.remote) {
 						let value = this.selectEcho(name, i, model[name]);
 						if (value) {
@@ -259,7 +253,6 @@ export default class ElFormTable extends Vue {
 						}
 					}
 				}
-				// }
 			}
 		}
 		return this.value
@@ -302,20 +295,22 @@ export default class ElFormTable extends Vue {
 		if (!this.echoOptions[name]) {
 			this.echoOptions[name] = { [idx]: [] }
 		}
-		if (Array.isArray(options)) {
+		if (Array.isArray(options) && options.length > 0) {
 			let echoOptions = this.echoOptions[name][idx];
 			let values: string[] = []
+			let isChange = false;
 			for (let i = 0; i < options.length; i++) {
 				if (options[i] && options[i].label && options[i].value) {
 					if (!echoOptions.find((option: Record<string, string>) => option.value == options[i].value)) {
 						echoOptions.push(Object.assign({}, options[i]))
 					}
+					isChange = true;
 					values.push(options[i].value);
 				} else {
 					values.push(options[i]);
 				}
 			}
-			return values;
+			return isChange ? values : false
 		} else if (options && options.label && options.value) {
 			this.echoOptions[name][idx] = [Object.assign({}, options)];
 			return options.value;
@@ -430,21 +425,7 @@ export default class ElFormTable extends Vue {
 				// 	this.$set(this.check, name, false);
 				// }
 			}
-
-			// let value = this.value[name] == undefined ? item.value : this.value[name]
-			// if (item.type == "select") {
-			// value = this.selectEcho(name, value)
-			// }
 			this.defaultValue[name] = item.value;
-			if (this.value && this.value.length && item.type == "select") {
-				this.value.forEach((item: Record<string, any>, idx: number) => {
-					let value = this.selectEcho(name, idx, item[name])
-					if (value) {
-						item[name] = value
-					}
-				})
-			}
-			// this.$set(this.model, name, value);
 		})
 		if (this.value.length < 1) {
 			this.handleAddItem()
