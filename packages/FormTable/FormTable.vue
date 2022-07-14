@@ -40,9 +40,13 @@
 				</template>
 				<template slot-scope="{ row, $index }">
 					<el-form-item :prop="`model.${$index}.${name}`" :rules="rules[name]">
-						<template v-if="item.slot">
-							<dynamic-slot :name="item.slot" :data="{ item, model:row, name }"></dynamic-slot>
-						</template>
+						<slot
+							v-if="item.slot"
+							:name="item.slot"
+							v-bind:item="item"
+							v-bind:model="row"
+							v-bind:name="name"
+						></slot>
 						<template v-else-if="'component'==item.type">
 							<component :is="item.component" v-bind="item.props" v-on="item.on"></component>
 						</template>
@@ -197,29 +201,18 @@
 <script lang="ts">
 import { Form } from "element-ui";
 import { Vue, Component, Prop, Model, Watch, Ref } from "vue-property-decorator";
-import { clone, cloneDeep, forEach, omit, uniqBy } from "lodash-es";
+import { cloneDeep, forEach, omit, uniqBy } from "lodash-es";
 import { ElAutoMixinOptions, ElAutoOption, ElFormAutoField } from "types/saas-extend";
 import { transformOptions } from "../util";
 import locale from "../../src/mixin/locale"
 import selectScroll from "../../src/mixin/selectScroll"
-import DynamicSlot from "../components/DynamicSlot"
 import { ValidateCallback } from "element-ui/types/form";
 
 @Component({
 	name: "ElFormTable",
-	provide() {
-		return {
-			slotRoot: this
-		}
-	},
 	mixins: [locale, selectScroll],
-	components: {
-		DynamicSlot
-	}
 })
 export default class ElFormTable extends Vue {
-
-
 	@Ref("FormAuto") readonly FormAuto!: Form;
 
 	private fields: Record<string, ElFormAutoField> = {};
@@ -490,7 +483,7 @@ export default class ElFormTable extends Vue {
 						item.props.remoteMethod.call(item, "")
 					}
 					let originClearEvent = item.on.clear || (() => { })
-					let self=this;
+					let self = this;
 					item.on.clear = function () {
 						originClearEvent()
 						item.remoteParams.query = "clear";

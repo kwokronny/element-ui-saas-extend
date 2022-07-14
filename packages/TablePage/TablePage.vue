@@ -7,14 +7,9 @@
 			class="el-table-page__search-card"
 		>
 			<slot name="search_prepend"></slot>
-			<el-form-auto ref="SearchForm" v-model="filter" :data="searchForm" v-bind="searchProps">
+			<el-form-auto ref="SearchForm" v-model="filter" @keyup.enter.native="search(1)" :data="searchForm" v-bind="searchProps">
 				<template v-for="search in searchForm" :slot="search.slot" slot-scope="{item,model,name}">
-					<dynamic-slot
-						v-if="search.slot"
-						:name="search.slot"
-						:data="{item,model,name}"
-						:key="search.slot"
-					></dynamic-slot>
+					<slot v-if="search.slot" :name="search.slot" v-bind:item="item" v-bind:model="model" v-bind:name="name" ></slot>
 				</template>
 				<slot name="search_button">
 					<el-button
@@ -76,7 +71,7 @@
 				>
 					<el-table-column v-if="$scopedSlots['expand']" type="expand">
 						<template slot-scope="{row, $index}">
-							<dynamic-slot name="expand" :data="{row, index: $index}"></dynamic-slot>
+							<slot :name="item.slot" v-bind:row="row" v-bind:index="$index"></slot>
 						</template>
 					</el-table-column>
 					<el-table-column
@@ -99,7 +94,13 @@
 									</el-tooltip>
 								</template>
 								<template slot-scope="{row, $index}">
-									<dynamic-slot v-if="column.slot" :name="column.slot" :data="{row, column, index: $index}"></dynamic-slot>
+									<slot
+										v-if="column.slot"
+										:name="column.slot"
+										v-bind:row="row"
+										v-bind:column="column"
+										v-bind:index="$index"
+									></slot>
 									<template v-else-if="column.enum && typeof column.enum == 'object'">
 										<enum-tags
 											:key="$index"
@@ -203,12 +204,12 @@ import { Vue, Component, Prop, Ref, Watch, PropSync } from "vue-property-decorat
 import { Table } from "element-ui"
 import { omit, cloneDeep, keyBy } from "lodash-es"
 import ElTableDraggable from "element-ui-el-table-draggable"
-import { ElFormAutoField } from "../../types/form-auto"
+import { ElFormAutoField } from "../../types/saas-extend"
 import { ElTablePageColumn, ElTablePageDataMap } from "types/table-page"
 import { transformOptions } from "../util"
 import ElFormAuto from "../FormAuto";
 import EnumTags from "./EnumTags.vue";
-import DynamicSlot from "../components/DynamicSlot"
+import locale from "../../src/mixin/locale"
 
 interface ElTablePageColumnSort {
 	prop: string,
@@ -219,13 +220,9 @@ interface ElTablePageColumnSort {
 @Component({
 	name: "ElTablePage",
 	components: {
-		DynamicSlot, ElTableDraggable, ElFormAuto, EnumTags
+		ElTableDraggable, ElFormAuto, EnumTags
 	},
-	provide() {
-		return {
-			slotRoot: this
-		}
-	}
+	mixins: [locale],
 })
 export default class ElTablePage extends Vue {
 	@Ref("TablePage") readonly TablePage!: Table

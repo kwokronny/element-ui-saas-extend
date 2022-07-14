@@ -12,9 +12,12 @@ pageClass: component-page
 
 ```vue
 <template>
-  <el-form-table :data="form" ref="EditForm" v-model="model">
-    <el-button slot="option_append" @click="getModel">测试</el-button>
-  </el-form-table>
+  <div>
+    <el-form-table :data="form" ref="EditForm" v-model="model">
+      <el-button slot="option_append" @click="getModel">测试</el-button>
+    </el-form-table>
+    <div style="margin-top: 20px">表单字段: {{ model }}</div>
+  </div>
 </template>
 <script>
 export default {
@@ -119,7 +122,7 @@ export declare type ElAutoMixinOptions = Record<string | number, string | number
 <template>
   <div>
     <el-form-table :data="form" ref="EditForm" v-model="model"> </el-form-table>
-    <div>表单字段: {{ model }}</div>
+    <div style="margin-top: 20px">表单字段: {{ model }}</div>
   </div>
 </template>
 <script>
@@ -230,14 +233,17 @@ export default {
 
 ```vue
 <template>
-  <el-form-table :data="form" ref="EditForm" v-model="model">
-    <el-tag slot="option_perpend" type="primary">首部操作区前置</el-tag>
-    <el-tag slot="option_append" type="primary">首部操作区追加</el-tag>
-    <template slot-scope="{ item, model, name }" slot="customSlot"> 自定义 <el-input v-model="model[name]" style="width:100px"></el-input> </template>
-    <template slot="table_body_option" slot-scope="{ row, index }">
-      <el-button icon="el-icon-remove" tpye="text" @click="remove(index)"></el-button>
-    </template>
-  </el-form-table>
+  <div>
+    <el-form-table :data="form" ref="EditForm" v-model="model">
+      <el-tag slot="option_perpend" type="primary">首部操作区前置</el-tag>
+      <el-tag slot="option_append" type="primary">首部操作区追加</el-tag>
+      <template slot-scope="{ item, model, name }" slot="customSlot"> 自定义 <el-input v-model="model[name]" style="width:100px"></el-input> </template>
+      <template slot="table_body_option" slot-scope="{ row, index }">
+        <el-button icon="el-icon-remove" tpye="text" @click="remove(index)"></el-button>
+      </template>
+    </el-form-table>
+    <div style="margin-top: 20px">表单字段: {{ model }}</div>
+  </div>
 </template>
 <script>
 export default {

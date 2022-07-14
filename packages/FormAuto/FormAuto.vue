@@ -33,8 +33,8 @@
 								<i class="el-icon-question"></i>
 							</el-tooltip>
 						</span>
-						<template v-if="item.slot">
-							<dynamic-slot :name="item.slot" :data="{ item, model, name }"></dynamic-slot>
+						<template v-if="item.slot" >
+							<slot :name="item.slot" v-bind:item="item" v-bind:model="model" v-bind:name="name" ></slot>
 						</template>
 						<template v-else-if="'component'==item.type">
 							<component :is="item.component" v-bind="item.props" v-on="item.on"></component>
@@ -204,22 +204,13 @@ import { Form } from "element-ui";
 import { forEach, cloneDeep, uniqBy, omit } from "lodash-es";
 import { ElAutoMixinOptions, ElAutoOption, ElFormAutoField } from "../../types/saas-extend"
 import { transformOptions } from "../util"
-import DynamicSlot from "../components/DynamicSlot"
 import locale from "../../src/mixin/locale"
 import selectScroll from "../../src/mixin/selectScroll"
 import { ValidateCallback } from "element-ui/types/form";
 
 @Component({
 	name: "ElFormAuto",
-	provide() {
-		return {
-			slotRoot: this
-		}
-	},
 	mixins: [locale, selectScroll],
-	components: {
-		DynamicSlot
-	}
 })
 export default class ElFormAuto extends Vue {
 
@@ -391,26 +382,6 @@ export default class ElFormAuto extends Vue {
 			this.$set(this.model, name, model[name] || this.defaultValue[name])
 		}
 	}
-	// 	for (let name in model) {
-	// 		let value = model[name];
-	// 		let field = this.fields[name];
-	// 		if (field) {
-	// 			if (field.type == "select" && field.remote) {
-	// 				let values = this.selectEcho(name, value);
-	// 				if (Array.isArray(value)) {
-	// 					values.forEach((v: string, i: number) => {
-	// 						value[i] = v;
-	// 					})
-	// 				} else {
-	// 					value = values
-	// 				}
-	// 			} else if (field.type == "check") {
-	// 				this.handleCheckedChange(name, value);
-	// 			}
-	// 		}
-	// 		this.model[name] = value;
-	// 	}
-	// }
 
 	/**
 	 * 更新options
@@ -419,7 +390,7 @@ export default class ElFormAuto extends Vue {
 		let field = this.fields[fieldName];
 		if (field && field.props.remoteMethod) {
 			field.remoteParams.query = "refresh";
-			field.echoOptions = [];
+			this.echoOptions[fieldName] = {};
 			field.remoteMethod();
 		}
 	}
