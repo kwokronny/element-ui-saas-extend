@@ -52,13 +52,9 @@ Vue.use(ElementUISaaSExtend);
 
 更多内容请查看[文档](#文档)
 
-# TODO
-- [] 编写测试用例
-- [] 支持国际化
-
 # 支持作者🚀
 
-[作者博客](https://kwokronny.top/)
+[作者博客](https://www.kwokronny.com/)
 
 如果您正在使用这个项目并感觉良好，或者是想支持我继续开发，Star 并分享这个项目
 

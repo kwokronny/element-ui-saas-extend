@@ -63,7 +63,7 @@ module.exports = {
     //     label: "English",
     //     lastUpdated: "Latest Update",
     //     nav: [
-    //       { text: "Anthor", link: "https://kwokronny.top" },
+    //       { text: "Anthor", link: "https://https://www.kwokronny.com" },
     //       { text: "Gitee", link: "https://gitee.com/kwokronny/element-ui-saas-extend" },
     //     ],
     //     sidebar: [

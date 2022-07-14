@@ -39,5 +39,6 @@ export default {
   formtable: {
     add: "Add",
     remove: "Remove",
+    clear: "Clear",
   },
 };

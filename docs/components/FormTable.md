@@ -12,10 +12,9 @@ pageClass: component-page
 
 ```vue
 <template>
-  <div>
-    <el-form-table :data="form" ref="EditForm" v-model="model"></el-form-table>
-    <el-button @click="getModel">测试</el-button>
-  </div>
+  <el-form-table :data="form" ref="EditForm" v-model="model">
+    <el-button slot="option_append" @click="getModel">测试</el-button>
+  </el-form-table>
 </template>
 <script>
 export default {
@@ -84,7 +83,7 @@ export default {
   },
   methods: {
     getModel() {
-      this.model=[{binduserId:3},{binduserId:{label:"test",value:"a3"}}]
+      this.model = [{ binduserId: 3 }, { binduserId: { label: "test", value: "a3" } }];
     },
   },
 };
@@ -96,10 +95,10 @@ export default {
 ## options 设置
 
 1. `options` 标准规范值是 `[{label: "苹果", value: "apple", icon:"el-icon-apple", disabled: false }, ...]` <br/>
-1. `options` 值为 `["苹果", ...]` 文本数组时，`label` 与 `value` 皆为 "苹果"<br/>
-1. `options` 值为 `{apple: "苹果", banana: "香蕉", ...}` 对象时，`label` 为值 `苹果`， `value` 为对你的键值 `apple`<br/>
-1. `options` 值为 `async (query?)=>{ return await $axios.get("options") }` 的 Promise 函数时，会在表单生成前执行，query 参数是当 `{type: "select",remote:true}` 时应用于远程搜索。<br/>
-1. `type: "cascader"` 级联选择框只支持应用标准规范值。
+2. `options` 值为 `["苹果", ...]` 文本数组时，`label` 与 `value` 皆为 "苹果"<br/>
+3. `options` 值为 `{apple: "苹果", banana: "香蕉", ...}` 对象时，`label` 为值 `苹果`， `value` 为对应键值 `apple`<br/>
+4. `options` 值为 `async (query?)=>{ return await $axios.get("options") }` 的 Promise 函数时，会在表单生成前执行，query 参数是当 `{type: "select",remote:true}` 时应用于远程搜索。<br/>
+5. `type: "cascader"` 级联选择框只支持应用标准规范值。
 
 ```typescript
 export declare interface ElAutoOption {
@@ -140,13 +139,13 @@ export default {
           options: (query, page) => {
             return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
               return res.data.reduce((arr, item) => {
-                if (self.model.findIndex((model) => model.remote == (item.id * page)) < 0) {
+                if (self.model.findIndex((model) => model.remote == item.id * page) < 0) {
                   arr.push({
                     label: item.username,
                     value: item.id * page,
                   });
                 }
-                return arr
+                return arr;
               }, []);
             });
           },
@@ -202,7 +201,7 @@ export default {
           col: 12,
           label: "级联框",
           type: "daterange",
-          rangeName: ["startDate","endDate"],
+          rangeName: ["startDate", "endDate"],
           style: "width:100%",
         },
       },
@@ -231,11 +230,14 @@ export default {
 
 ```vue
 <template>
-  <div>
-    <el-form-table :data="form" ref="EditForm" v-model="model">
-      <template slot-scope="{ item, model, name }" slot="customSlot"> 自定义 <el-input v-model="model[name]" style="width:100px"></el-input> </template>
-    </el-form-table>
-  </div>
+  <el-form-table :data="form" ref="EditForm" v-model="model">
+    <el-tag slot="option_perpend" type="primary">首部操作区前置</el-tag>
+    <el-tag slot="option_append" type="primary">首部操作区追加</el-tag>
+    <template slot-scope="{ item, model, name }" slot="customSlot"> 自定义 <el-input v-model="model[name]" style="width:100px"></el-input> </template>
+    <template slot="table_body_option" slot-scope="{ row, index }">
+      <el-button icon="el-icon-remove" tpye="text" @click="remove(index)"></el-button>
+    </template>
+  </el-form-table>
 </template>
 <script>
 export default {
@@ -286,22 +288,8 @@ export default {
     };
   },
   methods: {
-    getOptions(query, page) {
-      // console.log(this.model.asyncSelect);
-      return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query: this.model.asyncSelect, page } }).then((res) => {
-        if (page > 2) return [];
-        return res.data
-          .filter((item) => item.username.indexOf(query) > -1)
-          .map((item) => {
-            return {
-              label: item.username,
-              value: item.id * page,
-            };
-          });
-      });
-    },
-    reset() {
-      this.$refs["EditForm"].reset();
+    remove(index) {
+      this.$refs["EditForm"].removeItem(index);
     },
   },
 };
@@ -314,11 +302,12 @@ export default {
 
 ### Props
 
-| 参数            | 描述                   | 类型                                                      | 可选值 | 默认值 |
-| :-------------- | :--------------------- | :-------------------------------------------------------- | :----- | ------ |
-| v-model         | 表单数据对象           | `Array<Record<string,any>>`                               | -      | []     |
-| data            | 表单项配置             | [Record&lt;name:string,FormAutoField&gt;](#FormAutoField) | -      | {}     |
-| `[prop:string]` | 继承 el-form 所有 Prop | `any`                                                     | -      | -      |
+| 参数            | 描述                        | 类型                                                      | 可选值 | 默认值 |
+| :-------------- | :-------------------------- | :-------------------------------------------------------- | :----- | ------ |
+| v-model         | 表单数据对象                | `Array<Record<string,any>>`                               | -      | []     |
+| data            | 表单项配置                  | [Record&lt;name:string,FormAutoField&gt;](#FormAutoField) | -      | {}     |
+| item-limit      | 限制最大成员数量            | `number`                                                  | -      | -1     |
+| `[prop:string]` | 继承 `<el-table>` 所有 Prop | `any`                                                     | -      | -      |
 
 ### FormAutoField
 
@@ -376,30 +365,31 @@ export default {
 
 ### Method
 
-| 方法名           | 描述                     | 参数                                                 |
-| :--------------- | :----------------------- | :--------------------------------------------------- |
-| reset()          | 重置表单                 | -                                                    |
-| refreshOptions() | 刷新选项                 | `(fieldName: string)=>void`                          |
-| validate()       | 对整个表单进行校验的方法 | `Promise<void> | (valid:boolean)=>void`              |
-| validateField()  | 对整个表单进行校验的方法 | `(prop:string,callback:(errMsg:string)=>void)=>void` |
-| getModel()       | 获取表单所有参数         |                                                      |
-| pushModel()      | 设置表单对应参数         | `Record<string,any>`                                 |
+| 方法名          | 描述                         | 参数                                                   | 返回                   |
+| :-------------- | :--------------------------- | :----------------------------------------------------- | ---------------------- |
+| clear()         | 清空所有                     | -                                                      | -                      |
+| validate()      | 对整个表单进行校验的方法     | `valid:boolean`                                        | `Promise<void> | void` |
+| validateField() | 对部分表单字段进行校验的方法 | `(prop:array | string,callback:(errMsg:string)=>void)` | -                      |
+| addItem()       | 添加项                       | `model?:Record<string,any>`                            | -                      |
+| removeItem()    | 获取表单所有参数             | `index:number`                                         | -                      |
 
 ### Slot
 
-| 插槽    | 描述                     |
-| :------ | :----------------------- |
-| prepend | 表单内首部插槽           |
-| append  | 表单尾部，按钮之前插槽   |
+| 插槽           | 描述           |
+| :------------- | :------------- |
+| option_prepend | 首部操作区前置 |
+| option_append  | 首部操作区追加 |
+| prepend        | 表格上方操作区 |
 
 ### Scope Slot
 
-| 插槽名称   | 描述                                              |
-| :--------- | :------------------------------------------------ |
-| 自定义名称 | 自定义表单项的内容，参数为 { field, model, name } |
+| 插槽名称          | 描述                                              |
+| :---------------- | :------------------------------------------------ |
+| 自定义名称        | 自定义表单项的内容，参数为 { field, model, name } |
+| table_body_option | 自定义表格右侧操作列的内容，参数为 { row, index } |
 
 ### Event
 
-| 事件名称     | 说明                                | 回调参数 |
-| :----------- | :---------------------------------- | :------- |
-| [event:name] | 可直接追加 &lt;el-form&gt; 所有事件 | -        |
+| 事件名称     | 说明                                 | 回调参数 |
+| :----------- | :----------------------------------- | :------- |
+| [event:name] | 可直接追加 &lt;el-table&gt; 所有事件 | -        |

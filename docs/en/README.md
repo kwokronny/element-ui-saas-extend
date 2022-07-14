@@ -13,7 +13,7 @@ features:
 - title: Easy
   details: Follow the standard development of Element UI, as many sample codes and documents as possible to help you get started quickly.
 
-footer: MIT Licensed | kwokronny.top
+footer: MIT Licensed | kwokronny.com
 ---
 
 Since recent work mainly focuses on SaaS business development, development in `form` and `table` interaction is highly repetitive, In order to reduce reppetitive work, it was decided to organize a library of perset components for  SaaS business. The project is developed on the basis of the Element UI suite, as his extension component library.

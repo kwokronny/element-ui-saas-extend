@@ -4,13 +4,26 @@
 		ref="FormTable"
 		:model="{model: value}"
 		:rules="rules"
-		v-bind="$attrs"
 		:validate-on-rule-change="false"
 	>
 		<div class="el-form-table__option">
-			<el-button @click="handleAddItem()" :disabled="itemLimit>-1 && this.value.length >= itemLimit">{{$t("formtable.add")}}</el-button>
+			<slot name="prepend">
+				<slot name="option_perpend"></slot>
+				<el-button
+					@click="addItem()"
+					icon="el-icon-plus"
+					:disabled="itemLimit>-1 && value.length >= itemLimit"
+				>{{$t("formtable.add")}}</el-button>
+				<el-button
+					@click="clear()"
+					icon="el-icon-delete"
+					type="danger"
+					:disabled="value.length < 1"
+				>{{$t("formtable.clear")}}</el-button>
+				<slot name="option_append"></slot>
+			</slot>
 		</div>
-		<el-table :data="value" border>
+		<el-table :data="value" v-bind="$attrs" v-on="$listeners">
 			<el-table-column
 				v-for="(item,name) in fields"
 				:prop="name"
@@ -170,9 +183,11 @@
 					</el-form-item>
 				</template>
 			</el-table-column>
-			<el-table-column prop="options" label="" width="80" fixed="right">
-				<template slot-scope="{ $index }">
-					<el-button type="text" @click="handleRemoveItem($index)">{{$t("formtable.remove")}}</el-button>
+			<el-table-column prop="options" label width="80" fixed="right">
+				<template slot-scope="{row, $index }">
+					<slot name="table_body_option" v-bind:row="row" v-bind:index="$index">
+						<el-button type="text" @click="removeItem($index)">{{$t("formtable.remove")}}</el-button>
+					</slot>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -183,8 +198,7 @@
 import { Form } from "element-ui";
 import { Vue, Component, Prop, Model, Watch, Ref } from "vue-property-decorator";
 import { clone, cloneDeep, forEach, omit, uniqBy } from "lodash-es";
-import { ElAutoMixinOptions, ElAutoOption } from "types/saas-extend";
-import { ElFormAutoField } from "../../types/form-auto";
+import { ElAutoMixinOptions, ElAutoOption, ElFormAutoField } from "types/saas-extend";
 import { transformOptions } from "../util";
 import locale from "../../src/mixin/locale"
 import selectScroll from "../../src/mixin/selectScroll"
@@ -205,10 +219,8 @@ import { ValidateCallback } from "element-ui/types/form";
 })
 export default class ElFormTable extends Vue {
 
-	@Prop({ type: Number, default: -1 }) readonly itemLimit!: number;
 
 	@Ref("FormAuto") readonly FormAuto!: Form;
-
 
 	private fields: Record<string, ElFormAutoField> = {};
 	private rules: Record<string, any> = {};
@@ -219,6 +231,7 @@ export default class ElFormTable extends Vue {
 		data && (this.generateRule(), this.generateModel())
 	}
 
+	@Prop({ type: Number, default: -1 }) readonly itemLimit!: number;
 	@Model("input", { type: Array, default: () => [] }) value!: Record<string, any>[];
 
 	@Watch("value", { immediate: true, deep: true })
@@ -259,21 +272,6 @@ export default class ElFormTable extends Vue {
 		}
 		return this.value
 	}
-
-
-
-	/**
-	 * 更新options
-	 */
-	public refreshOptions(fieldName: string) {
-		let field = this.fields[fieldName];
-		if (field && field.props.remoteMethod) {
-			field.remoteParams.query = "refresh";
-			field.echoOptions = [];
-			field.remoteMethod();
-		}
-	}
-
 
 	/**
 	 * @public
@@ -338,12 +336,17 @@ export default class ElFormTable extends Vue {
 		return value
 	}
 
-	private handleAddItem() {
-		this.value.push(Object.assign({}, this.defaultValue));
+	public addItem(model?: Record<string, any>) {
+		if (this.itemLimit > -1 && this.itemLimit < this.value.length) return;
+		this.value.push(Object.assign(model || {}, this.defaultValue));
 	}
 
-	private handleRemoveItem(index: number) {
+	public removeItem(index: number) {
 		this.value.splice(index, 1);
+	}
+
+	public clear() {
+		this.value.splice(0, this.value.length);
 	}
 
 	private defaultValue: Record<string, any> = {};
@@ -430,7 +433,7 @@ export default class ElFormTable extends Vue {
 			this.defaultValue[name] = item.value;
 		})
 		if (this.value.length < 1) {
-			this.handleAddItem()
+			this.addItem()
 		}
 		this.asyncOptionsRequest()
 	}
@@ -487,10 +490,10 @@ export default class ElFormTable extends Vue {
 						item.props.remoteMethod.call(item, "")
 					}
 					let originClearEvent = item.on.clear || (() => { })
+					let self=this;
 					item.on.clear = function () {
 						originClearEvent()
 						item.remoteParams.query = "clear";
-						item.echoOptions = []
 						item.props.remoteMethod.call(item, "")
 					}
 				} else if (item.options) {

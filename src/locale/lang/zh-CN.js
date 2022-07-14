@@ -39,5 +39,6 @@ export default {
   formtable: {
     add: "添加",
     remove: "删除",
+    clear: "清空",
   },
 };

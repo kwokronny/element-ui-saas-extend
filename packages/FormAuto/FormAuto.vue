@@ -202,8 +202,7 @@
 import { Vue, Component, Prop, Ref, Watch, Model } from "vue-property-decorator";
 import { Form } from "element-ui";
 import { forEach, cloneDeep, uniqBy, omit } from "lodash-es";
-import { ElFormAutoField } from "../../types/form-auto";
-import { ElAutoMixinOptions, ElAutoOption } from "../../types/saas-extend"
+import { ElAutoMixinOptions, ElAutoOption, ElFormAutoField } from "../../types/saas-extend"
 import { transformOptions } from "../util"
 import DynamicSlot from "../components/DynamicSlot"
 import locale from "../../src/mixin/locale"
@@ -476,6 +475,7 @@ export default class ElFormAuto extends Vue {
 				this.check[name] = false;
 			}
 		}
+		this.echoOptions = {}
 		if (this.FormAuto) {
 			this.$nextTick(function () {
 				this.FormAuto.resetFields();
@@ -641,10 +641,11 @@ export default class ElFormAuto extends Vue {
 						}
 					}
 					let originClearEvent = item.on.clear || (() => { })
+					let self = this;
 					item.on.clear = function () {
 						originClearEvent()
 						item.remoteParams.query = "clear";
-						item.echoOptions = []
+						self.echoOptions[item.name] = [];
 						item.props.remoteMethod.call(item, "")
 					}
 				} else if (item.options) {

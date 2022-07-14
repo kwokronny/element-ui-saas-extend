@@ -419,10 +419,10 @@ export default {
 ## options 设置
 
 1. `options` 标准规范值是 `[{label: "苹果", value: "apple", icon:"el-icon-apple", disabled: false }, ...]` <br/>
-1. `options` 值为 `["苹果", ...]` 文本数组时，`label` 与 `value` 皆为 "苹果"<br/>
-1. `options` 值为 `{apple: "苹果", banana: "香蕉", ...}` 对象时，`label` 为值 `苹果`， `value` 为对你的键值 `apple`<br/>
-1. `options` 值为 `async (query?)=>{ return await $axios.get("options") }` 的 Promise 函数时，会在表单生成前执行，query 参数是当 `{type: "select",remote:true}` 时应用于远程搜索。<br/>
-1. `type: "cascader"` 级联选择框只支持应用标准规范值。
+2. `options` 值为 `["苹果", ...]` 文本数组时，`label` 与 `value` 皆为 "苹果"<br/>
+3. `options` 值为 `{apple: "苹果", banana: "香蕉", ...}` 对象时，`label` 为值 `苹果`， `value` 为对应键值 `apple`<br/>
+4. `options` 值为 `async (query?)=>{ return await $axios.get("options") }` 的 Promise 函数时，会在表单生成前执行，query 参数是当 `{type: "select",remote:true}` 时应用于远程搜索。<br/>
+5. `type: "cascader"` 级联选择框只支持应用标准规范值。
 
 ```typescript
 export declare interface ElAutoOption {
