@@ -319,9 +319,7 @@ describe("FormAuto", () => {
     };
     vm.model = Object.assign({}, data);
     await waitImmediate();
-    console.log(vm.$refs.form.model);
-    console.log(data)
-    // expect(vm.$refs.form.model).to.deep.equal(data, "model value is valid");
+    expect(vm.$refs.form.model).to.deep.equal(Object.assign({ startTime: "00:00:00", endTime: "05:00:00", startDate: "2019-01-01", endDate: "2019-01-02", startDT: "2019-02-01 10:00:00", endDT: "2019-05-02 08:00:00" }, data), "model value is valid");
   });
 
   it("options transfer", async () => {
@@ -717,12 +715,12 @@ describe("FormAuto", () => {
     try {
       await vm.$refs.form.validate();
       expect(true).to.be.false;
-    } catch(e) {
-      console.log(vm.$el.querySelectorAll(".el-form-item__error"))
+    } catch (e) {
+      // console.log(vm.$el.querySelectorAll(".el-form-item__error"))
       expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(11);
     }
   });
-  
+
   it("slot", async () => {
     vm = createVue(
       {
@@ -735,13 +733,13 @@ describe("FormAuto", () => {
         data() {
           return {
             model: {},
-            form:{
-              input:{
+            form: {
+              input: {
                 label: "input",
                 type: "text",
                 value: "test",
-                slot: true
-              }
+                slot: true,
+              },
             },
           };
         },
@@ -749,12 +747,11 @@ describe("FormAuto", () => {
       true
     );
     expect(vm.$el.querySelector(".default-slot").parentNode.className).to.equal("el-form-item__content");
-    expect(vm.$el.querySelector(".prepend-slot").nextElementSibling.classList.contains("el-form-auto-row")).to.be.true
-    expect(vm.$el.querySelector(".append-slot").previousElementSibling.classList.contains("el-form-auto-row")).to.be.true
+    expect(vm.$el.querySelector(".prepend-slot").nextElementSibling.classList.contains("el-form-auto-row")).to.be.true;
+    expect(vm.$el.querySelector(".append-slot").previousElementSibling.classList.contains("el-form-auto-row")).to.be.true;
     expect(vm.$el.querySelector(".el-form-item[data-prop=input] span.input-slot")).to.exist;
     expect(vm.$el.querySelector(".el-form-item[data-prop=input] span.input-slot").textContent).to.equal("input_test_text");
   });
 });
-
 
 // TODO: 编写 全选 复选框
