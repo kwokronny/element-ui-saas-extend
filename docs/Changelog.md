@@ -3,6 +3,12 @@ sidebarDepth: 0
 ---
 # 更新日志
 
+## 1.0.34.beta <small>2022-07-15</small>
+- #### 新增
+	- 新增 FormTable 组件
+- #### 优化
+	- TablePage 列属性同时设置了 copy 和 showOverflowTooltip 属性时样式交互
+
 ## 1.0.33 <small>2022-06-05</small>
 - #### 新增
 	- 新增 MorePopover 组件

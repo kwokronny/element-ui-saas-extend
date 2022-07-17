@@ -34,8 +34,9 @@ export default {
         dateRange: {
           label: "日期范围",
           type: "daterange",
-          suffixTime: true,
           rangeName: ["startDate", "endDate"],
+          suffixTime: true,
+          // valueFormat: "yyyy-MM-dd HH:mm:ss",
         },
         numberrange: {
           label: "金额范围",

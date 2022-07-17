@@ -133,7 +133,6 @@ export default {
       model: [],
       form: {
         remote: {
-          col: 12,
           label: "远程搜索(选过不可再选)",
           type: "select",
           style: "width:100%",
@@ -154,7 +153,6 @@ export default {
           },
         },
         remoteMult: {
-          col: 12,
           label: "远程搜索",
           type: "select",
           style: "width:100%",
@@ -176,7 +174,6 @@ export default {
           },
         },
         cascader: {
-          col: 12,
           label: "级联框",
           type: "cascader",
           options: [
@@ -200,11 +197,11 @@ export default {
           ],
           style: "width:100%",
         },
-        remoteCascader: {
-          col: 12,
-          label: "级联框",
+        daterange: {
+          label: "日期范围",
           type: "daterange",
           rangeName: ["startDate", "endDate"],
+          suffixTime: true,
           style: "width:100%",
         },
       },

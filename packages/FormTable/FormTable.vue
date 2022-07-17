@@ -207,6 +207,7 @@ import { transformOptions } from "../util";
 import locale from "../../src/mixin/locale"
 import selectScroll from "../../src/mixin/selectScroll"
 import { ValidateCallback } from "element-ui/types/form";
+import { formatDate } from "element-ui/src/utils/date-util.js"
 
 @Component({
 	name: "ElFormTable",
@@ -243,12 +244,26 @@ export default class ElFormTable extends Vue {
 				// if (!item.notSubmit) {
 				let field = this.fields[name]
 				if (field) {
-					if (Array.isArray(model[name]) && model[name].length > 0 && field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
+					if (Array.isArray(model[name]) && model[name].length == 2 && field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
 						let [sn, en] = field.rangeName;
 						let [sd, ed] = model[name];
-						if (sd && ed && field.type == "daterange" && field.suffixTime == true) {
-							sd += " 00:00:00";
-							ed += " 23:59:59";
+						if (sd && ed && /date|time/g.test(field.type)) {
+							if (field.type == "daterange" && field.suffixTime == true) {
+								sd += " 00:00:00";
+								ed += " 23:59:59";
+							}
+							if (field.valueFormat) {
+								if (field.valueFormat == 'timestamp') {
+									sd = new Date(sd).valueOf();
+									ed = new Date(ed).valueOf();
+								} else if (field.valueFormat == 'unix') {
+									sd = Math.floor(new Date(sd).valueOf() / 1000);
+									ed = Math.floor(new Date(ed).valueOf() / 1000);
+								} else {
+									sd = formatDate(sd, field.valueFormat);
+									ed = formatDate(ed, field.valueFormat);
+								}
+							}
 						}
 						this.$set(model, sn, sd)
 						this.$set(model, en, ed)
@@ -352,7 +367,7 @@ export default class ElFormTable extends Vue {
 		forEach(this.fields, (item, name) => {
 			item.name = name;
 			item.on = Object.assign({}, item.on);
-			item.props = omit(item, ["value", "addRules", "label", "labelTooltip", "width", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "checkAll", "notSubmit", "required", "options"])
+			item.props = omit(item, ["value", "addRules", "label", "labelTooltip", "width", "type", "on", "slot", "bindShow", "rangeName", "valueFormat", "suffixTime", "checkAll", "notSubmit", "required", "options"])
 			item.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
 			if (item.slot) {
@@ -396,13 +411,13 @@ export default class ElFormTable extends Vue {
 
 			// 针对日期时间类型组件设置统一日期格式及显示格式
 			if (/datetime/g.test(item.type)) {
-				item.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
-				item.props.format = "yyyy-MM-dd HH:mm:ss";
+				item.props.valueFormat = "yyyy/MM/dd HH:mm:ss";
+				item.props.format = item.props.format || "yyyy-MM-dd HH:mm:ss";
 			} else if (/date/g.test(item.type)) {
-				item.props.valueFormat = "yyyy-MM-dd";
-				item.props.format = "yyyy-MM-dd";
+				item.props.valueFormat = "yyyy/MM/dd";
+				item.props.format = item.props.format || "yyyy-MM-dd";
 			} else if (/time/g.test(item.type)) {
-				item.props.valueFormat = "HH:mm:ss";
+				item.props.valueFormat = item.props.valueFormat || "HH:mm:ss";
 			}
 
 			if (this.$ELEMENT && this.$ELEMENT.pickerOptions && /date/g.test(item.type)) {
