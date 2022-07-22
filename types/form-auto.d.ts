@@ -1,7 +1,7 @@
-import { ElAutoMixinOptions } from "./saas-extend";
+import { ElAutoMixinOptions, ElAutoOption, ElFormAutoField } from "./saas-extend";
 import { ElForm } from "element-ui/types/form";
-import { ElAutoOption } from "types";
 
+export interface ElFormAutoField extends ElFormAutoField {}
 
 export declare class ElFormAuto extends ElForm {
   /** 表单项配置 */

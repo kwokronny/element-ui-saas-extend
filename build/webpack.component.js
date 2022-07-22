@@ -8,9 +8,10 @@ const TerserPlugin = require("terser-webpack-plugin");
 const Components = {
   "element-ui-saas-extend": "./packages/index.ts",
   "form-auto": "./packages/FormAuto/index.ts",
-  copy: "./src/mixin/copy.ts",
   "table-page": "./packages/TablePage/index.ts",
   "number-range": "./packages/NumberRange/index.ts",
+  "more-popover": "./packages/MorePopover/index.ts",
+  "form-table": "./packages/FormTable/index.ts",
 };
 
 const webpackConfig = {

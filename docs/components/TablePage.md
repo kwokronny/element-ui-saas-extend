@@ -633,6 +633,15 @@ export default {
 | addSearch       | 为此字段后添加更多搜索项，参考 [添加搜索项](#添加搜索项)                                                                                       | [Record<string, FormAutoField>](FormAuto.html#formautofield) | -      |
 | `[prop:string]` | 可直接追加 `<el-table-column>` 组件的 prop，参考 [`<el-table>`属性](https://element.eleme.io/#/zh-CN/component/table#table-attributes)         | `any`                                                        | -      |
 
+### ElTablePageDataMap
+
+| 参数     | 描述       | 类型                   |
+| :------- | :--------- | :--------------------- |
+| page     | 页码       | `number`               |
+| pageSize | 页成员数量 | `number`               |
+| total    | 总成员数量 | `number`               |
+| record   | 数据记录   | `Record<string,any>[]` |
+
 ### Event
 
 | 事件名称             | 说明                                                                                             | 回调参数  |

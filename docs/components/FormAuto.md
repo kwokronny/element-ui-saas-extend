@@ -33,10 +33,9 @@ export default {
         },
         dateRange: {
           label: "日期范围",
-          type: "daterange",
+          type: "datetimerange",
           rangeName: ["startDate", "endDate"],
-          suffixTime: true,
-          // valueFormat: "yyyy-MM-dd HH:mm:ss",
+          valueFormat: "unix",
         },
         numberrange: {
           label: "金额范围",
@@ -91,13 +90,13 @@ export default {
 
 ```vue
 <template>
-  <el-button type="primary" round @click="edit">编辑</el-button>
-  <el-button type="primary" round @click="changeRule">改变规则</el-button>
   <el-form-auto :data="form" ref="EditForm" v-model="model" label-width="120px">
     <template>
       <el-button type="primary" round @click="getValidModel">提交</el-button>
       <el-button type="primary" round @click="getModel">获取数据</el-button>
       <el-button type="primary" round @click="reset">重置</el-button>
+      <el-button type="primary" round @click="edit">编辑</el-button>
+      <el-button type="primary" round @click="changeRule">改变规则</el-button>
     </template>
   </el-form-auto>
 </template>
@@ -764,6 +763,7 @@ export default {
 | on              | 设置 type 对应组件的事件                                                                     | `object`                        | {}     |
 | rangeName       | 日期范围名 type 为 daterange/timerange/datetimerange/numberrange 选填                        | `array<string>`                 | false  |
 | suffixTime      | type 为 daterange 选填，为日期范围增加 00:00:00 - 23:59:59                                   | `boolean`                       | false  |
+| valueFormat     | type 为 日期类控件 选填，格式与 element-ui 一致，增加 `unix` 10 位时间戳格式                 | `string`                        | -      |
 | options         | 控件选项，type 为 check/radio/select 必填，详情可参考 [options 设置](#options-设置)          | `object` / `array` / `Promise`  | []     |
 | remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                       | false  |
 | notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                       | false  |

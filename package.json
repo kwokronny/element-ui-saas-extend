@@ -1,7 +1,7 @@
 {
   "name": "element-ui-saas-extend",
   "description": "基于 Element UI 对 SaaS 平台常见交互开发的预设组件",
-  "version": "1.0.34-beta.0",
+  "version": "1.0.35-beta.3",
   "main": "lib/element-ui-saas-extend.js",
   "typings": "types/index.d.ts",
   "license": "MIT",
@@ -31,17 +31,15 @@
     "serve": "vue-cli-service serve"
   },
   "dependencies": {
-    "async-validator": "1.11.5",
     "core-js": "3.6.5",
     "element-ui": "^2.15.3",
     "element-ui-el-table-draggable": "^1.2.10",
-    "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
-    "vue": "^2.6.11",
-    "vue-class-component": "^7.2.3",
-    "vue-property-decorator": "^9.1.2"
+    "vue": "^2.6.11"
   },
   "devDependencies": {
+    "vue-class-component": "^7.2.3",
+    "vue-property-decorator": "^9.1.2",
     "@babel/plugin-transform-modules-umd": "^7.14.5",
     "@types/chai": "^4.2.11",
     "@types/lodash": "^4.14.170",

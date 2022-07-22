@@ -2,7 +2,7 @@
 import { DatePickerOptions, InstallationOptions } from "element-ui";
 import Vue, { PluginObject } from "vue";
 
-import { ElFormAuto } from "./form-auto";
+import { ElFormAuto, ElFormAutoField } from "./form-auto";
 import { ElTablePage } from "./table-page";
 import { ElNumberRange } from "./number-range";
 
@@ -20,6 +20,7 @@ export declare interface ElAutoOption {
   props?: Record<string, any>;
 }
 export declare type ElAutoMixinOptions = Record<string | number, string | number> | Array<string | ElAutoOption>;
+
 
 export declare type ElFormAutoFieldType =
   | "hidden"
@@ -49,7 +50,6 @@ export declare type ElFormAutoFieldType =
   | "select"
   | "cascader"
   | "rate";
-
 export declare interface ElFormAutoField {
   /**
    * 组件引用col
@@ -163,6 +163,7 @@ export declare interface ElFormAutoField {
    */
   on?: Record<string, (...args: any[]) => void>;
 }
+
 
 export interface SaaSInstallationOptions extends InstallationOptions {
   pickerOptions?: Record<"date" | "range", DatePickerOptions>;

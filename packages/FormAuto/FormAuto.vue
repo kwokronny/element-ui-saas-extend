@@ -302,10 +302,10 @@ export default class ElFormAuto extends Vue {
 
 			// 针对日期时间类型组件设置统一日期格式及显示格式
 			if (/datetime/g.test(item.type)) {
-				item.props.valueFormat = "yyyy/MM/dd HH:mm:ss";
+				item.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
 				item.props.format = item.props.format || "yyyy-MM-dd HH:mm:ss";
 			} else if (/date/g.test(item.type)) {
-				item.props.valueFormat = "yyyy/MM/dd";
+				item.props.valueFormat = "yyyy-MM-dd";
 				item.props.format = item.props.format || "yyyy-MM-dd";
 			} else if (/time/g.test(item.type)) {
 				item.props.valueFormat = item.props.valueFormat || "HH:mm:ss";
@@ -406,7 +406,7 @@ export default class ElFormAuto extends Vue {
 		if (field && field.props.remoteMethod) {
 			field.remoteParams.query = "refresh";
 			this.echoOptions[fieldName] = {};
-			field.remoteMethod();
+			field.props.remoteMethod("");
 		}
 	}
 
@@ -441,7 +441,7 @@ export default class ElFormAuto extends Vue {
 	}
 
 	private selectOptions(field: ElFormAutoField, name: string) {
-		if (Array.isArray(field.options) && field.remote && this.echoOptions[name]) {
+		if (Array.isArray(field.options) && field.remote && Array.isArray(this.echoOptions[name])) {
 			let echoOpitons = this.echoOptions[name] || []
 			return uniqBy(echoOpitons.concat(field.options), "value")
 		}
@@ -543,7 +543,7 @@ export default class ElFormAuto extends Vue {
 						}
 						break;
 					case "slider":
-						requiredRule.type =  item.props && item.props.range == true? "array" : "number";
+						requiredRule.type = item.props && item.props.range == true ? "array" : "number";
 						break;
 					case "select":
 						if (item.multiple) {
@@ -626,9 +626,7 @@ export default class ElFormAuto extends Vue {
 					let self = this;
 					item.on.clear = function () {
 						originClearEvent()
-						item.remoteParams.query = "clear";
-						self.echoOptions[item.name] = [];
-						item.props.remoteMethod.call(item, "")
+						self.refreshOptions(item.name)
 					}
 				} else if (item.options) {
 					let remoteMethod = item.options;
