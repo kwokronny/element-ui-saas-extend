@@ -33,6 +33,7 @@ export declare interface ElTablePageColumn {
   slot?: boolean | string;
   hide?: boolean;
   filters?: string | Array<string | any[]>;
+  children?: ElTablePageColumn[];
   filtersFunc?: (value: string) => any;
   enum?: ElAutoMixinOptions | ((query?: string) => Promise<ElAutoMixinOptions>);
   splitChar?: string;

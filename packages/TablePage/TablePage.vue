@@ -7,9 +7,21 @@
 			class="el-table-page__search-card"
 		>
 			<slot name="search_prepend"></slot>
-			<el-form-auto ref="SearchForm" v-model="filter" @keyup.enter.native="search(1)" :data="searchForm" v-bind="searchProps">
+			<el-form-auto
+				ref="SearchForm"
+				v-model="filter"
+				@keyup.enter.native="search(1)"
+				:data="searchForm"
+				v-bind="Object.assign({inline:true},searchProps)"
+			>
 				<template v-for="search in searchForm" :slot="search.slot" slot-scope="{item,model,name}">
-					<slot v-if="search.slot" :name="search.slot" v-bind:item="item" v-bind:model="model" v-bind:name="name" ></slot>
+					<slot
+						v-if="search.slot"
+						:name="search.slot"
+						v-bind:item="item"
+						v-bind:model="model"
+						v-bind:name="name"
+					></slot>
 				</template>
 				<slot name="search_button">
 					<el-button
@@ -80,53 +92,7 @@
 						type="selection"
 						reserve-selection
 					></el-table-column>
-					<template v-for="(column,index) in headers">
-						<template v-if="!column.hide">
-							<el-table-column
-								:fixed="column.fixed"
-								:key="`column_${column.prop}_${index}`"
-								v-bind="column.props"
-							>
-								<template slot="header" slot-scope="scope">
-									{{scope.column.label || " "}}
-									<el-tooltip v-if="column.labelTooltip" :content="column.labelTooltip">
-										<i class="el-icon-question"></i>
-									</el-tooltip>
-								</template>
-								<template slot-scope="{row, $index}">
-									<slot
-										v-if="column.slot"
-										:name="column.slot"
-										v-bind:row="row"
-										v-bind:column="column"
-										v-bind:index="$index"
-									></slot>
-									<template v-else-if="column.enum && typeof column.enum == 'object'">
-										<enum-tags
-											:key="$index"
-											:enums="column.enum"
-											:value="row[column.prop]"
-											:enumTag="column.enumTag"
-											:splitChar="column.splitChar"
-										></enum-tags>
-									</template>
-									<template v-else-if="column.filtersFunc">{{ column.filtersFunc(row[column.prop]) }}</template>
-									<template
-										v-else-if="column.formatter"
-									>{{ column.formatter(row,column,row[column.prop],$index) }}</template>
-									<template v-else>
-										<i
-											v-if="column.copy"
-											:key="`copy_${column.prop}_${index}`"
-											class="el-table-page_copy-icon el-icon-copy-document"
-											v-copy="row[column.prop]"
-										></i>
-										{{ row[column.prop] }}
-									</template>
-								</template>
-							</el-table-column>
-						</template>
-					</template>
+					<table-column-reduce v-for="column in headers" :key="`column_${column.prop}`" :column="column"></table-column-reduce>
 				</el-table>
 			</div>
 			<slot name="table_append"></slot>
@@ -208,7 +174,7 @@ import { ElFormAutoField } from "../../types/saas-extend"
 import { ElTablePageColumn, ElTablePageDataMap } from "types/table-page"
 import { transformOptions } from "../util"
 import ElFormAuto from "../FormAuto";
-import EnumTags from "./EnumTags.vue";
+import TableColumnReduce from "./TableColumnReduce.vue"
 import locale from "../../src/mixin/locale"
 
 interface ElTablePageColumnSort {
@@ -220,7 +186,7 @@ interface ElTablePageColumnSort {
 @Component({
 	name: "ElTablePage",
 	components: {
-		ElTableDraggable, ElFormAuto, EnumTags
+		ElTableDraggable, ElFormAuto, TableColumnReduce
 	},
 	mixins: [locale],
 })
@@ -228,7 +194,7 @@ export default class ElTablePage extends Vue {
 	@Ref("TablePage") readonly TablePage!: Table
 	@Ref("SearchForm") readonly SearchForm!: ElFormAuto
 
-	@Prop({ type: Object, default: () => { return { inline: true } } }) searchProps!: Record<string, any>;
+	@Prop(Object) searchProps!: Record<string, any>;
 
 	@Prop({ type: Boolean, default: false }) showOverflowTooltip!: boolean;
 
@@ -248,7 +214,7 @@ export default class ElTablePage extends Vue {
 		return this.layoutType == "card" ? "el-card" : "div"
 	}
 
-	// # region 列相关
+	// #region 列相关
 	@Prop({ type: Array, required: true, default: () => [] }) columns!: ElTablePageColumn[];
 	private headers: ElTablePageColumn[] = [];
 	private refresh: boolean = true;
@@ -257,34 +223,7 @@ export default class ElTablePage extends Vue {
 	private async handleColumnsChange() {
 		this.refresh = false;
 		this.headers = cloneDeep(this.columns)
-		await this.headers.forEach(async (column: ElTablePageColumn) => {
-			column.props = omit(column, ["slot", "enum", "filters", "enumTag", "children", "splitChar", "addSearch", "search", "labelTooltip", "copy"])
-
-			if (column.slot && typeof column.slot == "boolean") column.slot = column.prop;
-			if (column.search) {
-				let defaultForm: ElFormAutoField = {
-					label: column.label,
-					type: "text"
-				}
-				column.enum && (defaultForm.options = column.search.options || column.enum)
-				this.addSearchField(column.prop, Object.assign(defaultForm, column.search))
-			}
-			// 追加搜索项
-			if (column.addSearch) {
-				for (let name in column.addSearch) {
-					this.addSearchField(name, column.addSearch[name])
-				}
-			}
-			// 获取全局过滤器及组件内过滤器对数据包装成一个函数使用
-			if (column.filters) {
-				column.filtersFunc = this.transfromFilter(column.filters)
-			}
-			if (column.enum) {
-				let options = await transformOptions(column.enum)
-				column.enum = keyBy(options, "value")
-			}
-			column.props.showOverflowTooltip = column.props.showOverflowTooltip || this.showOverflowTooltip;
-		})
+		this.reduceTransformColumn(this.headers)
 		if (this.customColumns) {
 			// 从localStorage获取存储的自定义列配置
 			this.loadCustomColumns()
@@ -292,6 +231,40 @@ export default class ElTablePage extends Vue {
 		this.$nextTick(function () {
 			this.search();
 			this.refresh = true;
+		})
+	}
+
+	private reduceTransformColumn(columns: ElTablePageColumn[]) {
+		columns.forEach(async (column: ElTablePageColumn) => {
+			if (column.children) {
+				this.reduceTransformColumn(column.children)
+			} else {
+				column.props = omit(column, ["slot", "enum", "filters", "enumTag", "children", "splitChar", "addSearch", "search", "labelTooltip", "copy"])
+				if (column.slot && typeof column.slot == "boolean") column.slot = column.prop;
+				if (column.search) {
+					let defaultForm: ElFormAutoField = {
+						label: column.label,
+						type: "text"
+					}
+					column.enum && (defaultForm.options = column.search.options || column.enum)
+					this.addSearchField(column.prop, Object.assign(defaultForm, column.search))
+				}
+				// 追加搜索项
+				if (column.addSearch) {
+					for (let name in column.addSearch) {
+						this.addSearchField(name, column.addSearch[name])
+					}
+				}
+				// 获取全局过滤器及组件内过滤器对数据包装成一个函数使用
+				if (column.filters) {
+					column.filtersFunc = this.transfromFilter(column.filters)
+				}
+				if (column.enum) {
+					let options = await transformOptions(column.enum)
+					column.enum = keyBy(options, "value")
+				}
+				column.props.showOverflowTooltip = column.props.showOverflowTooltip || this.showOverflowTooltip;
+			}
 		})
 	}
 

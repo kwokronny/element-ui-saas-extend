@@ -33,6 +33,7 @@ export default {
             return row.name;
           },
           fixed: "left",
+          showOverflowTooltip: true,
           search: {
             type: "text",
             // value: "测试",
@@ -155,16 +156,22 @@ export default {
           width: 200,
         },
         {
-          label: "手机",
-          prop: "phone",
-          width: 200,
-        },
-        {
-          label: "邮箱",
-          prop: "email",
-          copy: true,
-          showOverflowTooltip: true,
-          width: 260,
+          label: "联系方式",
+          prop: "contact",
+          children: [
+            {
+              label: "手机",
+              prop: "phone",
+              width: 200,
+            },
+            {
+              label: "邮箱",
+              prop: "email",
+              copy: true,
+              showOverflowTooltip: true,
+              width: 260,
+            },
+          ],
         },
         {
           label: "积分",
