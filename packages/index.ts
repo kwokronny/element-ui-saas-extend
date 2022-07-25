@@ -28,4 +28,4 @@ if (typeof window !== "undefined" && window.Vue) {
   install(window.Vue);
 }
 
-export default { install, TablePage, FormAuto, NumberRange, locale: locale.use };
+export default { install, TablePage, FormAuto, FormTable, NumberRange, MorePopover, locale: locale.use };

@@ -214,7 +214,7 @@ import { formatDate } from "element-ui/src/utils/date-util.js"
 	mixins: [locale, selectScroll],
 })
 export default class ElFormTable extends Vue {
-	@Ref("FormAuto") readonly FormAuto!: Form;
+	@Ref("FormTable") readonly FormTable!: Form;
 
 	private fields: Record<string, ElFormAutoField> = {};
 	private rules: Record<string, any> = {};
@@ -286,7 +286,7 @@ export default class ElFormTable extends Vue {
 	 * 异步验证成功后获取表单所有参数
 	 */
 	public validate(cb?: ValidateCallback): Promise<boolean> | void {
-		return cb ? this.FormAuto.validate(cb) : this.FormAuto.validate();
+		return cb ? this.FormTable.validate(cb) : this.FormTable.validate();
 	}
 
 	/**
@@ -294,7 +294,7 @@ export default class ElFormTable extends Vue {
 	 * 验证单个字段
 	 */
 	public validateField(props: string[] | string, callback: (errorMessage: string) => void): void {
-		return this.FormAuto && this.FormAuto.validateField(props, callback);
+		return this.FormTable && this.FormTable.validateField(props, callback);
 	}
 
 	private echoOptions: Record<string, any> = {}

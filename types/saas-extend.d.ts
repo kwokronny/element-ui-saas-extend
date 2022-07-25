@@ -4,11 +4,15 @@ import Vue, { PluginObject } from "vue";
 
 import { ElFormAuto, ElFormAutoField } from "./form-auto";
 import { ElTablePage } from "./table-page";
+import { ElFormTable } from "./form-table";
+import { ElMorePopover } from "./more-popover";
 import { ElNumberRange } from "./number-range";
 
 export class FormAuto extends ElFormAuto {}
 export class TablePage extends ElTablePage {}
 export class NumberRange extends ElNumberRange {}
+export class MorePopover extends ElMorePopover {}
+export class FormTable extends ElFormTable {}
 
 export declare interface ElAutoOption {
   icon?: string;
@@ -19,8 +23,8 @@ export declare interface ElAutoOption {
   children?: ElAutoOption[];
   props?: Record<string, any>;
 }
-export declare type ElAutoMixinOptions = Record<string | number, string | number> | Array<string | ElAutoOption>;
 
+export declare type ElAutoMixinOptions = Record<string | number, string | number> | Array<string | ElAutoOption>;
 
 export declare type ElFormAutoFieldType =
   | "hidden"
@@ -163,7 +167,6 @@ export declare interface ElFormAutoField {
    */
   on?: Record<string, (...args: any[]) => void>;
 }
-
 
 export interface SaaSInstallationOptions extends InstallationOptions {
   pickerOptions?: Record<"date" | "range", DatePickerOptions>;

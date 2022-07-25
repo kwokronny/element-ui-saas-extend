@@ -7,7 +7,11 @@
 			</el-tooltip>
 		</template>
 		<template v-if="column.children">
-			<table-column-reduce v-for="span in column.children" :key="`column_${span.prop}`" :column="span"></table-column-reduce>
+			<table-column-reduce v-for="span in column.children" :key="`column_${span.prop}`" :column="span">
+				<template v-if="span.slot" :slot="span.slot" slot-scope="{row,$index}">
+					<slot :name="span.slot" v-bind:row="row" v-bind:column="span" v-bind:index="$index"></slot>
+				</template>
+			</table-column-reduce>
 		</template>
 		<template slot-scope="{row, $index}">
 			<slot

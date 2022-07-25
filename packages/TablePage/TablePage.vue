@@ -92,7 +92,11 @@
 						type="selection"
 						reserve-selection
 					></el-table-column>
-					<table-column-reduce v-for="column in headers" :key="`column_${column.prop}`" :column="column"></table-column-reduce>
+					<table-column-reduce v-for="column in headers" :key="`column_${column.prop}`" :column="column">
+						<template v-if="column.slot" :slot="column.slot" slot-scope="{row,$index}">
+							<slot :name="column.slot" v-bind:row="row" v-bind:column="column" v-bind:index="$index"></slot>
+						</template>
+					</table-column-reduce>
 				</el-table>
 			</div>
 			<slot name="table_append"></slot>

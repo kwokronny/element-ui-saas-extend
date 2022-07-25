@@ -136,7 +136,9 @@ export default {
 
 ```vue
 <template>
-  <el-table-page :columns="columns" custom-columns="table_test1" :request="getList"></el-table-page>
+  <el-table-page :columns="columns" custom-columns="table_test1" :request="getList">
+    <template slot="phone" slot-scope="{row,index,column}">{{row.phone}} 多级插槽测试</template>
+  </el-table-page>
 </template>
 <script>
 export default {
@@ -163,6 +165,7 @@ export default {
               label: "手机",
               prop: "phone",
               width: 200,
+              slot: true,
             },
             {
               label: "邮箱",
