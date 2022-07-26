@@ -348,9 +348,19 @@ export default class ElFormAuto extends Vue {
 		for (let name in this.fields) {
 			let field = this.fields[name]
 			if (field) {
-				if (Array.isArray(model[name]) && model[name].length == 2 && field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
+				if (field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
 					let [sn, en] = field.rangeName;
-					let [sd, ed] = model[name];
+					let _value = model[name];
+					if (!_value) {
+						if (field.type == "slider" && field.props && field.props.range == true) {
+							_value = [0, 0]
+						} else if (field.type == "numberrange") {
+							_value = ["", ""]
+						} else {
+							_value = [null, null]
+						}
+					}
+					let [sd, ed] = _value;
 					if (sd && ed && /date|time/g.test(field.type)) {
 						if (field.type == "daterange" && field.suffixTime == true) {
 							sd += " 00:00:00";

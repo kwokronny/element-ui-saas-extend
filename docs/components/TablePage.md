@@ -115,9 +115,7 @@ export default {
           page,
           total: 100,
           pageSize,
-          record: ret.data.data.filter(function(item, index) {
-            return index > baseId && index < baseId + pageSize;
-          }),
+          record: ret.data.data.slice(baseId, baseId + pageSize),
         };
       });
     },
@@ -136,9 +134,7 @@ export default {
 
 ```vue
 <template>
-  <el-table-page :columns="columns" custom-columns="table_test1" :request="getList">
-    <template slot="phone" slot-scope="{row,index,column}">{{row.phone}} 多级插槽测试</template>
-  </el-table-page>
+  <el-table-page :columns="columns" custom-columns="table_test1" :request="getList"> </el-table-page>
 </template>
 <script>
 export default {
@@ -165,7 +161,6 @@ export default {
               label: "手机",
               prop: "phone",
               width: 200,
-              slot: true,
             },
             {
               label: "邮箱",
@@ -210,9 +205,7 @@ export default {
   methods: {
     getList(page = 1, search, pageSize) {
       return axios.get("/element-ui-saas-extend/json/page.json").then(function(ret) {
-        return ret.data.data.filter(function(item, index) {
-          return index < 10;
-        });
+        return ret.data.data.slice(0, 10);
       });
     },
   },
@@ -292,9 +285,7 @@ export default {
           page,
           total: 100,
           pageSize,
-          record: ret.data.data.filter(function(item, index) {
-            return index > baseId && index < baseId + pageSize;
-          }),
+          record: ret.data.data.slice(baseId, baseId + pageSize),
         };
       });
     },
@@ -422,9 +413,7 @@ export default {
           page,
           total: 100,
           pageSize,
-          record: ret.data.data.filter(function(item, index) {
-            return index > baseId && index < baseId + pageSize;
-          }),
+          record: ret.data.data.slice(baseId, baseId + pageSize),
         };
       });
     },
@@ -589,9 +578,7 @@ export default {
           page,
           total: 100,
           pageSize,
-          record: ret.data.data.filter(function(item, index) {
-            return index > baseId && index < baseId + pageSize;
-          }),
+          record: ret.data.data.slice(baseId, baseId + pageSize),
         };
       });
     },
@@ -631,6 +618,7 @@ export default {
 | :-------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :----- |
 | label           | 列显示标题                                                                                                                                     | `string`                                                     | -      |
 | prop            | 列对应字段名                                                                                                                                   | `boolean`                                                    | false  |
+| children        | 多级表头                                                                                                                                       | `columns[]`                                                  | -      |
 | labelTooltip    | 列名提示                                                                                                                                       | `string`                                                     | false  |
 | copy            | 增加复制功能                                                                                                                                   | `boolean`                                                    | false  |
 | hide            | 是否隐藏                                                                                                                                       | `boolean`                                                    | -      |

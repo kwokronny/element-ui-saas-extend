@@ -8,8 +8,8 @@
 		</template>
 		<template v-if="column.children">
 			<table-column-reduce v-for="span in column.children" :key="`column_${span.prop}`" :column="span">
-				<template v-if="span.slot" :slot="span.slot" slot-scope="{row,$index}">
-					<slot :name="span.slot" v-bind:row="row" v-bind:column="span" v-bind:index="$index"></slot>
+				<template v-for="(props,slot) in $scopedSlots" #[slot]="scope">
+					<slot :name="slot" v-bind="scope" />
 				</template>
 			</table-column-reduce>
 		</template>
@@ -21,7 +21,7 @@
 				v-bind:column="column"
 				v-bind:index="$index"
 			></slot>
-			<template v-else-if="column.enum && typeof column.enum == 'object'">
+			<template v-else-if="column.enum">
 				<enum-tags
 					:key="$index"
 					:enums="column.enum"

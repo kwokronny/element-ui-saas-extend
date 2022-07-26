@@ -34,7 +34,6 @@ export default class EnumTags extends Vue {
 		} else {
 			return [this.value]
 		}
-
 	}
 }
 </script>
