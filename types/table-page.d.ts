@@ -2,8 +2,10 @@ import { ElFormAutoField } from "./form-auto";
 import { ElTable } from "element-ui/types/table";
 
 export declare class ElTablePage extends ElTable {
-  /** 表单项配置 */
+  /** 表头配置 */
   columns: ElTablePageColumn[];
+  /** 筛选项配置 */
+  searchForm?: Record<string, ElFormAutoField>;
   /** el-row 属性 gutter 栅格间格 */
   request: (page: number, search: Record<string, any>, pageSize: number) => Promise<Record<ElTablePageDataMap, any> | Record<string, any>[]>;
   pageSize: number;
@@ -25,6 +27,9 @@ export declare class ElTablePage extends ElTable {
 
 export declare type ElTablePageDataMap = "page" | "pageSize" | "total" | "record";
 
+// declare interface ElTablePageSearchField extends ElFormAutoField{
+//   search: boolean
+// }
 export declare interface ElTablePageColumn {
   prop: string;
   label: string;

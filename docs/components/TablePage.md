@@ -21,6 +21,11 @@ pageClass: component-page
   <el-table-page row-key="id" ref="TablePage" :columns="columns" :request="getList"></el-table-page>
 </template>
 <script>
+var accountTypeOption = {
+  0: "主账号ID",
+  1: "企业名称",
+  2: "手机号",
+};
 export default {
   data() {
     return {
@@ -34,14 +39,23 @@ export default {
           },
           fixed: "left",
           showOverflowTooltip: true,
-          search: {
-            type: "text",
-            // value: "测试",
-          },
           addSearch: {
-            test: {
-              type: "switch",
-              label: "开关",
+            accountType: {
+              labelHidden: true,
+              type: "select",
+              clearable: false,
+              options: accountTypeOption,
+              notChangeRefresh: true,
+              value: "0",
+              style: "width: 100px",
+              on: {
+                change: this.handleAccountType,
+              },
+            },
+            searchNumber: {
+              label: "主账号ID",
+              labelHidden: true,
+              type: "text",
             },
           },
         },
@@ -108,6 +122,10 @@ export default {
     };
   },
   methods: {
+    handleAccountType(value) {
+      this.$refs["TablePage"].searchForm['searchNumber'].label = accountTypeOption[value];
+      return value;
+    },
     getList(page = 1, search, pageSize) {
       return axios.get("/element-ui-saas-extend/json/page.json").then(function(ret) {
         let baseId = (page - 1) * pageSize;

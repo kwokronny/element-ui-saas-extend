@@ -19,10 +19,31 @@ pageClass: component-page
   </el-form-auto>
 </template>
 <script>
+var accountTypeOption= {
+  0: "主账号ID",
+  1: "企业名称",
+  2: "手机号",
+};
 export default {
   data() {
     return {
       form: {
+				accountType: {
+					labelHidden: true,
+					type: "select",
+					clearable: false,
+					options: accountTypeOption,
+					value: "0",
+					style: "width: 100px",
+          on:{
+            change:this.handleAccountType
+          }
+				},
+				searchNumber: {
+          label: "主账号ID",
+					labelHidden: true,
+					type: "text",
+				},
         account: {
           label: "文本框",
           type: "text",
@@ -68,6 +89,10 @@ export default {
     };
   },
   methods: {
+    handleAccountType(value){
+      this.form.searchNumber.label=accountTypeOption[value];
+      return value
+    },
     getList() {
       this.$msgbox({
         title: "表单返回数据",

@@ -315,20 +315,37 @@ export default class ElTablePage extends Vue {
 	private filter: Record<string, any> = {}
 
 	private addSearchField(name: string, field: ElFormAutoField) {
-		if (!this.searchForm[name]) {
-			if (field.slot) {
-				let slot_name = field.slot == true ? name : field.slot
-				field.slot = `search-${slot_name}`;
-			}
-			this.searchForm[name] = field
+		if (field.slot) {
+			let slot_name = field.slot == true ? name : field.slot
+			field.slot = `search-${slot_name}`;
 		}
+		// if (!field.on) {
+		// 	field.on = {}
+		// }
+		// let self = this;
+		// if (!field.notChangeRefresh) {
+		// 	if (/numberrange|text/.test(field.type)) {
+		// 		let originClearEvent = field.on["clear"] || (() => { })
+		// 		field.on["clear"] = function (value: any) {
+		// 			self.search();
+		// 			return originClearEvent(value)
+		// 		}
+		// 	} else if (!/password|textarea|number|slider|check/.test(field.type)) {
+		// 		let originChangeEvent = field.on["change"] || (() => { })
+		// 		field.on["change"] = function (value: any) {
+		// 			self.search();
+		// 			return originChangeEvent(value)
+		// 		}
+		// 	}
+		// }
+		this.searchForm[name] = field
 	}
 
 	public getParams(): Record<string, any> {
 		return this.filter;
 	}
 
-	private searchForm: Record<string, ElFormAutoField> = {}
+	public searchForm: Record<string, ElFormAutoField> = {}
 	private loading: boolean = false;
 	@Prop({ type: Function, required: true }) request!: ((page: number, search?: Record<string, any>, pageSize?: number) => Promise<Record<ElTablePageDataMap, any> | Record<string, any>[]>)
 

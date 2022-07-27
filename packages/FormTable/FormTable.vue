@@ -147,16 +147,18 @@
 								v-on="item.on"
 								@change="handleSelectChange(item,name,$index,$event)"
 							>
-								<el-option
-									v-for="(option,key) in selectOptions(item,name,$index)"
-									:key="`${name}_${key}`"
-									:label="option.label"
-									:value="option.value"
-									:disabled="option.disabled"
-								>
-									<i v-if="option.icon" :class="option.icon"></i>
-									<span>{{ option.label }}</span>
-								</el-option>
+								<template v-if="Array.isArray(item.options)">
+									<el-option
+										v-for="(option,key) in selectOptions(item,name,$index)"
+										:key="`${name}_${key}`"
+										:label="option.label"
+										:value="option.value"
+										:disabled="option.disabled"
+									>
+										<i v-if="option.icon" :class="option.icon"></i>
+										<span>{{ option.label }}</span>
+									</el-option>
+								</template>
 								<el-option
 									disabled
 									v-if="item.remoteParams && item.remoteParams.optionLoading"

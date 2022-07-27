@@ -1,6 +1,7 @@
 ---
 pageClass: component-page
 ---
+
 # 数值范围输入框 NumberRange
 
 解决在筛选过程中需要对某数值进行范围筛选，根据 Element 源码尽可能与 `<el-form>`组件 保持其一定的联动。
@@ -69,11 +70,11 @@ export default {
   data() {
     return { range: [] };
   },
-  methods:{
-    foc(){
+  methods: {
+    foc() {
       this.$refs["range"].focus();
-    }
-  }
+    },
+  },
 };
 </script>
 ```
@@ -99,6 +100,7 @@ export default {
 | 事件名称 | 说明                      | 回调参数   |
 | :------- | :------------------------ | :--------- |
 | change   | 用户输入的值时触发        | 组件绑定值 |
+| clear    | 清空回调                  | -          |
 | blur     | 当 `input` 失去焦点时触发 | -          |
 | focus    | 当 `input` 获得焦点时触发 | -          |
 

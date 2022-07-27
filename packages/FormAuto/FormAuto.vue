@@ -142,23 +142,25 @@
 								</el-checkbox>
 							</el-checkbox-group>
 						</template>
-						<template v-else-if="item.type == 'select' && Array.isArray(item.options)">
+						<template v-else-if="item.type == 'select'">
 							<el-select
 								v-model="model[name]"
 								v-select-scroll="item.loadScroll && item.props?item.props.remoteMethod:null"
 								v-bind="item.props"
 								v-on="item.on"
 							>
-								<el-option
-									v-for="(option,key) in selectOptions(item,name)"
-									:key="`${name}_${key}`"
-									:label="option.label"
-									:value="option.value"
-									:disabled="option.disabled"
-								>
-									<i v-if="option.icon" :class="option.icon"></i>
-									<span>{{ option.label }}</span>
-								</el-option>
+								<template v-if="Array.isArray(item.options)">
+									<el-option
+										v-for="(option,key) in selectOptions(item,name)"
+										:key="`${name}_${key}`"
+										:label="option.label"
+										:value="option.value"
+										:disabled="option.disabled"
+									>
+										<i v-if="option.icon" :class="option.icon"></i>
+										<span>{{ option.label }}</span>
+									</el-option>
+								</template>
 								<el-option
 									disabled
 									v-if="item.remoteParams && item.remoteParams.optionLoading"
