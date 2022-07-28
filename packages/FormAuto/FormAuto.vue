@@ -225,7 +225,7 @@ export default class ElFormAuto extends Vue {
 
 	@Watch("data", { immediate: true, deep: true })
 	private onDataChange(data: Record<string, ElFormAutoField>) {
-		data && (this.generateRule(), this.generateModel())
+		data && (this.generateModel(), this.generateRule())
 	}
 
 	@Watch("model", { immediate: true, deep: true })
@@ -246,7 +246,7 @@ export default class ElFormAuto extends Vue {
 			} else {
 				field = this.fields[name];
 			}
-			field.name = item.name;
+			field.name = name;
 			field.on = Object.assign({}, item.on);
 			field.props = omit(item, ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "checkAll", "notSubmit", "required", "col", "options"])
 			field.type = item.type || "text"

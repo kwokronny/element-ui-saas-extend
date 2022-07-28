@@ -224,7 +224,7 @@ export default class ElFormTable extends Vue {
 	@Prop(Object) readonly data!: Record<string, ElFormAutoField>;
 	@Watch("data", { immediate: true, deep: true })
 	private onDataChange(data: Record<string, ElFormAutoField>) {
-		data && (this.generateRule(), this.generateModel())
+		data && (this.generateModel(), this.generateRule())
 	}
 
 	@Prop({ type: Number, default: -1 }) readonly itemLimit!: number;

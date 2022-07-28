@@ -557,15 +557,16 @@ describe("FormAuto", () => {
                 type: "select",
                 remote: true,
                 clearable: true,
-                options: async (query, page) => {
-                  return userData
-                    .filter((item) => item.username.indexOf(query) > -1)
-                    .map((item) => {
-                      return {
+                options: async (query) => {
+                  return userData.reduce((res,item)=>{
+                    if(item.username.indexOf(query)>-1){
+                      res.push({
                         label: item.username,
-                        value: item.id * page,
-                      };
-                    });
+                        value: item.id,
+                      });
+                    }
+                    return res;
+                  },[])
                 },
                 on: {
                   clear: () => {
@@ -674,7 +675,7 @@ describe("FormAuto", () => {
     }
     vm = createVue(
       {
-        template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+        template: `<el-form-auto :data="form" v-model="model" ref="Form"></el-form-auto>`,
         data() {
           return {
             model: {},
@@ -703,17 +704,17 @@ describe("FormAuto", () => {
       selects: [],
       cascader: [],
     };
-    vm.$refs.form.validate((valid) => {
+    vm.$refs.Form.validate((valid) => {
       expect(valid).to.be.true;
     });
     vm.model.password = "";
-    vm.$refs.form.validateField("password");
+    vm.$refs.Form.validateField("password");
     await waitImmediate();
     expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(1);
     vm.model = Object.assign({}, data);
     await waitImmediate();
     try {
-      await vm.$refs.form.validate();
+      await vm.$refs.Form.validate();
       expect(true).to.be.false;
     } catch (e) {
       // console.log(vm.$el.querySelectorAll(".el-form-item__error"))
