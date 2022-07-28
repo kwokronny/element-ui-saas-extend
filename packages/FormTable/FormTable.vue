@@ -79,9 +79,7 @@
 						<template v-else-if="item.type == 'switch'">
 							<el-switch v-model="row[name]" :disabled="item.disabled" v-bind="item.props" v-on="item.on"></el-switch>
 						</template>
-						<template
-							v-else-if="/year|month|week|date|dates|datetime|daterange|monthrange|datetimerange/.test(item.type)"
-						>
+						<template v-else-if="/(year|month|week|date(s|time|))(range|)/.test(item.type)">
 							<el-date-picker
 								v-model="row[name]"
 								:type="item.type"
@@ -90,7 +88,7 @@
 								v-on="item.on"
 							></el-date-picker>
 						</template>
-						<template v-else-if="/time|timerange/.test(item.type)">
+						<template v-else-if="/time(range|)/.test(item.type)">
 							<el-time-picker
 								:is-range="item.type == 'timerange'"
 								v-model="row[name]"
@@ -99,7 +97,7 @@
 								v-on="item.on"
 							></el-time-picker>
 						</template>
-						<template v-else-if="/radio|radiobutton/.test(item.type)">
+						<template v-else-if="/radio(|button)/.test(item.type)">
 							<el-radio-group v-model="row[name]" v-bind="item.props" v-on="item.on">
 								<component
 									:is="item.type=='radio'?'el-radio':'el-radio-button'"
@@ -128,15 +126,17 @@
 								v-bind="item.props"
 								v-on="item.on"
 							>
-								<el-checkbox
-									v-for="(option, key) in item.options"
-									:key="`${name}_${key}`"
-									:label="option.value"
-									:disabled="item.disabled || option.disabled"
-								>
-									<i v-if="option.icon" :class="option.icon"></i>
-									<span>{{ option.label }}</span>
-								</el-checkbox>
+								<template v-if="Array.isArray(item.options)">
+									<el-checkbox
+										v-for="(option, key) in item.options"
+										:key="`${name}_${key}`"
+										:label="option.value"
+										:disabled="item.disabled || option.disabled"
+									>
+										<i v-if="option.icon" :class="option.icon"></i>
+										<span>{{ option.label }}</span>
+									</el-checkbox>
+								</template>
 							</el-checkbox-group>
 						</template>
 						<template v-else-if="item.type=='select'">
@@ -376,82 +376,96 @@ export default class ElFormTable extends Vue {
 	 * 规范生成 model 
 	 */
 	private generateModel(): void {
-		this.fields = cloneDeep(this.data) as Record<string, ElFormAutoField>;
-		forEach(this.fields, (item, name) => {
-			item.name = name;
-			item.on = Object.assign({}, item.on);
-			item.props = omit(item, ["value", "addRules", "label", "labelTooltip", "width", "type", "on", "slot", "bindShow", "rangeName", "valueFormat", "suffixTime", "checkAll", "notSubmit", "required", "options"])
-			item.type = item.type || "text"
+		forEach(this.data, (item, name) => {
+			let field: ElFormAutoField;
+			if (!this.fields[name]) {
+				field = cloneDeep(item);
+			} else {
+				field = this.fields[name];
+			}
+			field.name = name;
+			field.on = Object.assign({}, item.on);
+			field.props = omit(item, ["value", "addRules", "label", "labelTooltip", "width", "type", "on", "slot", "bindShow", "rangeName", "valueFormat", "suffixTime", "checkAll", "notSubmit", "required", "options"])
+			field.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
 			if (item.slot) {
-				item.slot = typeof item.slot == "boolean" ? name : item.slot;
-				item.type = "text"
+				field.slot = typeof item.slot == "boolean" ? name : item.slot;
+				field.type = "text"
 			}
 			// 根据字段 type 设置 model 默认值
 			if (
 				/(check|range|cascader)/g.test(item.type) ||
-				(item.type == "select" && item.props.multiple === true) ||
-				(item.type == "slider" && item.props.range === true)
+				(item.type == "select" && field.props.multiple === true) ||
+				(item.type == "slider" && field.props.range === true)
 			) {
-				item.value = item.value || [];
+				field.value = item.value || [];
 			} else if (item.type == "timerange") {
 				let defaultValue = ["00:00:00", "00:00:00"]
-				item.value = item.value || defaultValue;
+				field.value = item.value || defaultValue;
 			} else if (item.type == "datetimerange") {
-				item.props.defaultTime = item.props.defaultTime || ["00:00:00", "23:59:59"]
+				field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
 			} else if (/rate|number|slider/.test(item.type)) {
-				item.value = parseInt(item.value) || 0;
+				field.value = parseInt(item.value) || 0;
 			} else if (item.type == "switch") {
-				item.value = item.value === undefined ? false : item.value;
+				field.value = item.value === undefined ? false : item.value;
 			} else {
-				item.value = item.value === undefined ? "" : item.value;
+				field.value = item.value === undefined ? "" : item.value;
 			}
 
 			// 根据字段 type 设置表单占位字符串
 			if (/range/g.test(item.type)) {
 				if (item.type == "numberrange") {
-					item.props.startPlaceholder = item.props.startPlaceholder || `${this.$t("formauto.min")}${item.label}`;
-					item.props.endPlaceholder = item.props.endPlaceholder || `${this.$t("formauto.max")}${item.label}`;
+					field.props.startPlaceholder = field.props.startPlaceholder || `${this.$t("formauto.min")}${item.label}`;
+					field.props.endPlaceholder = field.props.endPlaceholder || `${this.$t("formauto.max")}${item.label}`;
 				} else {
-					item.props.startPlaceholder = item.props.startPlaceholder || `${this.$t("formauto.start")}${item.label}`;
-					item.props.endPlaceholder = item.props.endPlaceholder || `${this.$t("formauto.end")}${item.label}`;
+					field.props.startPlaceholder = field.props.startPlaceholder || `${this.$t("formauto.start")}${item.label}`;
+					field.props.endPlaceholder = field.props.endPlaceholder || `${this.$t("formauto.end")}${item.label}`;
 				}
 			} if (/date|time|datetime|select|week|year|month|dates|cascader/g.test(item.type)) {
-				item.props.placeholder = item.props.placeholder || `${this.$t("formauto.pleaseSelect")}${item.label}`;
+				field.props.placeholder = field.props.placeholder || `${this.$t("formauto.pleaseSelect")}${item.label}`;
 			} else {
-				item.props.placeholder = item.props.placeholder || `${this.$t("formauto.pleaseInput")}${item.label}`;
+				field.props.placeholder = field.props.placeholder || `${this.$t("formauto.pleaseInput")}${item.label}`;
 			}
 
 			// 针对日期时间类型组件设置统一日期格式及显示格式
 			if (/datetime/g.test(item.type)) {
-				item.props.valueFormat = "yyyy/MM/dd HH:mm:ss";
-				item.props.format = item.props.format || "yyyy-MM-dd HH:mm:ss";
+				field.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
+				field.props.format = field.props.format || "yyyy-MM-dd HH:mm:ss";
 			} else if (/date/g.test(item.type)) {
-				item.props.valueFormat = "yyyy/MM/dd";
-				item.props.format = item.props.format || "yyyy-MM-dd";
+				field.props.valueFormat = "yyyy-MM-dd";
+				field.props.format = field.props.format || "yyyy-MM-dd";
 			} else if (/time/g.test(item.type)) {
-				item.props.valueFormat = item.props.valueFormat || "HH:mm:ss";
+				field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
 			}
 
-			if (this.$ELEMENT && this.$ELEMENT.pickerOptions && /date/g.test(item.type)) {
+			if (this.$ELEMENT && this.$ELEMENT.pickerOptions && /date/g.test(field.type)) {
 				let type = /range/g.test(item.type) ? "range" : "date"
 				let pickerOptions = this.$ELEMENT.pickerOptions[type];
 				if (pickerOptions) {
-					item.props.pickerOptions = Object.assign({}, pickerOptions, item.props.pickerOptions);
+					field.props.pickerOptions = Object.assign({}, pickerOptions, field.props.pickerOptions);
 				}
 			}
 
-			if (/text|password|textarea|select|cascader/.test(item.type)) {
-				item.props.clearable = item.props.clearable == false ? false : true
+			if (/text|password|textarea|select|cascader/.test(field.type)) {
+				field.props.clearable = field.props.clearable == false ? false : true
 			}
 
 			if (/select|radio|check|cascader/.test(item.type)) {
-				this.asyncOptions.push(item)
+				if (item.options instanceof Function && item.options != field.originOption) {
+					field.options = item.options
+					this.asyncOptions.push(field)
+					field.originOption = item.options
+				} else if (!field.originOption) {
+					this.asyncOptions.push(field)
+					field.originOption = true;
+				}
+				// this.asyncOptions.push(item)
 				// if (item.type == "check" && item.checkAll !== false) {
 				// 	this.$set(this.check, name, false);
 				// }
 			}
 			this.defaultValue[name] = item.value;
+			this.fields[name] = field
 		})
 		if (this.value.length < 1) {
 			this.addItem()
@@ -531,12 +545,13 @@ export default class ElFormTable extends Vue {
 					item.remoteMethod()
 				}
 			})
+			this.asyncOptions = []
 		}
 	}
 
 	private generateRule(): void {
 		this.rules = {};
-		forEach(this.data, (item, name) => {
+		forEach(this.fields, (item, name) => {
 			this.rules[name] = [];
 
 			if (item.required === true) {
@@ -558,14 +573,14 @@ export default class ElFormTable extends Vue {
 						}
 						break;
 					case "slider":
-						if (item.props && item.props.range == true) {
+						if (item.props && item.props.range) {
 							requiredRule.type = "array";
 						} else {
 							requiredRule.type = "number";
 						}
 						break;
 					case "select":
-						if (item.multiple) {
+						if (item.props.multiple) {
 							requiredRule.type = "array";
 						} else {
 							requiredRule.type = "string";

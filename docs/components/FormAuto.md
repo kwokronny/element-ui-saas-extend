@@ -19,7 +19,7 @@ pageClass: component-page
   </el-form-auto>
 </template>
 <script>
-var accountTypeOption= {
+var accountTypeOption = {
   0: "主账号ID",
   1: "企业名称",
   2: "手机号",
@@ -28,22 +28,22 @@ export default {
   data() {
     return {
       form: {
-				accountType: {
-					labelHidden: true,
-					type: "select",
-					clearable: false,
-					options: accountTypeOption,
-					value: "0",
-					style: "width: 100px",
-          on:{
-            change:this.handleAccountType
-          }
-				},
-				searchNumber: {
+        accountType: {
+          labelHidden: true,
+          type: "select",
+          clearable: false,
+          options: accountTypeOption,
+          value: "0",
+          style: "width: 120px",
+          on: {
+            change: this.handleAccountType,
+          },
+        },
+        searchNumber: {
           label: "主账号ID",
-					labelHidden: true,
-					type: "text",
-				},
+          labelHidden: true,
+          type: "text",
+        },
         account: {
           label: "文本框",
           type: "text",
@@ -66,32 +66,25 @@ export default {
         status: {
           label: "选择框",
           type: "select",
-          options: [
-            {
-              label: "选项1",
-              value: 2,
-            },
-            {
-              label: "带图标选项3",
-              value: 5,
-              icon: "el-icon-help",
-            },
-            {
-              label: "选项禁用2",
-              value: 6,
-              disabled: true,
-            },
-            "选项2",
-          ],
+          options: () => {
+            return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
+              return res.data.map((item) => {
+                return {
+                  label: item.username,
+                  value: item.id,
+                };
+              });
+            });
+          },
         },
       },
       model: {},
     };
   },
   methods: {
-    handleAccountType(value){
-      this.form.searchNumber.label=accountTypeOption[value];
-      return value
+    handleAccountType(value) {
+      this.form.searchNumber.label = accountTypeOption[value];
+      return value;
     },
     getList() {
       this.$msgbox({
