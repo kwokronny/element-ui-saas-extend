@@ -13,8 +13,9 @@
 					@click="addItem()"
 					icon="el-icon-plus"
 					:disabled="itemLimit>-1 && value.length >= itemLimit"
-				>{{$t("formtable.add")}}</el-button>
+				>{{addText||$t("formtable.add")}}</el-button>
 				<el-button
+					v-if="showClear"
 					@click="clear()"
 					icon="el-icon-delete"
 					type="danger"
@@ -44,8 +45,9 @@
 							v-if="item.slot"
 							:name="item.slot"
 							v-bind:item="item"
-							v-bind:model="row"
+							v-bind:row="row"
 							v-bind:name="name"
+							v-bind:index="$index"
 						></slot>
 						<template v-else-if="'component'==item.type">
 							<component :is="item.component" v-bind="item.props" v-on="item.on"></component>
@@ -227,7 +229,9 @@ export default class ElFormTable extends Vue {
 		data && (this.generateModel(), this.generateRule())
 	}
 
-	@Prop({ type: Number, default: -1 }) readonly itemLimit!: number;
+	@Prop({ type: Number, default: -1 }) itemLimit!: number;
+	@Prop({ type: String, default: "" }) addText!: string;
+	@Prop({ type: Boolean, default: false }) showClear!: boolean;
 	@Model("input", { type: Array, default: () => [] }) value!: Record<string, any>[];
 
 	@Watch("value", { immediate: true, deep: true })
@@ -285,9 +289,8 @@ export default class ElFormTable extends Vue {
 						if (value) {
 							model[name] = value;
 						}
-					} else if (model[name] === undefined && this.defaultValue[name] !== undefined) {
-						model[name] = this.defaultValue[name]
 					}
+					model[name] = model[name] === undefined ? this.defaultValue[name] : model[name]
 				}
 			}
 		}
@@ -385,7 +388,7 @@ export default class ElFormTable extends Vue {
 			}
 			field.name = name;
 			field.on = Object.assign({}, item.on);
-			field.props = omit(item, ["value", "addRules", "label", "labelTooltip", "width", "type", "on", "slot", "bindShow", "rangeName", "valueFormat", "suffixTime", "checkAll", "notSubmit", "required", "options"])
+			field.props = omit(item, ["value", "addRules", "label", "labelTooltip", "width", "type", "on", "slot", "bindShow", "rangeName", "valueFormat", "suffixTime", "notSubmit", "required", "options"])
 			field.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
 			if (item.slot) {
@@ -399,11 +402,12 @@ export default class ElFormTable extends Vue {
 				(item.type == "slider" && field.props.range === true)
 			) {
 				field.value = item.value || [];
-			} else if (item.type == "timerange") {
-				let defaultValue = ["00:00:00", "00:00:00"]
-				field.value = item.value || defaultValue;
-			} else if (item.type == "datetimerange") {
-				field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
+				if (item.type == "timerange") {
+					let defaultValue = ["00:00:00", "00:00:00"]
+					field.value = item.value || defaultValue;
+				} else if (item.type == "datetimerange") {
+					field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
+				}
 			} else if (/rate|number|slider/.test(item.type)) {
 				field.value = parseInt(item.value) || 0;
 			} else if (item.type == "switch") {

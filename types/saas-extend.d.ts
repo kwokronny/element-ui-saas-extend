@@ -128,7 +128,7 @@ export declare interface ElFormAutoField {
    * 去除 全选复选框
    * @default true
    */
-  checkAll?: boolean;
+   notAll?: boolean;
   /**
    * type为select时
    * select可多选

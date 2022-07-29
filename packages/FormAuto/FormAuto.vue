@@ -248,7 +248,7 @@ export default class ElFormAuto extends Vue {
 			}
 			field.name = name;
 			field.on = Object.assign({}, item.on);
-			field.props = omit(item, ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "checkAll", "notSubmit", "required", "col", "options"])
+			field.props = omit(item, ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "notSubmit", "required", "col", "options"])
 			field.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
 			if (item.slot) {
@@ -262,11 +262,12 @@ export default class ElFormAuto extends Vue {
 				(item.type == "slider" && field.props.range === true)
 			) {
 				field.value = item.value || [];
-			} else if (item.type == "timerange") {
-				let defaultValue = ["00:00:00", "00:00:00"]
-				field.value = item.value || defaultValue;
-			} else if (item.type == "datetimerange") {
-				field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
+				if (item.type == "timerange") {
+					let defaultValue = ["00:00:00", "00:00:00"]
+					field.value = item.value || defaultValue;
+				} else if (item.type == "datetimerange") {
+					field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
+				}
 			} else if (/rate|number|slider/.test(item.type)) {
 				field.value = parseInt(item.value) || 0;
 			} else if (item.type == "switch") {
@@ -322,13 +323,14 @@ export default class ElFormAuto extends Vue {
 					this.asyncOptions.push(field)
 					field.originOption = true;
 				}
-				if (item.type == "check" && item.checkAll !== false) {
+				if (item.type == "check" && item.notAll !== false) {
 					this.$set(this.check, name, false);
 				}
 			}
-			this.fields[name] = field;
+			// debugger
 			this.defaultValue[name] = field.value;
-			this.$set(this.model, name, this.model[name] === undefined ? field.value : this.model[name]);
+			// this.$set(this.model, name, this.model[name] === undefined ? field.value : this.model[name]);
+			this.fields[name] = field;
 		})
 		this.getModel();
 		this.$nextTick(function () {
@@ -502,11 +504,10 @@ export default class ElFormAuto extends Vue {
 					if (value) {
 						model[name] = value;
 					}
-				} else if (field.type == "check") {
+				} else if (field.type == "check" && !field.notAll) {
 					this.handleCheckedChange(name, model[name]);
-				} else if (model[name] === undefined && this.defaultValue[name] !== undefined) {
-					model[name] = this.defaultValue[name]
 				}
+				this.$set(this.model, name, model[name] === undefined ? this.defaultValue[name] : model[name]) 
 			}
 		}
 		return this.model
@@ -609,7 +610,7 @@ export default class ElFormAuto extends Vue {
 		for (let name in this.fields) {
 			let field = this.fields[name];
 			this.model[name] = this.defaultValue[name];
-			if (field.type == "check" && field.checkAll) {
+			if (field.type == "check" && field.notAll) {
 				this.check[name] = false;
 			}
 		}

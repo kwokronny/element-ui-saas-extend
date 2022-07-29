@@ -294,24 +294,26 @@ export default {
     };
   },
   mounted() {
-    this.model = {
-      id: "123",
-      switch: 1,
-      text: "文本框",
-      password: "password123456",
-      date: "2021-01-10",
-      datetime: "2021-01-10 11:11:00",
-      dateRange: ["2021-01-10", "2021-01-13"],
-      datetimeRange: ["2021-01-10 11:11:00", "2021-01-12 13:11:00"],
-      time: "11:11:00",
-      // timeRange: ["11:11:00", "23:12:00"],
-      select: 0,
-      check: ["1", "2", "3"],
-      radiobutton: 0,
-      radio: 3,
-      cascader: [2, 6],
-      rate: 5,
-    };
+    this.model = {};
+    // this.model = {
+    //   id: "123",
+    //   switch: 1,
+    //   text: "文本框",
+    //   password: "password123456",
+    //   date: "2021-01-10",
+    //   datetime: "2021-01-10 11:11:00",
+    //   dateRange: ["2021-01-10", "2021-01-13"],
+    //   datetimeRange: ["2021-01-10 11:11:00", "2021-01-12 13:11:00"],
+    //   time: "11:11:00",
+    //   // timeRange: ["11:11:00", "23:12:00"],
+    //   select: 0,
+    //   check: ["1", "2", "3"],
+    //   radiobutton: 0,
+    //   radio: 3,
+    //   cascader: [2, 6],
+    //   rate: 5,
+    // };
+    this.model.text = "sdfs";
   },
   methods: {
     reset() {
@@ -337,7 +339,7 @@ export default {
         time: "11:11:00",
         timeRange: ["11:11:00", "22:12:00"],
         select: 0,
-        check: [1],
+        check: ["1"],
         radiobutton: 0,
         radio: 3,
         cascader: [2, 6],
