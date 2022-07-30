@@ -14,7 +14,7 @@ pageClass: component-page
 <template>
   <div>
     <el-form-table :data="form" ref="EditForm" v-model="model">
-      <el-button slot="option_append" @click="getModel">测试</el-button>
+      <el-button slot="option_append" @click="setModel">赋值</el-button>
     </el-form-table>
     <div style="margin-top: 20px">表单字段: {{ model }}</div>
   </div>
@@ -85,9 +85,9 @@ export default {
     };
   },
   methods: {
-    getModel() {
+    setModel() {
       this.model = [{ binduserId: 3 }, { binduserId: { label: "test", value: "a3" } }];
-    },
+    }
   },
 };
 </script>
@@ -223,8 +223,9 @@ export default {
 支持对表单项自定义动态插槽，通过设置 slot 属性，可设置`boolean`、`string`类型，设置为 true 时，slot 名为属性的字段名，slot 为字符串类型时，多个字段可复用一个插槽，插槽携带参数如下：
 
 - `item` 字段属性
-- `model` 表单 model
+- `row` 当前行记录
 - `name` 字段名
+- `index` 索引
 
 ::: demo
 
@@ -234,7 +235,7 @@ export default {
     <el-form-table :data="form" ref="EditForm" v-model="model">
       <el-tag slot="option_perpend" type="primary">首部操作区前置</el-tag>
       <el-tag slot="option_append" type="primary">首部操作区追加</el-tag>
-      <template slot-scope="{ item, model, name }" slot="customSlot"> 自定义 <el-input v-model="model[name]" style="width:100px"></el-input> </template>
+      <template slot-scope="{ item, row, name }" slot="customSlot"> 自定义 <el-input v-model="row[name]" style="width:100px"></el-input> </template>
       <template slot="table_body_option" slot-scope="{ row, index }">
         <el-button icon="el-icon-remove" tpye="text" @click="remove(index)"></el-button>
       </template>
@@ -305,14 +306,16 @@ export default {
 
 ### Props
 
-| 参数            | 描述                        | 类型                                                      | 可选值 | 默认值 |
-| :-------------- | :-------------------------- | :-------------------------------------------------------- | :----- | ------ |
-| v-model         | 表单数据对象                | `Array<Record<string,any>>`                               | -      | []     |
-| data            | 表单项配置                  | [Record&lt;name:string,FormAutoField&gt;](#FormAutoField) | -      | {}     |
-| item-limit      | 限制最大成员数量            | `number`                                                  | -      | -1     |
-| `[prop:string]` | 继承 `<el-table>` 所有 Prop | `any`                                                     | -      | -      |
+| 参数            | 描述                        | 类型                                                        | 可选值 | 默认值 |
+| :-------------- | :-------------------------- | :---------------------------------------------------------- | :----- | ------ |
+| v-model         | 表单数据对象                | `Array<Record<string,any>>`                                 | -      | []     |
+| data            | 表单项配置                  | [Record&lt;name:string,FormTableField&gt;](#FormTableField) | -      | {}     |
+| item-limit      | 限制最大成员数量            | `number`                                                    | -      | -1     |
+| add-text        | 添加按钮文案                | `string`                                                    | -      | 添加   |
+| showClear       | 显示清空按钮                | `boolean`                                                   | -      | false  |
+| `[prop:string]` | 继承 `<el-table>` 所有 Prop | `any`                                                       | -      | -      |
 
-### FormAutoField
+### FormTableField
 
 | 参数            | 描述                                                                                         | 类型                            | 默认值 |
 | :-------------- | :------------------------------------------------------------------------------------------- | :------------------------------ | :----- |
@@ -388,7 +391,7 @@ export default {
 
 | 插槽名称          | 描述                                              |
 | :---------------- | :------------------------------------------------ |
-| 自定义名称        | 自定义表单项的内容，参数为 { item, row, name } |
+| 自定义名称        | 自定义表单项的内容，参数为 { item, row, name }    |
 | table_body_option | 自定义表格右侧操作列的内容，参数为 { row, index } |
 
 ### Event

@@ -245,12 +245,10 @@ export default class ElFormTable extends Vue {
 	 */
 	public getModel(): Record<string, any>[] {
 		for (let i = 0; i < this.value.length; i++) {
-			let model = this.value[i]
+			let model = Object.assign({}, this.value[i], this.defaultValue);
 			for (let name in this.fields) {
-				// if (!item.notSubmit) {
 				let field = this.fields[name]
 				if (field) {
-
 					if (field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
 						let [sn, en] = field.rangeName;
 						let _value = model[name];
@@ -362,7 +360,7 @@ export default class ElFormTable extends Vue {
 
 	public addItem(model?: Record<string, any>) {
 		if (this.itemLimit > -1 && this.itemLimit < this.value.length) return;
-		this.value.push(Object.assign(model || {}, this.defaultValue));
+		this.value.push(Object.assign(model || {}, cloneDeep(this.defaultValue)));
 	}
 
 	public removeItem(index: number) {
@@ -468,7 +466,7 @@ export default class ElFormTable extends Vue {
 				// 	this.$set(this.check, name, false);
 				// }
 			}
-			this.defaultValue[name] = item.value;
+			this.defaultValue[name] = field.value;
 			this.fields[name] = field
 		})
 		if (this.value.length < 1) {
