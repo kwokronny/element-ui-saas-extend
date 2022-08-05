@@ -83,7 +83,7 @@
 				>
 					<el-table-column v-if="$scopedSlots['expand']" type="expand">
 						<template slot-scope="{row, $index}">
-							<slot :name="item.slot" v-bind:row="row" v-bind:index="$index"></slot>
+							<slot name="expand" v-bind:row="row" v-bind:index="$index"></slot>
 						</template>
 					</el-table-column>
 					<el-table-column
@@ -126,7 +126,7 @@
 					size="small"
 					:data="sortColumns"
 					border
-					height="400px"
+					max-height="400px"
 					row-key="prop"
 					default-expand-all
 					:tree-props="{children:'children',hasChildren:'hasChildren'}"
@@ -447,6 +447,7 @@ export default class ElTablePage extends Vue {
 				prop: column.prop,
 				fixed: column.fixed || false,
 				hide: column.hide || false,
+				hasChildren: column.children && column.children.length > 0
 			})
 		})
 	}

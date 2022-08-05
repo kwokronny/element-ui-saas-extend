@@ -601,7 +601,7 @@ export default class ElFormTable extends Vue {
 				this.rules[name].push(requiredRule);
 			}
 			if (item.addRules && item.addRules.length > 0) {
-				this.rules[name].push(...item.addRules);
+				this.rules[name] = this.rules[name].concat(item.addRules);
 			}
 		});
 	}

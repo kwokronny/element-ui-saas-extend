@@ -456,7 +456,7 @@ export default class ElFormAuto extends Vue {
 				this.rules[name].push(requiredRule);
 			}
 			if (item.addRules && item.addRules.length > 0) {
-				this.rules[name].concat(item.addRules);
+				this.rules[name] = this.rules[name].concat(item.addRules);
 			}
 		});
 	}
@@ -507,7 +507,7 @@ export default class ElFormAuto extends Vue {
 				} else if (field.type == "check" && !field.notAll) {
 					this.handleCheckedChange(name, model[name]);
 				}
-				this.$set(this.model, name, model[name] === undefined ? this.defaultValue[name] : model[name]) 
+				this.$set(this.model, name, model[name] === undefined ? this.defaultValue[name] : model[name])
 			}
 		}
 		return this.model
