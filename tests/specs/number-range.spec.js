@@ -122,31 +122,18 @@ describe("NumberRange", () => {
     expect(vm.$el.querySelector(".el-range-separator").textContent).to.equal("至");
   });
 
-  it("method:focus", async () => {
-    let spyFocus = sinon.spy();
-    let vm = createVue(
-      {
-        template: `<el-number-range @focus="spyFocus"></el-number-range>`,
-        methods: {
-          spyFocus,
-        },
-      },
-      true
-    );
-    vm.$children[0].focus();
-    expect(spyFocus.calledOnce).to.be.true;
-  });
-
   it("all event", async () => {
     let spyChange = sinon.spy();
     let spyFocus = sinon.spy();
+    let spyClear = sinon.spy();
     let spyBlur = sinon.spy();
     let vm = createVue(
       {
-        template: `<el-number-range @focus="spyFocus" @blur="spyBlur" @change="spyChange"></el-number-range>`,
+        template: `<el-number-range @focus="spyFocus" @clear="spyClear" @blur="spyBlur" @change="spyChange"></el-number-range>`,
         methods: {
           spyChange,
           spyFocus,
+          spyClear,
           spyBlur,
         },
       },
@@ -159,9 +146,12 @@ describe("NumberRange", () => {
       triggerEvent(input, "change");
       input.blur();
     });
+    let clearDOM = vm.$el.querySelector(".el-range__close-icon");
+    clearDOM.click();
     expect(spyChange.calledTwice).to.be.true;
     expect(spyFocus.calledTwice).to.be.true;
     expect(spyBlur.calledTwice).to.be.true;
+    expect(spyClear.calledOnce).to.be.true;
   });
 
   it("el-form relative disabled", (done) => {

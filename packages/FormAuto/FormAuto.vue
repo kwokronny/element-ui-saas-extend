@@ -90,6 +90,23 @@
 								v-on="item.on"
 							></el-date-picker>
 						</template>
+						<template v-else-if="/time(|select|range)/.test(item.type)">
+							<el-time-select
+								v-if="item.type == 'timeselect'"
+								v-model="model[name]"
+								:readonly="item.disabled"
+								v-bind="item.props"
+								v-on="item.on"
+							></el-time-select>
+							<el-time-picker
+								v-else
+								:is-range="item.type == 'timerange'"
+								v-model="model[name]"
+								:readonly="item.disabled"
+								v-bind="item.props"
+								v-on="item.on"
+							></el-time-picker>
+						</template>
 						<template v-else-if="/time(|range)/.test(item.type)">
 							<el-time-picker
 								:is-range="item.type == 'timerange'"
@@ -207,7 +224,15 @@ import { transformOptions } from "../util"
 import locale from "../../src/mixin/locale"
 import selectScroll from "../../src/mixin/selectScroll"
 import { ValidateCallback } from "element-ui/types/form";
-import { formatDate } from "element-ui/src/utils/date-util.js"
+import { toDate, formatDate } from "element-ui/src/utils/date-util.js"
+
+const DATE_FORMATTER = function (value, format) {
+	value = toDate(value);
+	if (!value) return '';
+	if (format === 'timestamp') return value.getTime();
+	else if (format === 'unix') return Math.floor(value.getTime() / 1000);
+	return formatDate(value, format);
+};
 
 @Component({
 	name: "ElFormAuto",
@@ -247,7 +272,7 @@ export default class ElFormAuto extends Vue {
 				field = this.fields[name];
 			}
 			field.name = name;
-			field.on = Object.assign({}, item.on);
+			field.on = Object.assign(field.on || {}, item.on);
 			field.props = omit(item, ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "notSubmit", "required", "col", "options"])
 			field.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
@@ -296,7 +321,7 @@ export default class ElFormAuto extends Vue {
 				field.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
 				field.props.format = field.props.format || "yyyy-MM-dd HH:mm:ss";
 			} else if (/date/g.test(item.type)) {
-				field.props.valueFormat = "yyyy-MM-dd";
+				field.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
 				field.props.format = field.props.format || "yyyy-MM-dd";
 			} else if (/time/g.test(item.type)) {
 				field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
@@ -327,7 +352,22 @@ export default class ElFormAuto extends Vue {
 					this.$set(this.check, name, false);
 				}
 			}
-			// debugger
+
+			if (field.type == "select" && field.remote && field.options instanceof Function) {
+				let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
+				field.on["visible-change"] = function (visible) {
+					originVisibleChangeEvent(visible)
+					if (visible == false && field.options && field.options.length == 0) {
+						field.props.remoteMethod.call(item, "")
+					}
+				}
+				let originClearEvent = field.on.clear || (() => { })
+				let self = this;
+				field.on.clear = function () {
+					originClearEvent()
+					self.refreshOptions(name)
+				}
+			}
 			this.defaultValue[name] = field.value;
 			// this.$set(this.model, name, this.model[name] === undefined ? field.value : this.model[name]);
 			this.fields[name] = field;
@@ -380,22 +420,6 @@ export default class ElFormAuto extends Vue {
 					};
 					item.props.remoteMethod = item.remoteMethod;
 					item.props.remoteMethod("");
-					if (!item.on) {
-						item.on = {}
-					}
-					let originVisibleChangeEvent = item.on["visible-change"] || (() => { })
-					item.on["visible-change"] = function (visible) {
-						originVisibleChangeEvent(visible)
-						if (visible == false && item.options && item.options.length == 0) {
-							item.props.remoteMethod.call(item, "")
-						}
-					}
-					let originClearEvent = item.on.clear || (() => { })
-					let self = this;
-					item.on.clear = function () {
-						originClearEvent()
-						self.refreshOptions(item.name)
-					}
 				} else if (item.options) {
 					let remoteMethod = item.options;
 					item.remoteMethod = () => {
@@ -479,23 +503,9 @@ export default class ElFormAuto extends Vue {
 						}
 					}
 					let [sd, ed] = _value;
-					if (sd && ed && /date|time/g.test(field.type)) {
-						if (field.type == "daterange" && field.suffixTime == true) {
-							sd += " 00:00:00";
-							ed += " 23:59:59";
-						}
-						if (field.valueFormat) {
-							if (field.valueFormat == 'timestamp') {
-								sd = new Date(sd).valueOf();
-								ed = new Date(ed).valueOf();
-							} else if (field.valueFormat == 'unix') {
-								sd = Math.floor(new Date(sd).valueOf() / 1000);
-								ed = Math.floor(new Date(ed).valueOf() / 1000);
-							} else {
-								sd = formatDate(sd, field.valueFormat);
-								ed = formatDate(ed, field.valueFormat);
-							}
-						}
+					if (sd && ed && /date|time|month|year/g.test(field.type) && field.valueFormat) {
+						sd = DATE_FORMATTER(sd, field.valueFormat);
+						ed = DATE_FORMATTER(ed, field.valueFormat);
 					}
 					this.$set(this.model, sn, sd)
 					this.$set(this.model, en, ed)
@@ -506,6 +516,8 @@ export default class ElFormAuto extends Vue {
 					}
 				} else if (field.type == "check" && !field.notAll) {
 					this.handleCheckedChange(name, model[name]);
+				} else if (/date|datetime|month|year/g.test(field.type) && field.valueFormat) {
+					model[name] = DATE_FORMATTER(model[name], field.valueFormat);
 				}
 				this.$set(this.model, name, model[name] === undefined ? this.defaultValue[name] : model[name])
 			}
@@ -523,8 +535,8 @@ export default class ElFormAuto extends Vue {
 		let field = this.fields[fieldName];
 		if (field && field.props.remoteMethod) {
 			field.remoteParams.query = "refresh";
-			this.echoOptions[fieldName] = {};
 			field.props.remoteMethod("");
+			// this.echoOptions[fieldName] = [];
 		}
 	}
 

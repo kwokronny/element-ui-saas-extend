@@ -150,6 +150,7 @@ describe("FormAuto", () => {
     },
   };
 
+  //#region 组件基础测试用例
   it("props:inline", (done) => {
     vm = createTest(
       FormAuto,
@@ -252,6 +253,7 @@ describe("FormAuto", () => {
     expect(document.getElementById(icon.getAttribute("aria-describedby")).textContent).to.equal("field help tip");
     triggerEvent(icon, "mouseleave");
   });
+  //#endregion
 
   it("form default value and v-model valid", async () => {
     vm = createVue(
@@ -322,6 +324,40 @@ describe("FormAuto", () => {
     expect(vm.$refs.form.model).to.deep.equal(Object.assign({ startTime: "00:00:00", endTime: "05:00:00", startDate: "2019-01-01", endDate: "2019-01-02", startDT: "2019-02-01 10:00:00", endDT: "2019-05-02 08:00:00" }, data), "model value is valid");
   });
 
+  it("check reshow", async () => {
+    vm = createVue(
+      {
+        template: `<el-form-auto :data="form" inline v-model="model" ref="form"></el-form-auto>`,
+        data() {
+          return {
+            model: { check: [0, 1] },
+            form: {
+              check: {
+                // notAll: true,
+                label: "check",
+                type: "check",
+                options: [
+                  { label: "option0", value: 0 },
+                  { label: "option1", value: 1 },
+                  { label: "option2", value: 2 },
+                ],
+              },
+            },
+          };
+        },
+      },
+      true
+    );
+    let checkAll = vm.$refs.form.$children[0].$children[0].$children[1];
+    expect(checkAll.indeterminate).to.be.true;
+    vm.model.check = [0, 1, 2];
+    await waitImmediate();
+    expect(checkAll.indeterminate).to.be.false;
+    expect(checkAll.value).to.be.true;
+    // console.log(vm.$refs.form.$children[0].$children[0].$children[1]);
+    // expect(vm.$refs.form.$children[0].$children[0].$children[1].name).to.equal("el-checkbox");
+  });
+
   it("options transfer", async () => {
     let objectOptions = {
       0: "option0",
@@ -369,49 +405,26 @@ describe("FormAuto", () => {
     );
     let fields = vm.$refs.form.fields;
     await waitImmediate();
-    expect(Array.isArray(fields.check.options)).to.be.true;
-    expect(fields.check.options.length).to.equal(3);
-    expect(fields.check.options.map((i) => i.value)).to.deep.equal("0,1,2".split(","));
-    expect(fields.select.options.length).to.equal(3);
-    expect(fields.select.options.map((i) => i.value)).to.deep.equal([0, 1, 2]);
-    expect(fields.select.options[0].disabled).to.deep.true;
-    expect(fields.radio.options.map((i) => i.value)).to.deep.equal(["option1", "option2", "option3"]);
-    expect(fields.asyncSelect.options.length).to.equal(3);
-    expect(fields.asyncSelect.options.map((i) => i.value)).to.deep.equal("0,1,2".split(","));
-  });
-
-  it("check reshow", async () => {
-    vm = createVue(
-      {
-        template: `<el-form-auto :data="form" inline v-model="model" ref="form"></el-form-auto>`,
-        data() {
-          return {
-            model: { check: [0, 1] },
-            form: {
-              check: {
-                // notAll: true,
-                label: "check",
-                type: "check",
-                options: [
-                  { label: "option0", value: 0 },
-                  { label: "option1", value: 1 },
-                  { label: "option2", value: 2 },
-                ],
-              },
-            },
-          };
-        },
-      },
-      true
-    );
-    let checkAll = vm.$refs.form.$children[0].$children[0].$children[1];
-    expect(checkAll.indeterminate).to.be.true;
-    vm.model.check = [0, 1, 2];
-    await waitImmediate();
-    expect(checkAll.indeterminate).to.be.false;
-    expect(checkAll.value).to.be.true;
-    // console.log(vm.$refs.form.$children[0].$children[0].$children[1]);
-    // expect(vm.$refs.form.$children[0].$children[0].$children[1].name).to.equal("el-checkbox");
+    expect(fields.check.options).to.have.deep.members([
+      { label: "option0", value: "0", disabled: false, icon: false, children: [], props: {} },
+      { label: "option1", value: "1", disabled: false, icon: false, children: [], props: {} },
+      { label: "option2", value: "2", disabled: false, icon: false, children: [], props: {} },
+    ]);
+    expect(fields.select.options).to.have.deep.members([
+      { label: "option0", value: 0, disabled: true, icon: false, children: [], props: {} },
+      { label: "option1", value: 1, disabled: false, icon: false, children: [], props: {} },
+      { label: "option2", value: 2, disabled: false, icon: false, children: [], props: {} },
+    ]);
+    expect(fields.radio.options).to.have.deep.members([
+      { label: "option1", value: "option1", disabled: false, icon: false, children: [], props: {} },
+      { label: "option2", value: "option2", disabled: false, icon: false, children: [], props: {} },
+      { label: "option3", value: "option3", disabled: false, icon: false, children: [], props: {} },
+    ]);
+    expect(fields.asyncSelect.options).to.have.deep.members([
+      { label: "option0", value: "0", disabled: false, icon: false, children: [], props: {} },
+      { label: "option1", value: "1", disabled: false, icon: false, children: [], props: {} },
+      { label: "option2", value: "2", disabled: false, icon: false, children: [], props: {} },
+    ]);
   });
 
   it("select remote search", async () => {
@@ -427,14 +440,15 @@ describe("FormAuto", () => {
                 type: "select",
                 remote: true,
                 options: async (query, page) => {
-                  return userData
-                    .filter((item) => item.username.indexOf(query) > -1)
-                    .map((item) => {
-                      return {
+                  return userData.reduce((perv, item) => {
+                    if (item.username.indexOf(query) > -1) {
+                      perv.push({
                         label: item.username,
                         value: item.id * page,
-                      };
-                    });
+                      });
+                    }
+                    return perv;
+                  }, []);
                 },
               },
             },
@@ -467,14 +481,15 @@ describe("FormAuto", () => {
                 loadScroll: true,
                 remote: true,
                 options: async (query, page) => {
-                  return userData
-                    .filter((item) => item.username.indexOf(query) > -1)
-                    .map((item) => {
-                      return {
+                  return userData.reduce((perv, item) => {
+                    if (item.username.indexOf(query) > -1) {
+                      perv.push({
                         label: item.username,
                         value: item.id * page,
-                      };
-                    });
+                      });
+                    }
+                    return perv;
+                  }, []);
                 },
               },
             },
@@ -509,14 +524,15 @@ describe("FormAuto", () => {
                 type: "select",
                 remote: true,
                 options: async (query, page) => {
-                  return userData
-                    .filter((item) => item.username.indexOf(query) > -1)
-                    .map((item) => {
-                      return {
+                  return userData.reduce((perv, item) => {
+                    if (item.username.indexOf(query) > -1) {
+                      perv.push({
                         label: item.username,
                         value: item.id * page,
-                      };
-                    });
+                      });
+                    }
+                    return perv;
+                  }, []);
                 },
                 on: {
                   ["visible-change"]: (visible) => {
@@ -557,16 +573,16 @@ describe("FormAuto", () => {
                 type: "select",
                 remote: true,
                 clearable: true,
-                options: async (query) => {
-                  return userData.reduce((res,item)=>{
-                    if(item.username.indexOf(query)>-1){
-                      res.push({
+                options: async (query, page) => {
+                  return userData.reduce((perv, item) => {
+                    if (item.username.indexOf(query) > -1) {
+                      perv.push({
                         label: item.username,
-                        value: item.id,
+                        value: item.id * page,
                       });
                     }
-                    return res;
-                  },[])
+                    return perv;
+                  }, []);
                 },
                 on: {
                   clear: () => {
@@ -598,6 +614,10 @@ describe("FormAuto", () => {
     expect(vm.clearPass).to.be.true;
     expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(10);
   });
+
+  it("type:date or time valueFormat",async ()=>{
+    
+  })
 
   it("method: reset", async () => {
     vm = createVue(
@@ -673,6 +693,12 @@ describe("FormAuto", () => {
     for (let key in form) {
       form[key].required = true;
     }
+    form["password"].addRules = [
+      {
+        pattern: /^(?=.*[a-zA-Z])(?=.*\d)[^]{8,16}$/,
+        message: "需要8位~16位以内，包含字母与数字的字符",
+      },
+    ];
     vm = createVue(
       {
         template: `<el-form-auto :data="form" v-model="model" ref="Form"></el-form-auto>`,
@@ -704,16 +730,16 @@ describe("FormAuto", () => {
       selects: [],
       cascader: [],
     };
-    vm.$refs.Form.validate((valid) => {
-      expect(valid).to.be.true;
-    });
-    vm.model.password = "";
+    vm.model.password = "123456";
     vm.$refs.Form.validateField("password");
     await waitImmediate();
-    expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(1);
+    expect(vm.$el.querySelector(".el-form-item__error").textContent.trim()).to.equal("需要8位~16位以内，包含字母与数字的字符");
     vm.model = Object.assign({}, data);
     await waitImmediate();
     try {
+      vm.$refs.Form.validate((valid) => {
+        expect(valid).to.be.false;
+      });
       await vm.$refs.Form.validate();
       expect(true).to.be.false;
     } catch (e) {
@@ -755,4 +781,3 @@ describe("FormAuto", () => {
   });
 });
 
-// TODO: 编写 全选 复选框

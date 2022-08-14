@@ -515,14 +515,15 @@ export default {
           remote: true,
           options: (query, page) => {
             return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
-              return res.data
-                .filter((item) => item.username.indexOf(query) > -1)
-                .map((item) => {
-                  return {
+              return res.data.reduce((prev, curr) => {
+                if (item.username.indexOf(query) > -1) {
+                  prev.push({
                     label: item.username,
                     value: item.id * page,
-                  };
-                });
+                  });
+                }
+                return prev;
+              }, []);
             });
           },
         },

@@ -1,5 +1,5 @@
 <template>
-	<el-table-column v-if="!column.hide" :fixed="column.fixed" v-bind="column.props">
+	<el-table-column v-if="!column.hide" :fixed="column.fixed" :prop="column.prop" v-bind="column.props">
 		<template slot="header" slot-scope="scope">
 			{{column.label || " "}}
 			<el-tooltip v-if="column.labelTooltip" :content="column.labelTooltip">
