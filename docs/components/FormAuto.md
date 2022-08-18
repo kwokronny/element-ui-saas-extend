@@ -236,6 +236,13 @@ export default {
           required: true,
           style: "width:100%",
         },
+        timeSelect: {
+          col: 12,
+          label: "时间",
+          type: "timeselect",
+          required: true,
+          style: "width:100%",
+        },
         timeRange: {
           col: 12,
           label: "时间范围",

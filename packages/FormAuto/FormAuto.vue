@@ -51,9 +51,6 @@
 								v-on="item.on"
 							></el-input>
 						</template>
-						<template v-else-if="item.type=='hidden'">
-							<el-input :name="name" v-model="model[name]" type="hidden" v-bind="item.props"></el-input>
-						</template>
 						<template v-else-if="item.type=='numberrange'">
 							<el-number-range v-model="model[name]" v-bind="item.props" v-on="item.on"></el-number-range>
 						</template>
@@ -90,7 +87,7 @@
 								v-on="item.on"
 							></el-date-picker>
 						</template>
-						<template v-else-if="/time(|select|range)/.test(item.type)">
+						<template v-else-if="/time(select|range|)/.test(item.type)">
 							<el-time-select
 								v-if="item.type == 'timeselect'"
 								v-model="model[name]"
@@ -271,9 +268,10 @@ export default class ElFormAuto extends Vue {
 			} else {
 				field = this.fields[name];
 			}
+			field.label = item.label;
 			field.name = name;
 			field.on = Object.assign(field.on || {}, item.on);
-			field.props = omit(item, ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "notSubmit", "required", "col", "options"])
+			field.props = Object.assign(field.props || {}, omit(item, ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "notSubmit", "required", "col", "options"]))
 			field.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
 			if (item.slot) {
@@ -304,16 +302,16 @@ export default class ElFormAuto extends Vue {
 			// 根据字段 type 设置表单占位字符串
 			if (/range/g.test(item.type)) {
 				if (item.type == "numberrange") {
-					field.props.startPlaceholder = field.props.startPlaceholder || `${this.$t("formauto.min")}${item.label}`;
-					field.props.endPlaceholder = field.props.endPlaceholder || `${this.$t("formauto.max")}${item.label}`;
+					field.props.startPlaceholder = item.startPlaceholder || `${this.$t("formauto.min")}${item.label}`;
+					field.props.endPlaceholder = item.endPlaceholder || `${this.$t("formauto.max")}${item.label}`;
 				} else {
-					field.props.startPlaceholder = field.props.startPlaceholder || `${this.$t("formauto.start")}${item.label}`;
-					field.props.endPlaceholder = field.props.endPlaceholder || `${this.$t("formauto.end")}${item.label}`;
+					field.props.startPlaceholder = item.startPlaceholder || `${this.$t("formauto.start")}${item.label}`;
+					field.props.endPlaceholder = item.endPlaceholder || `${this.$t("formauto.end")}${item.label}`;
 				}
 			} if (/date|time|datetime|select|week|year|month|dates|cascader/g.test(item.type)) {
-				field.props.placeholder = field.props.placeholder || `${this.$t("formauto.pleaseSelect")}${item.label}`;
+				field.props.placeholder = item.placeholder || `${this.$t("formauto.pleaseSelect")}${item.label}`;
 			} else {
-				field.props.placeholder = field.props.placeholder || `${this.$t("formauto.pleaseInput")}${item.label}`;
+				field.props.placeholder = item.placeholder || `${this.$t("formauto.pleaseInput")}${item.label}`;
 			}
 
 			// 针对日期时间类型组件设置统一日期格式及显示格式
@@ -321,6 +319,9 @@ export default class ElFormAuto extends Vue {
 				field.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
 				field.props.format = field.props.format || "yyyy-MM-dd HH:mm:ss";
 			} else if (/date/g.test(item.type)) {
+				if (item.type == "daterange" && item.suffixTime) {
+					field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
+				}
 				field.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
 				field.props.format = field.props.format || "yyyy-MM-dd";
 			} else if (/time/g.test(item.type)) {
@@ -340,20 +341,22 @@ export default class ElFormAuto extends Vue {
 			}
 
 			if (/select|radio|check|cascader/.test(item.type)) {
-				if (item.options instanceof Function && item.options != field.originOption) {
+				if (item.options instanceof Function) {
+					if (item.options != field.originOption) {
+						field.options = item.options
+						this.asyncOptions.push(field)
+						field.originOption = item.options
+					}
+				} else {
 					field.options = item.options
 					this.asyncOptions.push(field)
-					field.originOption = item.options
-				} else if (!field.originOption) {
-					this.asyncOptions.push(field)
-					field.originOption = true;
 				}
 				if (item.type == "check" && item.notAll !== false) {
 					this.$set(this.check, name, false);
 				}
 			}
 
-			if (field.type == "select" && field.remote && field.options instanceof Function) {
+			if (field.type == "select" && field.remote) {
 				let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
 				field.on["visible-change"] = function (visible) {
 					originVisibleChangeEvent(visible)

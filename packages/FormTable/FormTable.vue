@@ -90,8 +90,16 @@
 								v-on="item.on"
 							></el-date-picker>
 						</template>
-						<template v-else-if="/time(range|)/.test(item.type)">
+						<template v-else-if="/time(select|range|)/.test(item.type)">
+							<el-time-select
+								v-if="item.type == 'timeselect'"
+								v-model="row[name]"
+								:readonly="item.disabled"
+								v-bind="item.props"
+								v-on="item.on"
+							></el-time-select>
 							<el-time-picker
+								v-else
 								:is-range="item.type == 'timerange'"
 								v-model="row[name]"
 								:readonly="item.disabled"
@@ -385,8 +393,8 @@ export default class ElFormTable extends Vue {
 				field = this.fields[name];
 			}
 			field.name = name;
-			field.on = Object.assign({}, item.on);
-			field.props = omit(item, ["value", "addRules", "label", "labelTooltip", "width", "type", "on", "slot", "bindShow", "rangeName", "valueFormat", "suffixTime", "notSubmit", "required", "options"])
+			field.on = Object.assign(field.on || {}, item.on);
+			field.props = Object.assign(field.props || {}, omit(item, ["value", "addRules", "label", "labelTooltip", "width", "type", "on", "slot", "bindShow", "rangeName", "valueFormat", "suffixTime", "notSubmit", "required", "options"]))
 			field.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
 			if (item.slot) {
@@ -434,7 +442,10 @@ export default class ElFormTable extends Vue {
 				field.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
 				field.props.format = field.props.format || "yyyy-MM-dd HH:mm:ss";
 			} else if (/date/g.test(item.type)) {
-				field.props.valueFormat = "yyyy-MM-dd";
+				if (item.type == "daterange" && item.suffixTime) {
+					field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
+				}
+				field.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
 				field.props.format = field.props.format || "yyyy-MM-dd";
 			} else if (/time/g.test(item.type)) {
 				field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
@@ -453,6 +464,16 @@ export default class ElFormTable extends Vue {
 			}
 
 			if (/select|radio|check|cascader/.test(item.type)) {
+				if (item.options instanceof Function) {
+					if (item.options != field.originOption) {
+						field.options = item.options
+						this.asyncOptions.push(field)
+						field.originOption = item.options
+					}
+				} else {
+					field.options = item.options
+					this.asyncOptions.push(field)
+				}
 				if (item.options instanceof Function && item.options != field.originOption) {
 					field.options = item.options
 					this.asyncOptions.push(field)
@@ -461,11 +482,26 @@ export default class ElFormTable extends Vue {
 					this.asyncOptions.push(field)
 					field.originOption = true;
 				}
-				// this.asyncOptions.push(item)
 				// if (item.type == "check" && item.checkAll !== false) {
 				// 	this.$set(this.check, name, false);
 				// }
 			}
+			
+			// if (field.type == "select" && field.remote) {
+			// 	let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
+			// 	field.on["visible-change"] = function (visible) {
+			// 		originVisibleChangeEvent(visible)
+			// 		if (visible == false && field.options && field.options.length == 0) {
+			// 			field.props.remoteMethod.call(item, "")
+			// 		}
+			// 	}
+			// 	let originClearEvent = field.on.clear || (() => { })
+			// 	let self = this;
+			// 	field.on.clear = function () {
+			// 		originClearEvent()
+			// 		self.refreshOptions(name)
+			// 	}
+			// }
 			this.defaultValue[name] = field.value;
 			this.fields[name] = field
 		})
@@ -538,10 +574,6 @@ export default class ElFormTable extends Vue {
 					item.remoteMethod = () => {
 						transformOptions(remoteMethod, item.type != 'cascader').then((options) => {
 							item.options = options
-							// this.handleCheckedChange(item.name, this.value[item.name])
-							this.$nextTick(function () {
-								// this.FormT.clearValidate(item.name)
-							})
 						})
 					}
 					item.remoteMethod()

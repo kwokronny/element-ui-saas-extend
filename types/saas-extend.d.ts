@@ -43,6 +43,7 @@ export declare type ElFormAutoFieldType =
   | "date"
   | "dates"
   | "time"
+  | "timeselect"
   | "datetime"
   | "timerange"
   | "monthrange"
