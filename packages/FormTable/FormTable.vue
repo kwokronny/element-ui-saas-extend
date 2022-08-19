@@ -219,7 +219,15 @@ import { transformOptions } from "../util";
 import locale from "../../src/mixin/locale"
 import selectScroll from "../../src/mixin/selectScroll"
 import { ValidateCallback } from "element-ui/types/form";
-import { formatDate } from "element-ui/src/utils/date-util.js"
+import { toDate, formatDate } from "element-ui/src/utils/date-util.js"
+
+const DATE_FORMATTER = function (value, format) {
+	value = toDate(value);
+	if (!value) return '';
+	if (format === 'timestamp') return value.getTime();
+	else if (format === 'unix') return Math.floor(value.getTime() / 1000);
+	return formatDate(value, format);
+};
 
 @Component({
 	name: "ElFormTable",
@@ -253,7 +261,7 @@ export default class ElFormTable extends Vue {
 	 */
 	public getModel(): Record<string, any>[] {
 		for (let i = 0; i < this.value.length; i++) {
-			let model = Object.assign({}, this.value[i], this.defaultValue);
+			let model = this.value[i];
 			for (let name in this.fields) {
 				let field = this.fields[name]
 				if (field) {
@@ -270,23 +278,9 @@ export default class ElFormTable extends Vue {
 							}
 						}
 						let [sd, ed] = _value;
-						if (sd && ed && /date|time/g.test(field.type)) {
-							if (field.type == "daterange" && field.suffixTime == true) {
-								sd += " 00:00:00";
-								ed += " 23:59:59";
-							}
-							if (field.valueFormat) {
-								if (field.valueFormat == 'timestamp') {
-									sd = new Date(sd).valueOf();
-									ed = new Date(ed).valueOf();
-								} else if (field.valueFormat == 'unix') {
-									sd = Math.floor(new Date(sd).valueOf() / 1000);
-									ed = Math.floor(new Date(ed).valueOf() / 1000);
-								} else {
-									sd = formatDate(sd, field.valueFormat);
-									ed = formatDate(ed, field.valueFormat);
-								}
-							}
+						if (sd && ed && /date|time|month|year/g.test(field.type) && field.valueFormat) {
+							sd = DATE_FORMATTER(sd, field.valueFormat);
+							ed = DATE_FORMATTER(ed, field.valueFormat);
 						}
 						this.$set(model, sn, sd)
 						this.$set(model, en, ed)
@@ -295,8 +289,10 @@ export default class ElFormTable extends Vue {
 						if (value) {
 							model[name] = value;
 						}
+					// } else if (/date|datetime|month|year/g.test(field.type) && field.valueFormat) {
+					// 	model[name] = DATE_FORMATTER(model[name], field.valueFormat);
 					}
-					model[name] = model[name] === undefined ? this.defaultValue[name] : model[name]
+					this.$set(model, name, model[name] === undefined ? this.defaultValue[name] : model[name])
 				}
 			}
 		}
@@ -393,6 +389,7 @@ export default class ElFormTable extends Vue {
 				field = this.fields[name];
 			}
 			field.name = name;
+			field.label = item.label;
 			field.on = Object.assign(field.on || {}, item.on);
 			field.props = Object.assign(field.props || {}, omit(item, ["value", "addRules", "label", "labelTooltip", "width", "type", "on", "slot", "bindShow", "rangeName", "valueFormat", "suffixTime", "notSubmit", "required", "options"]))
 			field.type = item.type || "text"
@@ -425,28 +422,26 @@ export default class ElFormTable extends Vue {
 			// 根据字段 type 设置表单占位字符串
 			if (/range/g.test(item.type)) {
 				if (item.type == "numberrange") {
-					field.props.startPlaceholder = field.props.startPlaceholder || `${this.$t("formauto.min")}${item.label}`;
-					field.props.endPlaceholder = field.props.endPlaceholder || `${this.$t("formauto.max")}${item.label}`;
+					field.props.startPlaceholder = item.startPlaceholder || `${this.$t("formauto.min")}${item.label}`;
+					field.props.endPlaceholder = item.endPlaceholder || `${this.$t("formauto.max")}${item.label}`;
 				} else {
-					field.props.startPlaceholder = field.props.startPlaceholder || `${this.$t("formauto.start")}${item.label}`;
-					field.props.endPlaceholder = field.props.endPlaceholder || `${this.$t("formauto.end")}${item.label}`;
+					field.props.startPlaceholder = item.startPlaceholder || `${this.$t("formauto.start")}${item.label}`;
+					field.props.endPlaceholder = item.endPlaceholder || `${this.$t("formauto.end")}${item.label}`;
 				}
 			} if (/date|time|datetime|select|week|year|month|dates|cascader/g.test(item.type)) {
-				field.props.placeholder = field.props.placeholder || `${this.$t("formauto.pleaseSelect")}${item.label}`;
+				field.props.placeholder = item.placeholder || `${this.$t("formauto.pleaseSelect")}${item.label}`;
 			} else {
-				field.props.placeholder = field.props.placeholder || `${this.$t("formauto.pleaseInput")}${item.label}`;
+				field.props.placeholder = item.placeholder || `${this.$t("formauto.pleaseInput")}${item.label}`;
 			}
 
 			// 针对日期时间类型组件设置统一日期格式及显示格式
 			if (/datetime/g.test(item.type)) {
 				field.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
-				field.props.format = field.props.format || "yyyy-MM-dd HH:mm:ss";
 			} else if (/date/g.test(item.type)) {
 				if (item.type == "daterange" && item.suffixTime) {
 					field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
 				}
 				field.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
-				field.props.format = field.props.format || "yyyy-MM-dd";
 			} else if (/time/g.test(item.type)) {
 				field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
 			}
@@ -474,34 +469,28 @@ export default class ElFormTable extends Vue {
 					field.options = item.options
 					this.asyncOptions.push(field)
 				}
-				if (item.options instanceof Function && item.options != field.originOption) {
-					field.options = item.options
-					this.asyncOptions.push(field)
-					field.originOption = item.options
-				} else if (!field.originOption) {
-					this.asyncOptions.push(field)
-					field.originOption = true;
-				}
 				// if (item.type == "check" && item.checkAll !== false) {
 				// 	this.$set(this.check, name, false);
 				// }
 			}
-			
-			// if (field.type == "select" && field.remote) {
-			// 	let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
-			// 	field.on["visible-change"] = function (visible) {
-			// 		originVisibleChangeEvent(visible)
-			// 		if (visible == false && field.options && field.options.length == 0) {
-			// 			field.props.remoteMethod.call(item, "")
-			// 		}
-			// 	}
-			// 	let originClearEvent = field.on.clear || (() => { })
-			// 	let self = this;
-			// 	field.on.clear = function () {
-			// 		originClearEvent()
-			// 		self.refreshOptions(name)
-			// 	}
-			// }
+
+			if (field.type == "select" && field.remote) {
+				if (!field.on) {
+					field.on = {}
+				}
+				let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
+				field.on["visible-change"] = function (visible) {
+					originVisibleChangeEvent(visible)
+					field.remoteParams.query = "switch_select";
+					field.props.remoteMethod.call(field, "")
+				}
+				let originClearEvent = field.on.clear || (() => { })
+				field.on.clear = function () {
+					originClearEvent()
+					field.remoteParams.query = "clear";
+					field.props.remoteMethod.call(field, "")
+				}
+			}
 			this.defaultValue[name] = field.value;
 			this.fields[name] = field
 		})
@@ -553,22 +542,6 @@ export default class ElFormTable extends Vue {
 					};
 					item.props.remoteMethod = item.remoteMethod;
 					item.props.remoteMethod("");
-					if (!item.on) {
-						item.on = {}
-					}
-					let originVisibleChangeEvent = item.on["visible-change"] || (() => { })
-					item.on["visible-change"] = function (visible) {
-						originVisibleChangeEvent(visible)
-						item.remoteParams.query = "switch_select";
-						item.props.remoteMethod.call(item, "")
-					}
-					let originClearEvent = item.on.clear || (() => { })
-					let self = this;
-					item.on.clear = function () {
-						originClearEvent()
-						item.remoteParams.query = "clear";
-						item.props.remoteMethod.call(item, "")
-					}
 				} else if (item.options) {
 					let remoteMethod = item.options;
 					item.remoteMethod = () => {

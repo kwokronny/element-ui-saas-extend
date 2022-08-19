@@ -200,8 +200,15 @@ export default {
         daterange: {
           label: "日期范围",
           type: "daterange",
+          valueFormat: "unix",
           rangeName: ["startDate", "endDate"],
           suffixTime: true,
+          style: "width:100%",
+        },
+        date: {
+          label: "日期",
+          type: "date",
+          valueFormat: "unix",
           style: "width:100%",
         },
       },

@@ -226,6 +226,7 @@ export default {
           col: 12,
           label: "日期时间",
           type: "datetime",
+          valueFormat: "timestamp",
           required: true,
           style: "width:100%",
         },

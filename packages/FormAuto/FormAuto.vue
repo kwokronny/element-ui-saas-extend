@@ -104,15 +104,6 @@
 								v-on="item.on"
 							></el-time-picker>
 						</template>
-						<template v-else-if="/time(|range)/.test(item.type)">
-							<el-time-picker
-								:is-range="item.type == 'timerange'"
-								v-model="model[name]"
-								:readonly="item.disabled"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-time-picker>
-						</template>
 						<template v-else-if="/radio(|button)/.test(item.type)">
 							<el-radio-group v-model="model[name]" v-bind="item.props" v-on="item.on">
 								<component
@@ -237,7 +228,6 @@ const DATE_FORMATTER = function (value, format) {
 })
 export default class ElFormAuto extends Vue {
 
-	@Model("input", { type: Object, default: () => { return {} } }) model!: Record<string, any>;
 
 	@Ref("FormAuto") readonly FormAuto!: Form;
 	@Prop({ type: Boolean, default: false }) readonly inline!: boolean;
@@ -250,9 +240,16 @@ export default class ElFormAuto extends Vue {
 		data && (this.generateModel(), this.generateRule())
 	}
 
+	@Model("input", { type: Object, default: () => { return {} } }) value!: Record<string, any>;
+	@Watch("value", { immediate: true, deep: true })
+	private onValueChange(value: Record<string, any>) {
+		this.setModel(value)
+	}
+
+	private model: Record<string, any> = {};
 	@Watch("model", { immediate: true, deep: true })
 	private onModelChange() {
-		this.$emit("input", this.getModel());
+		this.$emit("input", this.getModel())
 	}
 
 	private asyncOptions: ElFormAutoField[] = [] //统一处理options
@@ -271,7 +268,7 @@ export default class ElFormAuto extends Vue {
 			field.label = item.label;
 			field.name = name;
 			field.on = Object.assign(field.on || {}, item.on);
-			field.props = Object.assign(field.props || {}, omit(item, ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "notSubmit", "required", "col", "options"]))
+			field.props = Object.assign(field.props || {}, omit(item, ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "notAll", "notSubmit", "required", "col", "options"]))
 			field.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
 			if (item.slot) {
@@ -316,14 +313,12 @@ export default class ElFormAuto extends Vue {
 
 			// 针对日期时间类型组件设置统一日期格式及显示格式
 			if (/datetime/g.test(item.type)) {
-				field.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
-				field.props.format = field.props.format || "yyyy-MM-dd HH:mm:ss";
+				field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss";
 			} else if (/date/g.test(item.type)) {
 				if (item.type == "daterange" && item.suffixTime) {
 					field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
 				}
-				field.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
-				field.props.format = field.props.format || "yyyy-MM-dd";
+				field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss";
 			} else if (/time/g.test(item.type)) {
 				field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
 			}
@@ -357,6 +352,9 @@ export default class ElFormAuto extends Vue {
 			}
 
 			if (field.type == "select" && field.remote) {
+				if (!field.on) {
+					field.on = {}
+				}
 				let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
 				field.on["visible-change"] = function (visible) {
 					originVisibleChangeEvent(visible)
@@ -375,7 +373,7 @@ export default class ElFormAuto extends Vue {
 			// this.$set(this.model, name, this.model[name] === undefined ? field.value : this.model[name]);
 			this.fields[name] = field;
 		})
-		this.getModel();
+		this.setModel();
 		this.$nextTick(function () {
 			this.FormAuto.clearValidate()
 		})
@@ -437,6 +435,7 @@ export default class ElFormAuto extends Vue {
 			this.asyncOptions = []
 		}
 	}
+
 	private generateRule(): void {
 		this.rules = {};
 		forEach(this.fields, (item, name) => {
@@ -489,7 +488,7 @@ export default class ElFormAuto extends Vue {
 	}
 
 	public getModel(): Record<string, any> {
-		let model = this.model
+		let model = cloneDeep(this.model)
 		for (let name in this.fields) {
 			let field = this.fields[name]
 			if (field) {
@@ -506,32 +505,66 @@ export default class ElFormAuto extends Vue {
 						}
 					}
 					let [sd, ed] = _value;
-					if (sd && ed && /date|time|month|year/g.test(field.type) && field.valueFormat) {
-						sd = DATE_FORMATTER(sd, field.valueFormat);
-						ed = DATE_FORMATTER(ed, field.valueFormat);
-					}
+					// if (sd && ed && /date|time|month|year/g.test(field.type) && field.valueFormat) {
+					// 	sd = DATE_FORMATTER(sd, field.valueFormat);
+					// 	ed = DATE_FORMATTER(ed, field.valueFormat);
+					// }
 					this.$set(this.model, sn, sd)
 					this.$set(this.model, en, ed)
-				} else if (field.type == "select" && field.remote) {
-					let value = this.selectEcho(name, model[name]);
-					if (value) {
-						model[name] = value;
-					}
-				} else if (field.type == "check" && !field.notAll) {
-					this.handleCheckedChange(name, model[name]);
+
+					// } else if (field.type == "check" && !field.notAll) {
+					// 	this.handleCheckedChange(name, model[name]);
 				} else if (/date|datetime|month|year/g.test(field.type) && field.valueFormat) {
 					model[name] = DATE_FORMATTER(model[name], field.valueFormat);
 				}
 				this.$set(this.model, name, model[name] === undefined ? this.defaultValue[name] : model[name])
 			}
 		}
-		return this.model
+		return model
 	}
 
-	public setModel(model: Record<string, any>): void {
-		for (let name in model) {
-			this.$set(this.model, name, model[name] || this.defaultValue[name])
+	public setModel(): void {
+		let model = this.value
+		for (let name in this.fields) {
+			let field = this.fields[name]
+			if (field) {
+				// if (field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
+				// 	let [sn, en] = field.rangeName;
+				// 	let _value = model[name];
+				// 	if (!_value) {
+				// 		if (field.type == "slider" && field.props && field.props.range == true) {
+				// 			_value = [0, 0]
+				// 		} else if (field.type == "numberrange") {
+				// 			_value = ["", ""]
+				// 		} else {
+				// 			_value = [null, null]
+				// 		}
+				// 	}
+				// let [sd, ed] = _value;
+				// if (sd && ed && /date|time|month|year/g.test(field.type) && field.valueFormat) {
+				// 	sd = DATE_FORMATTER(sd, field.valueFormat);
+				// 	ed = DATE_FORMATTER(ed, field.valueFormat);
+				// }
+				// this.$set(this.model, sn, sd)
+				// this.$set(this.model, en, ed)
+				// } else 
+				if (field.type == "select" && field.remote) {
+					let value = this.selectEcho(name, model[name]);
+					if (value) {
+						model[name] = value;
+					}
+				} else if (field.type == "check" && !field.notAll) {
+					this.handleCheckedChange(name, model[name]);
+					// } else if (/date|datetime|month|year/g.test(field.type) && field.valueFormat) {
+					// 	model[name] = DATE_FORMATTER(model[name], field.valueFormat);
+				}
+				this.$set(this.model, name, model[name] === undefined ? this.defaultValue[name] : model[name])
+			}
 		}
+		// return this.model
+		// for (let name in this.value) {
+		// this.$set(this.model, name, model[name] || this.defaultValue[name])
+		// }
 	}
 
 	public refreshOptions(fieldName: string) {
