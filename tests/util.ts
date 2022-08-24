@@ -2,14 +2,14 @@ import Vue from "vue";
 import Element from "element-ui";
 import ElementUISaaSExtend from "../packages/index";
 import { ComponentOptions } from "vue/types/umd";
-import numeral from "numeral"
-import dayjs from "dayjs"
+import numeral from "numeral";
+import dayjs from "dayjs";
 
 import "element-ui/lib/theme-chalk/index.css";
 import "../packages/theme-chalk/lib/index.css";
+import { isEqual, isObject, transform } from "lodash-es";
 Vue.use(Element);
 Vue.use(ElementUISaaSExtend);
-
 
 Vue.filter("numeral", function(value, format) {
   return numeral(value).format(format);
@@ -53,7 +53,10 @@ export const destroyVM = function(vm: Vue): void {
  * @param  {Boolean=false} mounted 是否添加到 DOM 上
  * @return {Object} vm
  */
-export const createVue = function(Compo: ComponentOptions<Vue> | string, mounted: boolean = false): Vue {
+export const createVue = function(
+  Compo: ComponentOptions<Vue> | string,
+  mounted: boolean = false
+): Vue {
   if (typeof Compo === "string") {
     Compo = { template: Compo };
   }
@@ -68,13 +71,39 @@ export const createVue = function(Compo: ComponentOptions<Vue> | string, mounted
  * @param  {Boolean=false} mounted  - 是否添加到 DOM 上
  * @return {Object} vm
  */
-export const createTest = function(Compo: ComponentOptions<Vue>, propsData: any = {}, mounted: boolean = false): Vue {
+export const createTest = function(
+  Compo: ComponentOptions<Vue>,
+  propsData: any = {},
+  mounted: boolean = false
+): Vue {
   if (propsData === true || propsData === false) {
     mounted = propsData;
     propsData = {};
   }
   const Ctor = Vue.extend(Compo);
-  return new Ctor({ propsData }).$mount(mounted === false ? undefined : createElm());
+  return new Ctor({ propsData }).$mount(
+    mounted === false ? undefined : createElm()
+  );
+};
+
+export const recordValid = function(
+  target: Record<string, any>,
+  template: Record<string, any>
+): string | boolean {
+  let hasError = false;
+  function changes(object, base) {
+    return transform(object, function(result: any, value, key) {
+      if (!isEqual(value, base[key])) {
+        hasError = true;
+        result[key] =
+          isObject(value) && isObject(base[key])
+            ? changes(value, base[key])
+            : value;
+      }
+    });
+  }
+  let diff = changes(target, template);
+  return hasError ? JSON.stringify(diff) : false;
 };
 
 /**
@@ -84,7 +113,11 @@ export const createTest = function(Compo: ComponentOptions<Vue>, propsData: any 
  * @param  {String} name
  * @param  {*} opts
  */
-export const triggerEvent = function(elm: HTMLElement, name: string, ...opts: any): HTMLElement {
+export const triggerEvent = function(
+  elm: HTMLElement,
+  name: string,
+  ...opts: any
+): HTMLElement {
   let eventName;
 
   if (/^mouse|click/.test(name)) {
@@ -107,7 +140,10 @@ export const triggerEvent = function(elm: HTMLElement, name: string, ...opts: an
  * @param {Element} elm
  * @param {*} opts
  */
-export const triggerClick = function(elm: HTMLElement, ...opts: any): HTMLElement {
+export const triggerClick = function(
+  elm: HTMLElement,
+  ...opts: any
+): HTMLElement {
   triggerEvent(elm, "mousedown", ...opts);
   triggerEvent(elm, "mouseup", ...opts);
 

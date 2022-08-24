@@ -22,8 +22,7 @@
 				<component
 					:is="inline ? 'span' : 'el-col'"
 					:span="item.col || 24"
-					v-if="!item.bindShow || item.bindShow(model)"
-					:class="{'el-form-item_hidden':item.type=='hidden'}"
+					v-if="(!item.bindShow || item.bindShow(model)) && item.type!='hidden'"
 					:key="`col_${name}`"
 				>
 					<el-form-item :prop="name" :label-width="item.labelWidth" :data-prop="name">
@@ -206,20 +205,22 @@
 <script lang="ts">
 import { Vue, Component, Prop, Ref, Watch, Model } from "vue-property-decorator";
 import { Form } from "element-ui";
-import { forEach, cloneDeep, uniqBy, omit } from "lodash-es";
+import { forEach, cloneDeep, uniqBy, omit, isEqual } from "lodash-es";
 import { ElAutoMixinOptions, ElAutoOption, ElFormAutoField } from "../../types/saas-extend"
 import { transformOptions } from "../util"
 import locale from "../../src/mixin/locale"
 import selectScroll from "../../src/mixin/selectScroll"
 import { ValidateCallback } from "element-ui/types/form";
-import { toDate, formatDate } from "element-ui/src/utils/date-util.js"
+import { toDate, } from "element-ui/src/utils/date-util.js"
 
-const DATE_FORMATTER = function (value, format) {
+const DATE_UNIX = function (value, format) {
+	if (typeof value == 'number' && `${value}`.length == 10) {
+		value = Math.floor(value * 1000)
+	}
 	value = toDate(value);
 	if (!value) return '';
 	if (format === 'timestamp') return value.getTime();
 	else if (format === 'unix') return Math.floor(value.getTime() / 1000);
-	return formatDate(value, format);
 };
 
 @Component({
@@ -265,10 +266,10 @@ export default class ElFormAuto extends Vue {
 			} else {
 				field = this.fields[name];
 			}
-			field.label = item.label;
 			field.name = name;
+			field.label = item.label;
 			field.on = Object.assign(field.on || {}, item.on);
-			field.props = Object.assign(field.props || {}, omit(item, ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "notAll", "notSubmit", "required", "col", "options"]))
+			field.props = Object.assign(field.props || {}, omit(item, ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "notSubmit", "required", "col", "options"]))
 			field.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
 			if (item.slot) {
@@ -312,15 +313,23 @@ export default class ElFormAuto extends Vue {
 			}
 
 			// 针对日期时间类型组件设置统一日期格式及显示格式
-			if (/datetime/g.test(item.type)) {
-				field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss";
-			} else if (/date/g.test(item.type)) {
-				if (item.type == "daterange" && item.suffixTime) {
-					field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
+			if (/(date(s|time|)|time|month|year)(range|)/.test(item.type)) {
+				field.props.valueFormat = field.valueFormat
+				if (field.valueFormat == "unix") {
+					field.props.valueFormat = "timestamp";
 				}
-				field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss";
-			} else if (/time/g.test(item.type)) {
-				field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
+				if (/datetime/g.test(item.type)) {
+					field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss";
+				} else if (/date/g.test(item.type)) {
+					if (item.type == "daterange" && item.suffixTime) {
+						field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss"
+						field.props.defaultTime = ["00:00:00", "23:59:59"]
+					} else {
+						field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd"
+					}
+				} else if (/time/g.test(item.type)) {
+					field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
+				}
 			}
 
 			if (this.$ELEMENT && this.$ELEMENT.pickerOptions && /date/g.test(item.type)) {
@@ -370,10 +379,10 @@ export default class ElFormAuto extends Vue {
 				}
 			}
 			this.defaultValue[name] = field.value;
-			// this.$set(this.model, name, this.model[name] === undefined ? field.value : this.model[name]);
+			this.$set(this.model, name, this.model[name] === undefined ? field.value : this.model[name]);
 			this.fields[name] = field;
 		})
-		this.setModel();
+		// this.setModel(this.defaultValue)
 		this.$nextTick(function () {
 			this.FormAuto.clearValidate()
 		})
@@ -488,13 +497,13 @@ export default class ElFormAuto extends Vue {
 	}
 
 	public getModel(): Record<string, any> {
-		let model = cloneDeep(this.model)
+		let value = {}
 		for (let name in this.fields) {
 			let field = this.fields[name]
-			if (field) {
+			if (field && !field.notSubmit) {
 				if (field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
 					let [sn, en] = field.rangeName;
-					let _value = model[name];
+					let _value: any[] = cloneDeep(this.model[name]);
 					if (!_value) {
 						if (field.type == "slider" && field.props && field.props.range == true) {
 							_value = [0, 0]
@@ -505,66 +514,70 @@ export default class ElFormAuto extends Vue {
 						}
 					}
 					let [sd, ed] = _value;
-					// if (sd && ed && /date|time|month|year/g.test(field.type) && field.valueFormat) {
-					// 	sd = DATE_FORMATTER(sd, field.valueFormat);
-					// 	ed = DATE_FORMATTER(ed, field.valueFormat);
-					// }
-					this.$set(this.model, sn, sd)
-					this.$set(this.model, en, ed)
-
-					// } else if (field.type == "check" && !field.notAll) {
-					// 	this.handleCheckedChange(name, model[name]);
-				} else if (/date|datetime|month|year/g.test(field.type) && field.valueFormat) {
-					model[name] = DATE_FORMATTER(model[name], field.valueFormat);
+					if (sd && ed && field.valueFormat == "unix" && /date|time|month|year/g.test(field.type)) {
+						sd = DATE_UNIX(sd, "unix");
+						ed = DATE_UNIX(ed, "unix");
+					}
+					value[name] = _value
+					value[sn] = sd;
+					value[en] = ed;
+				} else if (/(date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
+					if (Array.isArray(this.model[name])) {
+						value[name] = cloneDeep(this.model[name]).map(v => DATE_UNIX(v, "unix"))
+					} else {
+						value[name] = DATE_UNIX(this.model[name], "unix");
+					}
+				} else {
+					value[name] = this.model[name]
 				}
-				this.$set(this.model, name, model[name] === undefined ? this.defaultValue[name] : model[name])
 			}
 		}
-		return model
+		return value
 	}
 
-	public setModel(): void {
-		let model = this.value
+	public setModel(model: Record<string, any>): void {
 		for (let name in this.fields) {
 			let field = this.fields[name]
 			if (field) {
-				// if (field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
-				// 	let [sn, en] = field.rangeName;
-				// 	let _value = model[name];
-				// 	if (!_value) {
-				// 		if (field.type == "slider" && field.props && field.props.range == true) {
-				// 			_value = [0, 0]
-				// 		} else if (field.type == "numberrange") {
-				// 			_value = ["", ""]
-				// 		} else {
-				// 			_value = [null, null]
-				// 		}
-				// 	}
-				// let [sd, ed] = _value;
-				// if (sd && ed && /date|time|month|year/g.test(field.type) && field.valueFormat) {
-				// 	sd = DATE_FORMATTER(sd, field.valueFormat);
-				// 	ed = DATE_FORMATTER(ed, field.valueFormat);
-				// }
-				// this.$set(this.model, sn, sd)
-				// this.$set(this.model, en, ed)
-				// } else 
-				if (field.type == "select" && field.remote) {
-					let value = this.selectEcho(name, model[name]);
-					if (value) {
-						model[name] = value;
+				let value = model[name];
+				if (value !== undefined) {
+					if (field.type == "check" && !field.notAll) {
+						this.handleCheckedChange(name, value);
 					}
-				} else if (field.type == "check" && !field.notAll) {
-					this.handleCheckedChange(name, model[name]);
-					// } else if (/date|datetime|month|year/g.test(field.type) && field.valueFormat) {
-					// 	model[name] = DATE_FORMATTER(model[name], field.valueFormat);
+					if (field.rangeName && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
+						if (value && value.length == 2) {
+							let [sd, ed] = value
+							if (sd && ed && /date|datetime|month|year/g.test(field.type) && field.valueFormat == "unix") {
+								sd = DATE_UNIX(sd, "timestamp");
+								ed = DATE_UNIX(ed, "timestamp");
+							}
+							if (sd != this.model[name][0] || ed != this.model[name][1]) {
+								this.model[name] = [sd, ed];
+							}
+						}
+					} else if (field.type == "select" && field.remote) {
+						value = this.selectEcho(name, value);
+						if (value) {
+							this.model[name] = value;
+						}
+					} else if (/(date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
+						if (Array.isArray(value)) {
+							value = cloneDeep(value).map(v => DATE_UNIX(v, "timestamp"))
+							if (!isEqual(value, this.model[name])) {
+								this.model[name] = value;
+							}
+						} else {
+							value = DATE_UNIX(value, "timestamp");
+							if (value != this.model[name]) {
+								this.model[name] = value;
+							}
+						}
+					} else {
+						this.model[name] = value;
+					}
 				}
-				this.$set(this.model, name, model[name] === undefined ? this.defaultValue[name] : model[name])
 			}
 		}
-		// return this.model
-		// for (let name in this.value) {
-		// this.$set(this.model, name, model[name] || this.defaultValue[name])
-		// }
 	}
 
 	public refreshOptions(fieldName: string) {
@@ -654,18 +667,17 @@ export default class ElFormAuto extends Vue {
 	 * 重置表单
 	 */
 	public reset(): void {
-		this.generateModel();
-		for (let name in this.fields) {
-			let field = this.fields[name];
-			this.model[name] = this.defaultValue[name];
-			if (field.type == "check" && field.notAll) {
-				this.check[name] = false;
-			}
-		}
 		this.echoOptions = {}
 		if (this.FormAuto) {
 			this.$nextTick(function () {
 				this.FormAuto.resetFields();
+				for (let name in this.fields) {
+					let field = this.fields[name];
+					this.model[name] = this.defaultValue[name];
+					if (field.type == "check" && field.notAll) {
+						this.check[name] = false;
+					}
+				}
 			})
 		}
 	}

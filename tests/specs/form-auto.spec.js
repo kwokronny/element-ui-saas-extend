@@ -1,7 +1,14 @@
 import { expect } from "chai";
 import FormAuto from "../../packages/FormAuto";
 import userData from "../mock/user.json";
-import { createTest, createVue, triggerEvent, wait, waitImmediate } from "../util";
+import {
+  createTest,
+  recordValid,
+  createVue,
+  triggerEvent,
+  wait,
+  waitImmediate,
+} from "../util";
 
 describe("FormAuto", () => {
   let vm;
@@ -99,7 +106,7 @@ describe("FormAuto", () => {
     time: {
       label: "时间",
       type: "time",
-      value: "00:00:00",
+      value: "01:00:00",
     },
     timeRange: {
       label: "时间范围",
@@ -110,8 +117,9 @@ describe("FormAuto", () => {
     dateRange: {
       label: "日期范围",
       type: "daterange",
+      suffixTime: true,
       rangeName: ["startDate", "endDate"],
-      value: ["2018-01-01", "2018-01-02"],
+      value: ["2018-01-01 00:00:00", "2018-01-02 23:59:59"],
     },
     datetimeRange: {
       label: "日期时间范围",
@@ -171,8 +179,12 @@ describe("FormAuto", () => {
     );
     let form = vm.$el;
     expect(form.className.indexOf("el-form--inline") > -1).to.be.true;
-    expect(form.querySelector("span.el-form-auto-row").tagName).to.equal("SPAN");
-    expect(form.querySelectorAll("span.el-form-auto-row .el-col").length).to.equal(0);
+    expect(form.querySelector("span.el-form-auto-row").tagName).to.equal(
+      "SPAN"
+    );
+    expect(
+      form.querySelectorAll("span.el-form-auto-row .el-col").length
+    ).to.equal(0);
     done();
   });
 
@@ -226,7 +238,9 @@ describe("FormAuto", () => {
     let cols = row.querySelectorAll(".el-col");
     cols.forEach((col) => {
       expect(col.classList.contains("el-col-12")).to.be.true;
-      expect(col.style.paddingRight == "10px" && col.style.paddingLeft == "10px").to.be.true;
+      expect(
+        col.style.paddingRight == "10px" && col.style.paddingLeft == "10px"
+      ).to.be.true;
     });
     done();
   });
@@ -246,11 +260,15 @@ describe("FormAuto", () => {
       },
       true
     );
-    let icon = vm.$el.querySelector(".el-form-item__label .el-tooltip.el-icon-question");
+    let icon = vm.$el.querySelector(
+      ".el-form-item__label .el-tooltip.el-icon-question"
+    );
     expect(icon).to.exist;
     triggerEvent(icon, "mouseenter");
     await waitImmediate();
-    expect(document.getElementById(icon.getAttribute("aria-describedby")).textContent).to.equal("field help tip");
+    expect(
+      document.getElementById(icon.getAttribute("aria-describedby")).textContent
+    ).to.equal("field help tip");
     triggerEvent(icon, "mouseleave");
   });
   //#endregion
@@ -258,7 +276,7 @@ describe("FormAuto", () => {
   it("form default value and v-model valid", async () => {
     vm = createVue(
       {
-        template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+        template: `<el-card header="form default value and v-model valid"><el-form-auto :data="form" v-model="model" ref="form"></el-form-auto></el-card>`,
         data() {
           return {
             model: {},
@@ -268,36 +286,35 @@ describe("FormAuto", () => {
       },
       true
     );
-    expect(vm.model).to.deep.equal(
-      {
-        id: "1",
-        switch: true,
-        slider: 10,
-        text: "text",
-        password: "password",
-        textarea: "textarea",
-        date: "2018-01-01",
-        datetime: "2018-01-01 00:00:00",
-        dateRange: ["2018-01-01", "2018-01-02"],
-        startDate: "2018-01-01",
-        endDate: "2018-01-02",
-        datetimeRange: ["2018-01-01 00:00:00", "2018-01-02 00:00:00"],
-        startDT: "2018-01-01 00:00:00",
-        endDT: "2018-01-02 00:00:00",
-        time: "00:00:00",
-        timeRange: ["00:00:00", "01:00:00"],
-        startTime: "00:00:00",
-        endTime: "01:00:00",
-        radio: 3,
-        radiobutton: 2,
-        check: [2],
-        rate: 3,
-        select: 0,
-        selects: [3, 2],
-        cascader: [2, 6],
-      },
-      "field value is valid"
-    );
+
+    let error = recordValid(vm.model, {
+      id: "1",
+      switch: true,
+      slider: 10,
+      text: "text",
+      password: "password",
+      textarea: "textarea",
+      date: "2018-01-01",
+      datetime: "2018-01-01 00:00:00",
+      time: "01:00:00",
+      timeRange: ["00:00:00", "01:00:00"],
+      startTime: "00:00:00",
+      endTime: "01:00:00",
+      dateRange: ["2018-01-01 00:00:00", "2018-01-02 23:59:59"],
+      startDate: "2018-01-01 00:00:00",
+      endDate: "2018-01-02 23:59:59",
+      datetimeRange: ["2018-01-01 00:00:00", "2018-01-02 00:00:00"],
+      startDT: "2018-01-01 00:00:00",
+      endDT: "2018-01-02 00:00:00",
+      radio: 3,
+      radiobutton: 2,
+      check: [2],
+      rate: 3,
+      select: 0,
+      selects: [3, 2],
+      cascader: [2, 6],
+    });
+    expect(error).to.equal(false, `default value setting ${error}`);
     let data = {
       id: 45,
       switch: false,
@@ -305,9 +322,9 @@ describe("FormAuto", () => {
       text: "textchange",
       password: "passwordchange",
       textarea: "textareachange",
-      date: null,
+      date: "",
       datetime: "2019-02-01 10:00:00",
-      dateRange: ["2019-01-01", "2019-01-02"],
+      dateRange: ["2019-01-01 08:00:00", "2019-01-02 08:00:00"],
       datetimeRange: ["2019-02-01 10:00:00", "2019-05-02 08:00:00"],
       time: "06:00:00",
       timeRange: ["00:00:00", "05:00:00"],
@@ -321,7 +338,18 @@ describe("FormAuto", () => {
     };
     vm.model = Object.assign({}, data);
     await waitImmediate();
-    expect(vm.$refs.form.model).to.deep.equal(Object.assign({ startTime: "00:00:00", endTime: "05:00:00", startDate: "2019-01-01", endDate: "2019-01-02", startDT: "2019-02-01 10:00:00", endDT: "2019-05-02 08:00:00" }, data), "model value is valid");
+    error = recordValid(
+      vm.model,
+      Object.assign(data, {
+        startTime: "00:00:00",
+        endTime: "05:00:00",
+        startDate: "2019-01-01 08:00:00",
+        endDate: "2019-01-02 08:00:00",
+        startDT: "2019-02-01 10:00:00",
+        endDT: "2019-05-02 08:00:00",
+      })
+    );
+    expect(error).to.equal(false, `v-model setting ${error}`);
   });
 
   it("check reshow", async () => {
@@ -406,24 +434,108 @@ describe("FormAuto", () => {
     let fields = vm.$refs.form.fields;
     await waitImmediate();
     expect(fields.check.options).to.have.deep.members([
-      { label: "option0", value: "0", disabled: false, icon: false, children: [], props: {} },
-      { label: "option1", value: "1", disabled: false, icon: false, children: [], props: {} },
-      { label: "option2", value: "2", disabled: false, icon: false, children: [], props: {} },
+      {
+        label: "option0",
+        value: "0",
+        disabled: false,
+        icon: false,
+        children: [],
+        props: {},
+      },
+      {
+        label: "option1",
+        value: "1",
+        disabled: false,
+        icon: false,
+        children: [],
+        props: {},
+      },
+      {
+        label: "option2",
+        value: "2",
+        disabled: false,
+        icon: false,
+        children: [],
+        props: {},
+      },
     ]);
     expect(fields.select.options).to.have.deep.members([
-      { label: "option0", value: 0, disabled: true, icon: false, children: [], props: {} },
-      { label: "option1", value: 1, disabled: false, icon: false, children: [], props: {} },
-      { label: "option2", value: 2, disabled: false, icon: false, children: [], props: {} },
+      {
+        label: "option0",
+        value: 0,
+        disabled: true,
+        icon: false,
+        children: [],
+        props: {},
+      },
+      {
+        label: "option1",
+        value: 1,
+        disabled: false,
+        icon: false,
+        children: [],
+        props: {},
+      },
+      {
+        label: "option2",
+        value: 2,
+        disabled: false,
+        icon: false,
+        children: [],
+        props: {},
+      },
     ]);
     expect(fields.radio.options).to.have.deep.members([
-      { label: "option1", value: "option1", disabled: false, icon: false, children: [], props: {} },
-      { label: "option2", value: "option2", disabled: false, icon: false, children: [], props: {} },
-      { label: "option3", value: "option3", disabled: false, icon: false, children: [], props: {} },
+      {
+        label: "option1",
+        value: "option1",
+        disabled: false,
+        icon: false,
+        children: [],
+        props: {},
+      },
+      {
+        label: "option2",
+        value: "option2",
+        disabled: false,
+        icon: false,
+        children: [],
+        props: {},
+      },
+      {
+        label: "option3",
+        value: "option3",
+        disabled: false,
+        icon: false,
+        children: [],
+        props: {},
+      },
     ]);
     expect(fields.asyncSelect.options).to.have.deep.members([
-      { label: "option0", value: "0", disabled: false, icon: false, children: [], props: {} },
-      { label: "option1", value: "1", disabled: false, icon: false, children: [], props: {} },
-      { label: "option2", value: "2", disabled: false, icon: false, children: [], props: {} },
+      {
+        label: "option0",
+        value: "0",
+        disabled: false,
+        icon: false,
+        children: [],
+        props: {},
+      },
+      {
+        label: "option1",
+        value: "1",
+        disabled: false,
+        icon: false,
+        children: [],
+        props: {},
+      },
+      {
+        label: "option2",
+        value: "2",
+        disabled: false,
+        icon: false,
+        children: [],
+        props: {},
+      },
     ]);
   });
 
@@ -464,7 +576,9 @@ describe("FormAuto", () => {
     await wait(0);
     select.handleQueryChange("Antonette");
     await wait(350);
-    expect(vm.$refs.form.fields.remoteSelect.options[0].label).to.equal("Antonette");
+    expect(vm.$refs.form.fields.remoteSelect.options[0].label).to.equal(
+      "Antonette"
+    );
   });
 
   it("select remote scroll load", async () => {
@@ -500,8 +614,12 @@ describe("FormAuto", () => {
     );
     await waitImmediate();
     expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(10);
-    let $formItem = vm.$el.querySelector(".el-form-item[data-prop=remoteSelect]");
-    let dropDown = $formItem.querySelector(".el-select-dropdown .el-select-dropdown__wrap");
+    let $formItem = vm.$el.querySelector(
+      ".el-form-item[data-prop=remoteSelect]"
+    );
+    let dropDown = $formItem.querySelector(
+      ".el-select-dropdown .el-select-dropdown__wrap"
+    );
     $formItem.querySelector("input").click();
     await waitImmediate();
     dropDown.scrollTop = dropDown.clientHeight;
@@ -552,7 +670,9 @@ describe("FormAuto", () => {
     await wait(0);
     select.handleQueryChange("Antonette");
     await wait(250);
-    expect(vm.$refs.form.fields.remoteSelect.options[0].label).to.equal("Antonette");
+    expect(vm.$refs.form.fields.remoteSelect.options[0].label).to.equal(
+      "Antonette"
+    );
     select.$el.click();
     await wait(250);
     expect(vm.visiblePass).to.be.true;
@@ -604,20 +724,22 @@ describe("FormAuto", () => {
     select.handleQueryChange("Antonette");
     select.$el.click();
     await wait(250);
-    expect(vm.$refs.form.fields.remoteSelect.options[0].label).to.equal("Antonette");
+    expect(vm.$refs.form.fields.remoteSelect.options[0].label).to.equal(
+      "Antonette"
+    );
     select.hoverIndex = 0;
     select.selectOption(0);
     select.inputHovering = true;
     await wait(100);
-    vm.$el.querySelector(".el-form-item[data-prop=remoteSelect] .el-input__icon.el-icon-circle-close").click();
+    vm.$el
+      .querySelector(
+        ".el-form-item[data-prop=remoteSelect] .el-input__icon.el-icon-circle-close"
+      )
+      .click();
     await wait(250);
     expect(vm.clearPass).to.be.true;
     expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(10);
   });
-
-  it("type:date or time valueFormat",async ()=>{
-    
-  })
 
   it("method: reset", async () => {
     vm = createVue(
@@ -632,7 +754,7 @@ describe("FormAuto", () => {
       },
       true
     );
-    let data = {
+    vm.model = {
       id: 45,
       switch: false,
       slider: 23,
@@ -653,45 +775,43 @@ describe("FormAuto", () => {
       selects: [0, 2],
       cascader: [1, 4, 5],
     };
-    vm.model = Object.assign({}, data);
-    vm.$children[0].reset();
+    vm.$refs.form.reset();
     await waitImmediate();
-    expect(vm.model).to.deep.equal(
-      {
-        id: "1",
-        switch: true,
-        slider: 10,
-        text: "text",
-        password: "password",
-        textarea: "textarea",
-        date: "2018-01-01",
-        datetime: "2018-01-01 00:00:00",
-        dateRange: ["2018-01-01", "2018-01-02"],
-        startDate: "2018-01-01",
-        endDate: "2018-01-02",
-        datetimeRange: ["2018-01-01 00:00:00", "2018-01-02 00:00:00"],
-        startDT: "2018-01-01 00:00:00",
-        endDT: "2018-01-02 00:00:00",
-        time: "00:00:00",
-        timeRange: ["00:00:00", "01:00:00"],
-        startTime: "00:00:00",
-        endTime: "01:00:00",
-        radio: 3,
-        radiobutton: 2,
-        check: [2],
-        rate: 3,
-        select: 0,
-        selects: [3, 2],
-        cascader: [2, 6],
-      },
-      "field value is valid"
-    );
+    let error = recordValid(vm.model, {
+      id: "1",
+      switch: true,
+      slider: 10,
+      text: "text",
+      password: "password",
+      textarea: "textarea",
+      date: "2018-01-01",
+      datetime: "2018-01-01 00:00:00",
+      dateRange: ["2018-01-01 00:00:00", "2018-01-02 23:59:59"],
+      startDate: "2018-01-01 00:00:00",
+      endDate: "2018-01-02 23:59:59",
+      datetimeRange: ["2018-01-01 00:00:00", "2018-01-02 00:00:00"],
+      startDT: "2018-01-01 00:00:00",
+      endDT: "2018-01-02 00:00:00",
+      time: "01:00:00",
+      timeRange: ["00:00:00", "01:00:00"],
+      startTime: "00:00:00",
+      endTime: "01:00:00",
+      radio: 3,
+      radiobutton: 2,
+      check: [2],
+      rate: 3,
+      select: 0,
+      selects: [3, 2],
+      cascader: [2, 6],
+    });
+    expect(error).to.equal(false);
   });
 
   it("method: validate and validateField", async () => {
     let form = Object.assign({}, baseFormData);
     for (let key in form) {
       form[key].required = true;
+      delete form[key].value;
     }
     form["password"].addRules = [
       {
@@ -711,30 +831,13 @@ describe("FormAuto", () => {
       },
       true
     );
-    let data = {
-      id: 45,
-      slider: 0,
-      switch: false,
-      text: "",
-      password: "",
-      textarea: "",
-      date: null,
-      datetime: "",
-      dateRange: [],
-      datetimeRange: [],
-      time: "",
-      timeRange: ["00:00:00", "05:00:00"],
-      check: [],
-      rate: 0,
-      select: 0,
-      selects: [],
-      cascader: [],
-    };
     vm.model.password = "123456";
     vm.$refs.Form.validateField("password");
     await waitImmediate();
-    expect(vm.$el.querySelector(".el-form-item__error").textContent.trim()).to.equal("需要8位~16位以内，包含字母与数字的字符");
-    vm.model = Object.assign({}, data);
+    expect(
+      vm.$el.querySelector(".el-form-item__error").textContent.trim()
+    ).to.equal("需要8位~16位以内，包含字母与数字的字符");
+    vm.$refs.Form.reset();
     await waitImmediate();
     try {
       vm.$refs.Form.validate((valid) => {
@@ -743,8 +846,9 @@ describe("FormAuto", () => {
       await vm.$refs.Form.validate();
       expect(true).to.be.false;
     } catch (e) {
-      // console.log(vm.$el.querySelectorAll(".el-form-item__error"))
-      expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(11);
+      expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(
+        14
+      );
     }
   });
 
@@ -773,11 +877,25 @@ describe("FormAuto", () => {
       },
       true
     );
-    expect(vm.$el.querySelector(".default-slot").parentNode.className).to.equal("el-form-item__content");
-    expect(vm.$el.querySelector(".prepend-slot").nextElementSibling.classList.contains("el-form-auto-row")).to.be.true;
-    expect(vm.$el.querySelector(".append-slot").previousElementSibling.classList.contains("el-form-auto-row")).to.be.true;
-    expect(vm.$el.querySelector(".el-form-item[data-prop=input] span.input-slot")).to.exist;
-    expect(vm.$el.querySelector(".el-form-item[data-prop=input] span.input-slot").textContent).to.equal("input_test_text");
+    expect(vm.$el.querySelector(".default-slot").parentNode.className).to.equal(
+      "el-form-item__content"
+    );
+    expect(
+      vm.$el
+        .querySelector(".prepend-slot")
+        .nextElementSibling.classList.contains("el-form-auto-row")
+    ).to.be.true;
+    expect(
+      vm.$el
+        .querySelector(".append-slot")
+        .previousElementSibling.classList.contains("el-form-auto-row")
+    ).to.be.true;
+    expect(
+      vm.$el.querySelector(".el-form-item[data-prop=input] span.input-slot")
+    ).to.exist;
+    expect(
+      vm.$el.querySelector(".el-form-item[data-prop=input] span.input-slot")
+        .textContent
+    ).to.equal("input_test_text");
   });
 });
-

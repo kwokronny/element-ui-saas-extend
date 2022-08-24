@@ -1,6 +1,12 @@
 import { expect } from "chai";
 import NumberRange from "../../packages/NumberRange";
-import { createTest, createVue, triggerEvent, waitImmediate } from "../util";
+import {
+  createTest,
+  createVue,
+  triggerClick,
+  triggerEvent,
+  waitImmediate,
+} from "../util";
 
 describe("NumberRange", () => {
   it("props:size", async () => {
@@ -119,7 +125,9 @@ describe("NumberRange", () => {
     let inputs = vm.$el.querySelectorAll("input");
     expect(inputs[0].getAttribute("placeholder")).to.equal("最小金额");
     expect(inputs[1].getAttribute("placeholder")).to.equal("最大金额");
-    expect(vm.$el.querySelector(".el-range-separator").textContent).to.equal("至");
+    expect(vm.$el.querySelector(".el-range-separator").textContent).to.equal(
+      "至"
+    );
   });
 
   it("all event", async () => {
@@ -129,7 +137,7 @@ describe("NumberRange", () => {
     let spyBlur = sinon.spy();
     let vm = createVue(
       {
-        template: `<el-number-range @focus="spyFocus" @clear="spyClear" @blur="spyBlur" @change="spyChange"></el-number-range>`,
+        template: `<el-card header="all event"><el-number-range @focus="spyFocus" @clear="spyClear" @blur="spyBlur" @change="spyChange"></el-number-range></el-card>`,
         methods: {
           spyChange,
           spyFocus,
@@ -141,17 +149,20 @@ describe("NumberRange", () => {
     );
     let inputs = vm.$el.querySelectorAll("input");
     inputs.forEach(async (input) => {
+      // triggerClick(input);
       input.focus();
-      input.value = "10";
+      input.value = 10;
       triggerEvent(input, "change");
       input.blur();
     });
     let clearDOM = vm.$el.querySelector(".el-range__close-icon");
-    clearDOM.click();
-    expect(spyChange.calledTwice).to.be.true;
-    expect(spyFocus.calledTwice).to.be.true;
-    expect(spyBlur.calledTwice).to.be.true;
-    expect(spyClear.calledOnce).to.be.true;
+    console.log(clearDOM)
+    triggerClick(clearDOM);
+    await waitImmediate();
+    expect(spyChange.calledTwice).to.be.equal(true, "change event");
+    expect(spyFocus.calledTwice).to.be.equal(true, "focus event");
+    expect(spyBlur.calledTwice).to.be.equal(true, "blur event");
+    expect(spyClear.calledOnce).to.be.equal(true, "clear event");
   });
 
   it("el-form relative disabled", (done) => {

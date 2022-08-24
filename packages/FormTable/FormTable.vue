@@ -24,7 +24,7 @@
 				<slot name="option_append"></slot>
 			</slot>
 		</div>
-		<el-table :data="value" v-bind="$attrs" v-on="$listeners">
+		<el-table :data="model" v-bind="$attrs" v-on="$listeners">
 			<el-table-column
 				v-for="(item,name) in fields"
 				:prop="name"
@@ -213,20 +213,23 @@
 <script lang="ts">
 import { Form } from "element-ui";
 import { Vue, Component, Prop, Model, Watch, Ref } from "vue-property-decorator";
-import { cloneDeep, forEach, omit, uniqBy } from "lodash-es";
+import { cloneDeep, forEach, isEqual, omit, uniqBy } from "lodash-es";
 import { ElAutoMixinOptions, ElAutoOption, ElFormAutoField } from "types/saas-extend";
 import { transformOptions } from "../util";
 import locale from "../../src/mixin/locale"
 import selectScroll from "../../src/mixin/selectScroll"
 import { ValidateCallback } from "element-ui/types/form";
-import { toDate, formatDate } from "element-ui/src/utils/date-util.js"
+import { toDate } from "element-ui/src/utils/date-util.js"
 
-const DATE_FORMATTER = function (value, format) {
+
+const DATE_UNIX = function (value, format) {
+	if (typeof value == 'number' && `${value}`.length == 10) {
+		value = Math.floor(value * 1000)
+	}
 	value = toDate(value);
 	if (!value) return '';
 	if (format === 'timestamp') return value.getTime();
 	else if (format === 'unix') return Math.floor(value.getTime() / 1000);
-	return formatDate(value, format);
 };
 
 @Component({
@@ -248,11 +251,17 @@ export default class ElFormTable extends Vue {
 	@Prop({ type: Number, default: -1 }) itemLimit!: number;
 	@Prop({ type: String, default: "" }) addText!: string;
 	@Prop({ type: Boolean, default: false }) showClear!: boolean;
-	@Model("input", { type: Array, default: () => [] }) value!: Record<string, any>[];
 
+	@Model("input", { type: Array, default: () => [] }) value!: Record<string, any>[];
 	@Watch("value", { immediate: true, deep: true })
 	private onValueChange(model: Record<string, any>[]) {
-		this.$emit("input", this.getModel());
+		this.setModel(model)
+	}
+
+	private model: Record<string, any>[] = [];
+	@Watch("model", { immediate: true, deep: true })
+	private onModelChange() {
+		this.$emit("input", this.getModel())
 	}
 
 	/**
@@ -260,14 +269,15 @@ export default class ElFormTable extends Vue {
 	 * 获取表单所有参数
 	 */
 	public getModel(): Record<string, any>[] {
-		for (let i = 0; i < this.value.length; i++) {
-			let model = this.value[i];
+		let value: Record<string, any>[] = []
+		for (let i = 0; i < this.model.length; i++) {
+			let row: Record<string, any> = {}
 			for (let name in this.fields) {
 				let field = this.fields[name]
-				if (field) {
+				if (field && !field.notSubmit) {
 					if (field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
 						let [sn, en] = field.rangeName;
-						let _value = model[name];
+						let _value = cloneDeep(this.model[i][name]);
 						if (!_value) {
 							if (field.type == "slider" && field.props && field.props.range == true) {
 								_value = [0, 0]
@@ -278,25 +288,72 @@ export default class ElFormTable extends Vue {
 							}
 						}
 						let [sd, ed] = _value;
-						if (sd && ed && /date|time|month|year/g.test(field.type) && field.valueFormat) {
-							sd = DATE_FORMATTER(sd, field.valueFormat);
-							ed = DATE_FORMATTER(ed, field.valueFormat);
+						if (sd && ed && /date|time|month|year/g.test(field.type) && field.valueFormat == "unix") {
+							sd = DATE_UNIX(sd, field.valueFormat);
+							ed = DATE_UNIX(ed, field.valueFormat);
 						}
-						this.$set(model, sn, sd)
-						this.$set(model, en, ed)
-					} else if (field.type == "select" && field.remote) {
-						let value = this.selectEcho(name, i, model[name]);
-						if (value) {
-							model[name] = value;
+						row[name] = _value
+						row[sn] = sd;
+						row[en] = ed;
+					} else if (/(date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
+						if (Array.isArray(this.model[i][name])) {
+							row[name] = cloneDeep(this.model[i][name]).map(v => DATE_UNIX(v, "unix"))
+						} else {
+							row[name] = DATE_UNIX(this.model[i][name], "unix");
 						}
-					// } else if (/date|datetime|month|year/g.test(field.type) && field.valueFormat) {
-					// 	model[name] = DATE_FORMATTER(model[name], field.valueFormat);
+					} else {
+						row[name] = this.model[i][name]
 					}
-					this.$set(model, name, model[name] === undefined ? this.defaultValue[name] : model[name])
+				}
+			}
+			value.push(row);
+		}
+		return value
+	}
+
+	public setModel(model: Record<string, any>): void {
+		for (let i = 0; i < model.length; i++) {
+			if (!this.model[i]) this.addItem()
+			for (let name in this.fields) {
+				let field = this.fields[name]
+				if (field) {
+					let value = model[i][name];
+					if (value !== undefined) {
+						if (field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
+							if (value && value.length == 2) {
+								let [sd, ed] = value
+								if (sd && ed && /date|datetime|month|year/g.test(field.type) && field.valueFormat == "unix") {
+									sd = DATE_UNIX(sd, "timestamp");
+									ed = DATE_UNIX(ed, "timestamp");
+								}
+								if (sd != this.model[i][name][0] || ed != this.model[i][name][1]) {
+									this.model[i][name] = [sd, ed];
+								}
+							}
+						} else if (field.type == "select" && field.remote) {
+							value = this.selectEcho(name, i, value);
+							if (value) {
+								this.model[i][name] = value;
+							}
+						} else if (/(date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
+							if (Array.isArray(value)) {
+								value = cloneDeep(value).map(v => DATE_UNIX(v, "timestamp"))
+								if (!isEqual(value, this.model[i][name])) {
+									this.model[i][name] = value;
+								}
+							} else {
+								value = DATE_UNIX(value, "timestamp");
+								if (value != this.model[i][name]) {
+									this.model[i][name] = value;
+								}
+							}
+						} else {
+							this.model[i][name] = value;
+						}
+					}
 				}
 			}
 		}
-		return this.value
 	}
 
 	/**
@@ -319,7 +376,10 @@ export default class ElFormTable extends Vue {
 
 	private selectEcho(name: string, idx: number, options: any): any {
 		if (!this.echoOptions[name]) {
-			this.echoOptions[name] = { [idx]: [] }
+			this.echoOptions[name] = {}
+		}
+		if (!this.echoOptions[name][idx]) {
+			this.echoOptions[name][idx] = []
 		}
 		if (Array.isArray(options) && options.length > 0) {
 			let echoOptions = this.echoOptions[name][idx];
@@ -338,10 +398,10 @@ export default class ElFormTable extends Vue {
 			}
 			return isChange ? values : false
 		} else if (options && options.label && options.value) {
-			this.echoOptions[name][idx] = [Object.assign({}, options)];
+			this.echoOptions[name][idx].push(Object.assign({}, options));
 			return options.value;
 		} else {
-			return false;
+			return options;
 		}
 	}
 
@@ -363,16 +423,17 @@ export default class ElFormTable extends Vue {
 	}
 
 	public addItem(model?: Record<string, any>) {
-		if (this.itemLimit > -1 && this.itemLimit < this.value.length) return;
-		this.value.push(Object.assign(model || {}, cloneDeep(this.defaultValue)));
+		if (this.itemLimit > -1 && this.itemLimit < this.model.length) return;
+		// this.$set(this.model, this.model.length, Object.assign(model || {}, cloneDeep(this.defaultValue)))
+		this.model.push(Object.assign(cloneDeep(this.defaultValue), model || {}));
 	}
 
 	public removeItem(index: number) {
-		this.value.splice(index, 1);
+		this.model.splice(index, 1);
 	}
 
 	public clear() {
-		this.value.splice(0, this.value.length);
+		this.model.splice(0, this.model.length);
 	}
 
 	private defaultValue: Record<string, any> = {};
@@ -435,15 +496,23 @@ export default class ElFormTable extends Vue {
 			}
 
 			// 针对日期时间类型组件设置统一日期格式及显示格式
-			if (/datetime/g.test(item.type)) {
-				field.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
-			} else if (/date/g.test(item.type)) {
-				if (item.type == "daterange" && item.suffixTime) {
-					field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
+			if (/(date(s|time|)|time|month|year)(range|)/.test(item.type)) {
+				field.props.valueFormat = field.valueFormat
+				if (field.valueFormat == "unix") {
+					field.props.valueFormat = "timestamp";
 				}
-				field.props.valueFormat = "yyyy-MM-dd HH:mm:ss";
-			} else if (/time/g.test(item.type)) {
-				field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
+				if (/datetime/g.test(item.type)) {
+					field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss";
+				} else if (/date/g.test(item.type)) {
+					if (item.type == "daterange" && item.suffixTime) {
+						field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss"
+						field.props.defaultTime = ["00:00:00", "23:59:59"]
+					} else {
+						field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd"
+					}
+				} else if (/time/g.test(item.type)) {
+					field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
+				}
 			}
 
 			if (this.$ELEMENT && this.$ELEMENT.pickerOptions && /date/g.test(field.type)) {
@@ -494,7 +563,7 @@ export default class ElFormTable extends Vue {
 			this.defaultValue[name] = field.value;
 			this.fields[name] = field
 		})
-		if (this.value.length < 1) {
+		if (this.model.length < 1) {
 			this.addItem()
 		}
 		this.asyncOptionsRequest()

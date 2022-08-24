@@ -14,7 +14,14 @@ pageClass: component-page
 
 ```vue
 <template>
-  <el-form-auto :data="form" :show-message="false" ref="FilterForm" v-model="model" label-width="70px" inline>
+  <el-form-auto
+    :data="form"
+    :show-message="false"
+    ref="FilterForm"
+    v-model="model"
+    label-width="70px"
+    inline
+  >
     <el-button type="primary" round @click="getList">筛选</el-button>
   </el-form-auto>
 </template>
@@ -67,14 +74,16 @@ export default {
           label: "选择框",
           type: "select",
           options: () => {
-            return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
-              return res.data.map((item) => {
-                return {
-                  label: item.username,
-                  value: item.id,
-                };
+            return axios
+              .get("https://jsonplaceholder.typicode.com/users")
+              .then((res) => {
+                return res.data.map((item) => {
+                  return {
+                    label: item.username,
+                    value: item.id,
+                  };
+                });
               });
-            });
           },
         },
       },
@@ -151,7 +160,6 @@ export default {
           type: "switch",
           activeValue: 1,
           inactiveValue: 0,
-          // value: 0,
           required: true,
         },
         slider: {
@@ -164,7 +172,6 @@ export default {
         text: {
           col: 12,
           label: "文本框",
-          // disabled: true,
           labelTooltip: "labelTooltip属性可以在标签旁增加图标，提示字段含义",
           type: "text",
           required: true,
@@ -218,15 +225,23 @@ export default {
         date: {
           col: 12,
           label: "日期",
-          type: "week",
+          type: "date",
           required: true,
+          style: "width:100%",
+        },
+        dates: {
+          col: 12,
+          label: "多个日期",
+          type: "dates",
+          required: true,
+          valueFormat: "unix",
           style: "width:100%",
         },
         datetime: {
           col: 12,
           label: "日期时间",
           type: "datetime",
-          valueFormat: "timestamp",
+          valueFormat: "unix",
           required: true,
           style: "width:100%",
         },
@@ -234,12 +249,13 @@ export default {
           col: 12,
           label: "时间",
           type: "time",
+          valueFormat: "unix",
           required: true,
           style: "width:100%",
         },
         timeSelect: {
           col: 12,
-          label: "时间",
+          label: "时间选择",
           type: "timeselect",
           required: true,
           style: "width:100%",
@@ -257,11 +273,14 @@ export default {
           col: 12,
           label: "日期范围",
           type: "daterange",
+          valueFormat: "unix",
+          suffixTime: true,
           rangeName: ["startDate", "endDate"],
           required: true,
           style: "width:100%",
+          value: ["2018-01-01 00:00:00", "2018-01-02 23:59:59"],
         },
-        datetimeRange: {
+        dateTimeRange: {
           label: "日期时间范围",
           type: "datetimerange",
           rangeName: ["startDT", "endDT"],
@@ -321,7 +340,6 @@ export default {
     //   cascader: [2, 6],
     //   rate: 5,
     // };
-    this.model.text = "sdfs";
   },
   methods: {
     reset() {
@@ -345,6 +363,7 @@ export default {
         dateRange: ["2021-01-10", "2021-01-13"],
         datetimeRange: ["2021-01-10 11:11:00", "2021-01-12 13:11:00"],
         time: "11:11:00",
+        timeSelect: "11:00",
         timeRange: ["11:11:00", "22:12:00"],
         select: 0,
         check: ["1"],
@@ -462,7 +481,9 @@ export declare interface ElAutoOption {
   children?: ElAutoOption[];
   props?: Record<string, any>;
 }
-export declare type ElAutoMixinOptions = Record<string | number, string | number> | Array<string | ElAutoOption>;
+export declare type ElAutoMixinOptions =
+  | Record<string | number, string | number>
+  | Array<string | ElAutoOption>;
 ```
 
 ::: demo
@@ -470,8 +491,11 @@ export declare type ElAutoMixinOptions = Record<string | number, string | number
 ```vue
 <template>
   <el-form-auto :data="form" ref="EditForm" v-model="model" label-width="90px">
-    <el-button type="primary" @click="editOptionReshow">远程搜索选项回显</el-button>
+    <el-button type="primary" @click="editOptionReshow"
+      >远程搜索选项回显</el-button
+    >
     <el-button type="primary" @click="reset">重置</el-button>
+    {{ model }}
   </el-form-auto>
 </template>
 <script>
@@ -487,14 +511,16 @@ export default {
           style: "width:100%",
           filterable: true,
           options: () => {
-            return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
-              return res.data.map((item) => {
-                return {
-                  label: item.username,
-                  value: item.id,
-                };
+            return axios
+              .get("https://jsonplaceholder.typicode.com/users")
+              .then((res) => {
+                return res.data.map((item) => {
+                  return {
+                    label: item.username,
+                    value: item.id,
+                  };
+                });
               });
-            });
           },
           on: {
             change: () => {
@@ -522,17 +548,21 @@ export default {
           loadScroll: true,
           remote: true,
           options: (query, page) => {
-            return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
-              return res.data.reduce((prev, curr) => {
-                if (item.username.indexOf(query) > -1) {
-                  prev.push({
-                    label: item.username,
-                    value: item.id * page,
-                  });
-                }
-                return prev;
-              }, []);
-            });
+            return axios
+              .get("https://jsonplaceholder.typicode.com/users", {
+                params: { query, page },
+              })
+              .then((res) => {
+                return res.data.reduce((prev, curr) => {
+                  if (item.username.indexOf(query) > -1) {
+                    prev.push({
+                      label: item.username,
+                      value: item.id * page,
+                    });
+                  }
+                  return prev;
+                }, []);
+              });
           },
         },
         cascader: {
@@ -566,9 +596,11 @@ export default {
           type: "cascader",
           props: { label: "name", value: "id", children: "childrenList" },
           options: () => {
-            return axios.get("/element-ui-saas-extend/json/cascader.json").then((res) => {
-              return res.data;
-            });
+            return axios
+              .get("/element-ui-saas-extend/json/cascader.json")
+              .then((res) => {
+                return res.data;
+              });
           },
           style: "width:100%",
         },
@@ -597,14 +629,16 @@ export default {
           type: "check",
           required: true,
           options: () => {
-            return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
-              return res.data.map((item) => {
-                return {
-                  label: item.username,
-                  value: item.id,
-                };
+            return axios
+              .get("https://jsonplaceholder.typicode.com/users")
+              .then((res) => {
+                return res.data.map((item) => {
+                  return {
+                    label: item.username,
+                    value: item.id,
+                  };
+                });
               });
-            });
           },
         },
       },
@@ -612,14 +646,14 @@ export default {
   },
   methods: {
     editOptionReshow() {
-      this.$refs["EditForm"].setModel({
+      this.model = {
         asyncSelect: 1,
         remote: { label: "回显测试", value: "echo_show" },
         remoteMult: [
           { label: "测试", value: "123" },
           { label: "测试2", value: "1233" },
         ],
-      });
+      };
       // this.model.asyncSelect = 1;
       // this.model.remote = { label: "回显测试", value: "123" };
       // this.model.remoteMult = [
@@ -629,17 +663,21 @@ export default {
     },
     getOptions(query, page) {
       // console.log(this.model.asyncSelect);
-      return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query: this.model.asyncSelect, page } }).then((res) => {
-        if (page > 2) return [];
-        return res.data
-          .filter((item) => item.username.indexOf(query) > -1)
-          .map((item) => {
-            return {
-              label: item.username,
-              value: item.id * page,
-            };
-          });
-      });
+      return axios
+        .get("https://jsonplaceholder.typicode.com/users", {
+          params: { query: this.model.asyncSelect, page },
+        })
+        .then((res) => {
+          if (page > 2) return [];
+          return res.data
+            .filter((item) => item.username.indexOf(query) > -1)
+            .map((item) => {
+              return {
+                label: item.username,
+                value: item.id * page,
+              };
+            });
+        });
     },
     reset() {
       this.$refs["EditForm"].reset();
@@ -672,8 +710,14 @@ export default {
 <template>
   <el-form-auto :data="form" v-model="model" label-width="90px">
     <template slot-scope="{ item, model, name }" slot="upload">
-      <el-upload action="https://jsonplaceholder.typicode.com/upload" v-model="model[name]" :on-success="uploadSuccess">
-        <el-button round type="primary" icon="el-icon-upload">上传文件</el-button>
+      <el-upload
+        action="https://jsonplaceholder.typicode.com/upload"
+        v-model="model[name]"
+        :on-success="uploadSuccess"
+      >
+        <el-button round type="primary" icon="el-icon-upload"
+          >上传文件</el-button
+        >
       </el-upload>
     </template>
     <template slot-scope="{ item, model, name }" slot="color">
