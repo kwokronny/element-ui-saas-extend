@@ -41,14 +41,16 @@ export default {
           remote: true,
           clearable: false,
           options: () => {
-            return axios.get("https://jsonplaceholder.typicode.com/users").then((res) => {
-              return res.data.map((item) => {
-                return {
-                  label: item.username,
-                  value: item.id,
-                };
+            return axios
+              .get("https://jsonplaceholder.typicode.com/users")
+              .then((res) => {
+                return res.data.map((item) => {
+                  return {
+                    label: item.username,
+                    value: item.id,
+                  };
+                });
               });
-            });
           },
         },
         employeeNum: {
@@ -86,8 +88,11 @@ export default {
   },
   methods: {
     setModel() {
-      this.model = [{ binduserId: 3 }, { binduserId: { label: "test", value: "a3" } }];
-    }
+      this.$refs.EditForm.setModel([
+        { binduserId: 3 },
+        { binduserId: { label: "test", value: "a3" } },
+      ]);
+    },
   },
 };
 </script>
@@ -113,7 +118,9 @@ export declare interface ElAutoOption {
   children?: ElAutoOption[];
   props?: Record<string, any>;
 }
-export declare type ElAutoMixinOptions = Record<string | number, string | number> | Array<string | ElAutoOption>;
+export declare type ElAutoMixinOptions =
+  | Record<string | number, string | number>
+  | Array<string | ElAutoOption>;
 ```
 
 ::: demo
@@ -139,17 +146,25 @@ export default {
           required: true,
           remote: true,
           options: (query, page) => {
-            return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
-              return res.data.reduce((arr, item) => {
-                if (self.model.findIndex((model) => model.remote == item.id * page) < 0) {
-                  arr.push({
-                    label: item.username,
-                    value: item.id * page,
-                  });
-                }
-                return arr;
-              }, []);
-            });
+            return axios
+              .get("https://jsonplaceholder.typicode.com/users", {
+                params: { query, page },
+              })
+              .then((res) => {
+                return res.data.reduce((arr, item) => {
+                  if (
+                    self.model.findIndex(
+                      (model) => model.remote == item.id * page
+                    ) < 0
+                  ) {
+                    arr.push({
+                      label: item.username,
+                      value: item.id * page,
+                    });
+                  }
+                  return arr;
+                }, []);
+              });
           },
         },
         remoteMult: {
@@ -161,16 +176,20 @@ export default {
           loadScroll: true,
           remote: true,
           options: (query, page) => {
-            return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
-              return res.data
-                .filter((item) => item.username.indexOf(query) > -1)
-                .map((item) => {
-                  return {
-                    label: item.username,
-                    value: item.id * page,
-                  };
-                });
-            });
+            return axios
+              .get("https://jsonplaceholder.typicode.com/users", {
+                params: { query, page },
+              })
+              .then((res) => {
+                return res.data
+                  .filter((item) => item.username.indexOf(query) > -1)
+                  .map((item) => {
+                    return {
+                      label: item.username,
+                      value: item.id * page,
+                    };
+                  });
+              });
           },
         },
         cascader: {
@@ -242,9 +261,15 @@ export default {
     <el-form-table :data="form" ref="EditForm" v-model="model">
       <el-tag slot="option_perpend" type="primary">首部操作区前置</el-tag>
       <el-tag slot="option_append" type="primary">首部操作区追加</el-tag>
-      <template slot-scope="{ item, row, name }" slot="customSlot"> 自定义 <el-input v-model="row[name]" style="width:100px"></el-input> </template>
+      <template slot-scope="{ item, row, name }" slot="customSlot">
+        自定义 <el-input v-model="row[name]" style="width:100px"></el-input>
+      </template>
       <template slot="table_body_option" slot-scope="{ row, index }">
-        <el-button icon="el-icon-remove" tpye="text" @click="remove(index)"></el-button>
+        <el-button
+          icon="el-icon-remove"
+          tpye="text"
+          @click="remove(index)"
+        ></el-button>
       </template>
     </el-form-table>
     <div style="margin-top: 20px">表单字段: {{ model }}</div>
@@ -265,16 +290,20 @@ export default {
           loadScroll: true,
           remote: true,
           options: (query, page) => {
-            return axios.get("https://jsonplaceholder.typicode.com/users", { params: { query, page } }).then((res) => {
-              return res.data
-                .filter((item) => item.username.indexOf(query) > -1)
-                .map((item) => {
-                  return {
-                    label: item.username,
-                    value: item.id * page,
-                  };
-                });
-            });
+            return axios
+              .get("https://jsonplaceholder.typicode.com/users", {
+                params: { query, page },
+              })
+              .then((res) => {
+                return res.data
+                  .filter((item) => item.username.indexOf(query) > -1)
+                  .map((item) => {
+                    return {
+                      label: item.username,
+                      value: item.id * page,
+                    };
+                  });
+              });
           },
         },
         customSlot: {
@@ -289,9 +318,11 @@ export default {
           type: "cascader",
           props: { label: "name", value: "id", children: "childrenList" },
           options: () => {
-            return axios.get("/element-ui-saas-extend/json/cascader.json").then((res) => {
-              return res.data;
-            });
+            return axios
+              .get("/element-ui-saas-extend/json/cascader.json")
+              .then((res) => {
+                return res.data;
+              });
           },
           style: "width:100%",
         },

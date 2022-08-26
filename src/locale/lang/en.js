@@ -12,6 +12,7 @@ export default {
     pleaseSelect: "Please select ",
     selectLoading: "Loading...",
     checkAll: "Check all",
+    selectAll: "All",
     min: "Min ",
     max: "Max ",
     start: "Start ",

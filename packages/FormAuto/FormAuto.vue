@@ -151,6 +151,7 @@
 								v-bind="item.props"
 								v-on="item.on"
 							>
+								<el-option v-if="!item.props.multiple && (item.allOption || allOption)" value :label="$t('formauto.selectAll')"></el-option>
 								<template v-if="Array.isArray(item.options)">
 									<el-option
 										v-for="(option,key) in selectOptions(item,name)"
@@ -233,6 +234,7 @@ export default class ElFormAuto extends Vue {
 	@Ref("FormAuto") readonly FormAuto!: Form;
 	@Prop({ type: Boolean, default: false }) readonly inline!: boolean;
 	@Prop({ type: Boolean, default: false }) readonly labelHidden!: boolean;
+	@Prop({ type: Boolean, default: false }) readonly allOption!: boolean;
 	@Prop(Object) readonly data!: Record<string, ElFormAutoField>;
 	@Prop({ type: Number, default: 15 }) readonly gutter!: number;
 
@@ -269,7 +271,7 @@ export default class ElFormAuto extends Vue {
 			field.name = name;
 			field.label = item.label;
 			field.on = Object.assign(field.on || {}, item.on);
-			field.props = Object.assign(field.props || {}, omit(item, ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "notSubmit", "required", "col", "options"]))
+			field.props = Object.assign(field.props || {}, omit(item, ["value", "addRules", "label", "labelHidden", "allOption", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "notSubmit", "required", "col", "options"]))
 			field.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
 			if (item.slot) {

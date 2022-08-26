@@ -18,6 +18,7 @@ pageClass: component-page
     :data="form"
     :show-message="false"
     ref="FilterForm"
+    all-option
     v-model="model"
     label-width="70px"
     inline

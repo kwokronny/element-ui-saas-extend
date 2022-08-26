@@ -12,7 +12,7 @@
 				v-model="filter"
 				@keyup.enter.native="search(1)"
 				:data="searchForm"
-				v-bind="Object.assign({inline:true},searchProps)"
+				v-bind="Object.assign({inline:true,allOption:true},searchProps)"
 			>
 				<template v-for="search in searchForm" :slot="search.slot" slot-scope="{item,model,name}">
 					<slot

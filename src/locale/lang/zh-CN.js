@@ -12,6 +12,7 @@ export default {
     pleaseSelect: "请选择",
     selectLoading: "加载中...",
     checkAll: "全选",
+    selectAll: "全部",
     min: "最小",
     max: "最大",
     start: "起始",

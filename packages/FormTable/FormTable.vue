@@ -253,10 +253,6 @@ export default class ElFormTable extends Vue {
 	@Prop({ type: Boolean, default: false }) showClear!: boolean;
 
 	@Model("input", { type: Array, default: () => [] }) value!: Record<string, any>[];
-	@Watch("value", { immediate: true, deep: true })
-	private onValueChange(model: Record<string, any>[]) {
-		this.setModel(model)
-	}
 
 	private model: Record<string, any>[] = [];
 	@Watch("model", { immediate: true, deep: true })
@@ -312,8 +308,9 @@ export default class ElFormTable extends Vue {
 	}
 
 	public setModel(model: Record<string, any>): void {
+		let newModel: Record<string, any>[] = []
 		for (let i = 0; i < model.length; i++) {
-			if (!this.model[i]) this.addItem()
+			let row: Record<string, any> = cloneDeep(this.defaultValue)
 			for (let name in this.fields) {
 				let field = this.fields[name]
 				if (field) {
@@ -326,34 +323,28 @@ export default class ElFormTable extends Vue {
 									sd = DATE_UNIX(sd, "timestamp");
 									ed = DATE_UNIX(ed, "timestamp");
 								}
-								if (sd != this.model[i][name][0] || ed != this.model[i][name][1]) {
-									this.model[i][name] = [sd, ed];
-								}
+								row[name] = [sd, ed];
 							}
 						} else if (field.type == "select" && field.remote) {
 							value = this.selectEcho(name, i, value);
-							if (value) {
-								this.model[i][name] = value;
-							}
+							row[name] = value;
 						} else if (/(date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
 							if (Array.isArray(value)) {
 								value = cloneDeep(value).map(v => DATE_UNIX(v, "timestamp"))
-								if (!isEqual(value, this.model[i][name])) {
-									this.model[i][name] = value;
-								}
+								row[name] = value;
 							} else {
 								value = DATE_UNIX(value, "timestamp");
-								if (value != this.model[i][name]) {
-									this.model[i][name] = value;
-								}
+								row[name] = value;
 							}
 						} else {
-							this.model[i][name] = value;
+							row[name] = value;
 						}
 					}
 				}
 			}
+			newModel.push(row)
 		}
+		this.model = newModel
 	}
 
 	/**
@@ -384,19 +375,19 @@ export default class ElFormTable extends Vue {
 		if (Array.isArray(options) && options.length > 0) {
 			let echoOptions = this.echoOptions[name][idx];
 			let values: string[] = []
-			let isChange = false;
+			// let isChange = false;
 			for (let i = 0; i < options.length; i++) {
 				if (options[i] && options[i].label && options[i].value) {
 					if (!echoOptions.find((option: Record<string, string>) => option.value == options[i].value)) {
 						echoOptions.push(Object.assign({}, options[i]))
 					}
-					isChange = true;
+					// isChange = true;
 					values.push(options[i].value);
 				} else {
 					values.push(options[i]);
 				}
 			}
-			return isChange ? values : false
+			return values
 		} else if (options && options.label && options.value) {
 			this.echoOptions[name][idx].push(Object.assign({}, options));
 			return options.value;
@@ -413,11 +404,11 @@ export default class ElFormTable extends Vue {
 		return field.options
 	}
 
-	private handleSelectChange(field: ElFormAutoField, name: string, idx: number, value: string | number) {
-		let option = (field.options as ElAutoOption[]).find((option: ElAutoOption) => option.value == value);
+	private handleSelectChange(field: ElFormAutoField, name: string, idx: number, value: Array<string | number> | string | number) {
+		let option = (field.options as ElAutoOption[]).filter((option: ElAutoOption) => (Array.isArray(value) && value.includes(option.value)) || value == option.value);
 		option && this.selectEcho(name, idx, option);
 		if (field.on && field.on.change) {
-			field.on.change(value);
+			return field.on.change(value);
 		}
 		return value
 	}

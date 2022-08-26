@@ -24,7 +24,9 @@ export declare interface ElAutoOption {
   props?: Record<string, any>;
 }
 
-export declare type ElAutoMixinOptions = Record<string | number, string | number> | Array<string | ElAutoOption>;
+export declare type ElAutoMixinOptions =
+  | Record<string | number, string | number>
+  | Array<string | ElAutoOption>;
 
 export declare type ElFormAutoFieldType =
   | "hidden"
@@ -123,13 +125,16 @@ export declare interface ElFormAutoField {
    * 选项数组，支持Promise
    * @default false
    */
-  options?: ElAutoMixinOptions | ((query?: string, page?: number = 1) => Promise<ElAutoMixinOptions>);
+  options?:
+    | ElAutoMixinOptions
+    | ((query?: string, page?: number = 1) => Promise<ElAutoMixinOptions>);
   /**
    * type为check时
    * 去除 全选复选框
    * @default true
    */
-   notAll?: boolean;
+  notAll?: boolean;
+  allOption?: boolean;
   /**
    * type为select时
    * select可多选
@@ -172,16 +177,26 @@ export declare interface ElFormAutoField {
 export interface SaaSInstallationOptions extends InstallationOptions {
   pickerOptions?: Record<"date" | "range", DatePickerOptions>;
   tablePage?: {
-    buttonStyle?: Record<"plain" | "round" | "size" | "style" | "class", string | boolean>;
+    buttonStyle?: Record<
+      "plain" | "round" | "size" | "style" | "class",
+      string | boolean
+    >;
     pageLayout?: string;
   };
 }
 
-export function install(vue: typeof Vue, options: SaaSInstallationOptions): void;
+export function install(
+  vue: typeof Vue,
+  options: SaaSInstallationOptions
+): void;
 
 declare module "vue/types/vue" {
   interface Vue {
     $ELEMENT?: SaaSInstallationOptions;
-    dispatch: (componentName: string, eventName: string, params?: any[]) => void;
+    dispatch: (
+      componentName: string,
+      eventName: string,
+      params?: any[]
+    ) => void;
   }
 }
