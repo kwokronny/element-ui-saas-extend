@@ -448,7 +448,6 @@ export default class ElFormTable extends Vue {
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
 			if (item.slot) {
 				field.slot = typeof item.slot == "boolean" ? name : item.slot;
-				field.type = "text"
 			}
 			// 根据字段 type 设置 model 默认值
 			if (

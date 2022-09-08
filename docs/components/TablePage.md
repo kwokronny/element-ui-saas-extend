@@ -45,7 +45,7 @@ export default {
               type: "select",
               clearable: false,
               options: accountTypeOption,
-              notChangeRefresh: true,
+              allOption: false,
               value: "0",
               style: "width: 100px",
               on: {

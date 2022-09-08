@@ -151,7 +151,7 @@
 								v-bind="item.props"
 								v-on="item.on"
 							>
-								<el-option v-if="!item.props.multiple && (item.allOption || allOption)" value :label="$t('formauto.selectAll')"></el-option>
+								<el-option v-if="!item.props.multiple && (item.allOption!==false && allOption===true || item.allOption===true)" value :label="$t('formauto.selectAll')"></el-option>
 								<template v-if="Array.isArray(item.options)">
 									<el-option
 										v-for="(option,key) in selectOptions(item,name)"
@@ -276,7 +276,6 @@ export default class ElFormAuto extends Vue {
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
 			if (item.slot) {
 				field.slot = typeof item.slot == "boolean" ? name : item.slot;
-				field.type = "text"
 			}
 			// 根据字段 type 设置 model 默认值
 			if (
