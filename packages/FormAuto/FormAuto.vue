@@ -151,7 +151,11 @@
 								v-bind="item.props"
 								v-on="item.on"
 							>
-								<el-option v-if="!item.props.multiple && (item.allOption!==false && allOption===true || item.allOption===true)" value :label="$t('formauto.selectAll')"></el-option>
+								<el-option
+									v-if="!item.props.multiple && (item.allOption!==false && allOption===true || item.allOption===true)"
+									value
+									:label="$t('formauto.selectAll')"
+								></el-option>
 								<template v-if="Array.isArray(item.options)">
 									<el-option
 										v-for="(option,key) in selectOptions(item,name)"
@@ -385,7 +389,7 @@ export default class ElFormAuto extends Vue {
 		})
 		// this.setModel(this.defaultValue)
 		this.$nextTick(function () {
-			this.FormAuto.clearValidate()
+			this.FormAuto && this.FormAuto.clearValidate()
 		})
 		this.asyncOptionsRequest()
 	}

@@ -10,6 +10,7 @@
 			<slot name="prepend">
 				<slot name="option_perpend"></slot>
 				<el-button
+					v-if="!noAdd"
 					@click="addItem()"
 					icon="el-icon-plus"
 					:disabled="itemLimit>-1 && value.length >= itemLimit"
@@ -25,119 +26,93 @@
 			</slot>
 		</div>
 		<el-table :data="model" v-bind="$attrs" v-on="$listeners">
-			<el-table-column
-				v-for="(item,name) in fields"
-				:prop="name"
-				:label="item.label"
-				:width="item.width"
-				:resizable="false"
-				:key="name"
-			>
-				<template slot="header" slot-scope="scope">
-					{{scope.column.label || " "}}
-					<el-tooltip v-if="item.labelTooltip" :content="item.labelTooltip">
-						<i class="el-icon-question"></i>
-					</el-tooltip>
-				</template>
-				<template slot-scope="{ row, $index }">
-					<el-form-item :prop="`model.${$index}.${name}`" :rules="rules[name]">
-						<slot
-							v-if="item.slot"
-							:name="item.slot"
-							v-bind:item="item"
-							v-bind:row="row"
-							v-bind:name="name"
-							v-bind:index="$index"
-						></slot>
-						<template v-else-if="'component'==item.type">
-							<component :is="item.component" v-bind="item.props" v-on="item.on"></component>
-						</template>
-						<template v-else-if="'plain'==item.type">
-							<div v-bind="item.props">{{ row[name] || '-'}}</div>
-						</template>
-						<template v-else-if="/text|password|textarea/g.test(item.type)">
-							<el-input
-								:name="name"
-								v-model="row[name]"
-								:type="item.type"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-input>
-						</template>
-						<template v-else-if="item.type=='numberrange'">
-							<el-number-range v-model="row[name]" v-bind="item.props" v-on="item.on"></el-number-range>
-						</template>
-						<template v-else-if="item.type == 'number'">
-							<el-input-number
-								v-model="row[name]"
-								:readonly="item.disabled"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-input-number>
-						</template>
-						<template v-else-if="item.type == 'slider'">
-							<el-slider v-model="row[name]" :disabled="item.disabled" v-bind="item.props" v-on="item.on"></el-slider>
-						</template>
-						<template v-else-if="item.type == 'switch'">
-							<el-switch v-model="row[name]" :disabled="item.disabled" v-bind="item.props" v-on="item.on"></el-switch>
-						</template>
-						<template v-else-if="/(year|month|week|date(s|time|))(range|)/.test(item.type)">
-							<el-date-picker
-								v-model="row[name]"
-								:type="item.type"
-								:readonly="item.disabled"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-date-picker>
-						</template>
-						<template v-else-if="/time(select|range|)/.test(item.type)">
-							<el-time-select
-								v-if="item.type == 'timeselect'"
-								v-model="row[name]"
-								:readonly="item.disabled"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-time-select>
-							<el-time-picker
-								v-else
-								:is-range="item.type == 'timerange'"
-								v-model="row[name]"
-								:readonly="item.disabled"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-time-picker>
-						</template>
-						<template v-else-if="/radio(|button)/.test(item.type)">
-							<el-radio-group v-model="row[name]" v-bind="item.props" v-on="item.on">
-								<component
-									:is="item.type=='radio'?'el-radio':'el-radio-button'"
-									v-for="(option, key) in item.options"
-									:key="`${name}_${key}`"
-									:label="option.value"
-									:disabled="item.disabled || option.disabled"
-								>
-									<i v-if="option.icon" :class="option.icon"></i>
-									<span>{{ option.label }}</span>
-								</component>
-							</el-radio-group>
-						</template>
-						<template v-else-if="item.type == 'check'">
-							<!-- <el-checkbox
-								v-if="!item.notAll"
-								:indeterminate="check[name] == 2"
-								v-model="check[name]"
-								style="margin-right: 30px"
-								@change="checkAll(name)"
-							>{{$t("formauto.checkAll")}}</el-checkbox>-->
-							<!-- @change="handleCheckedChange(name,$event)" -->
-							<el-checkbox-group
-								v-model="row[name]"
-								style="display: inline"
-								v-bind="item.props"
-								v-on="item.on"
-							>
-								<template v-if="Array.isArray(item.options)">
-									<el-checkbox
+			<template v-for="(item,name) in fields">
+				<el-table-column
+					v-if="item.type!='hidden'"
+					:prop="name"
+					:label="item.label"
+					:width="item.width"
+					:resizable="false"
+					:key="name"
+				>
+					<template slot="header" slot-scope="scope">
+						{{scope.column.label || " "}}
+						<el-tooltip v-if="item.labelTooltip" :content="item.labelTooltip">
+							<i class="el-icon-question"></i>
+						</el-tooltip>
+					</template>
+					<template slot-scope="{ row, $index }">
+						<el-form-item :prop="`model.${$index}.${name}`" :rules="rules[name]">
+							<slot
+								v-if="item.slot"
+								:name="item.slot"
+								v-bind:item="item"
+								v-bind:row="row"
+								v-bind:name="name"
+								v-bind:index="$index"
+							></slot>
+							<template v-else-if="'component'==item.type">
+								<component :is="item.component" v-bind="item.props" v-on="item.on"></component>
+							</template>
+							<template v-else-if="'plain'==item.type">
+								<div v-bind="item.props">{{ row[name] || '-'}}</div>
+							</template>
+							<template v-else-if="/text|password|textarea/g.test(item.type)">
+								<el-input
+									:name="name"
+									v-model="row[name]"
+									:type="item.type"
+									v-bind="item.props"
+									v-on="item.on"
+								></el-input>
+							</template>
+							<template v-else-if="item.type=='numberrange'">
+								<el-number-range v-model="row[name]" v-bind="item.props" v-on="item.on"></el-number-range>
+							</template>
+							<template v-else-if="item.type == 'number'">
+								<el-input-number
+									v-model="row[name]"
+									:readonly="item.disabled"
+									v-bind="item.props"
+									v-on="item.on"
+								></el-input-number>
+							</template>
+							<template v-else-if="item.type == 'slider'">
+								<el-slider v-model="row[name]" :disabled="item.disabled" v-bind="item.props" v-on="item.on"></el-slider>
+							</template>
+							<template v-else-if="item.type == 'switch'">
+								<el-switch v-model="row[name]" :disabled="item.disabled" v-bind="item.props" v-on="item.on"></el-switch>
+							</template>
+							<template v-else-if="/(year|month|week|date(s|time|))(range|)/.test(item.type)">
+								<el-date-picker
+									v-model="row[name]"
+									:type="item.type"
+									:readonly="item.disabled"
+									v-bind="item.props"
+									v-on="item.on"
+								></el-date-picker>
+							</template>
+							<template v-else-if="/time(select|range|)/.test(item.type)">
+								<el-time-select
+									v-if="item.type == 'timeselect'"
+									v-model="row[name]"
+									:readonly="item.disabled"
+									v-bind="item.props"
+									v-on="item.on"
+								></el-time-select>
+								<el-time-picker
+									v-else
+									:is-range="item.type == 'timerange'"
+									v-model="row[name]"
+									:readonly="item.disabled"
+									v-bind="item.props"
+									v-on="item.on"
+								></el-time-picker>
+							</template>
+							<template v-else-if="/radio(|button)/.test(item.type)">
+								<el-radio-group v-model="row[name]" v-bind="item.props" v-on="item.on">
+									<component
+										:is="item.type=='radio'?'el-radio':'el-radio-button'"
 										v-for="(option, key) in item.options"
 										:key="`${name}_${key}`"
 										:label="option.value"
@@ -145,61 +120,89 @@
 									>
 										<i v-if="option.icon" :class="option.icon"></i>
 										<span>{{ option.label }}</span>
-									</el-checkbox>
-								</template>
-							</el-checkbox-group>
-						</template>
-						<template v-else-if="item.type=='select'">
-							<el-select
-								v-model="row[name]"
-								v-select-scroll="item.loadScroll && item.props?item.props.remoteMethod:null"
-								v-bind="item.props"
-								v-on="item.on"
-								@change="handleSelectChange(item,name,$index,$event)"
-							>
-								<template v-if="Array.isArray(item.options)">
+									</component>
+								</el-radio-group>
+							</template>
+							<template v-else-if="item.type == 'check'">
+								<!-- <el-checkbox
+								v-if="!item.notAll"
+								:indeterminate="check[name] == 2"
+								v-model="check[name]"
+								style="margin-right: 30px"
+								@change="checkAll(name)"
+								>{{$t("formauto.checkAll")}}</el-checkbox>-->
+								<!-- @change="handleCheckedChange(name,$event)" -->
+								<el-checkbox-group
+									v-model="row[name]"
+									style="display: inline"
+									v-bind="item.props"
+									v-on="item.on"
+								>
+									<template v-if="Array.isArray(item.options)">
+										<el-checkbox
+											v-for="(option, key) in item.options"
+											:key="`${name}_${key}`"
+											:label="option.value"
+											:disabled="item.disabled || option.disabled"
+										>
+											<i v-if="option.icon" :class="option.icon"></i>
+											<span>{{ option.label }}</span>
+										</el-checkbox>
+									</template>
+								</el-checkbox-group>
+							</template>
+							<template v-else-if="item.type=='select'">
+								<el-select
+									v-model="row[name]"
+									v-select-scroll="item.loadScroll && item.props?item.props.remoteMethod:null"
+									v-bind="item.props"
+									v-on="item.on"
+									@change="handleSelectChange(item,name,$index,$event)"
+								>
+									<template v-if="Array.isArray(item.options)">
+										<el-option
+											v-for="(option,key) in selectOptions(item,name,$index)"
+											:key="`${name}_${key}`"
+											:label="option.label"
+											:value="option.value"
+											:disabled="option.disabled"
+										>
+											<i v-if="option.icon" :class="option.icon"></i>
+											<span>{{ option.label }}</span>
+										</el-option>
+									</template>
 									<el-option
-										v-for="(option,key) in selectOptions(item,name,$index)"
-										:key="`${name}_${key}`"
-										:label="option.label"
-										:value="option.value"
-										:disabled="option.disabled"
-									>
-										<i v-if="option.icon" :class="option.icon"></i>
-										<span>{{ option.label }}</span>
-									</el-option>
-								</template>
-								<el-option
-									disabled
-									v-if="item.remoteParams && item.remoteParams.optionLoading"
-									value="el-formauto-option-loading"
-									:label="$t('formauto.selectLoading')"
-								>{{$t('formauto.selectLoading')}}</el-option>
-							</el-select>
-						</template>
-						<template v-else-if="item.type == 'cascader'">
-							<el-cascader
-								v-if="Array.isArray(item.options)"
-								v-model="row[name]"
-								:options="item.options"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-cascader>
-						</template>
-						<template v-else-if="item.type == 'rate'">
-							<el-rate
-								v-model="row[name]"
-								:style="{ marginTop: '8px' }"
-								:disabled="item.disabled"
-								show-score
-								v-bind="item.props"
-								v-on="item.on"
-							></el-rate>
-						</template>
-					</el-form-item>
-				</template>
-			</el-table-column>
-			<el-table-column prop="options" label width="80" fixed="right">
+										disabled
+										v-if="item.remoteParams && item.remoteParams.optionLoading"
+										value="el-formauto-option-loading"
+										:label="$t('formauto.selectLoading')"
+									>{{$t('formauto.selectLoading')}}</el-option>
+								</el-select>
+							</template>
+							<template v-else-if="item.type == 'cascader'">
+								<el-cascader
+									v-if="Array.isArray(item.options)"
+									v-model="row[name]"
+									:options="item.options"
+									v-bind="item.props"
+									v-on="item.on"
+								></el-cascader>
+							</template>
+							<template v-else-if="item.type == 'rate'">
+								<el-rate
+									v-model="row[name]"
+									:style="{ marginTop: '8px' }"
+									:disabled="item.disabled"
+									show-score
+									v-bind="item.props"
+									v-on="item.on"
+								></el-rate>
+							</template>
+						</el-form-item>
+					</template>
+				</el-table-column>
+			</template>
+			<el-table-column v-if="!noOptionCol" prop="options" label width="80" fixed="right">
 				<template slot-scope="{row, $index }">
 					<slot name="table_body_option" v-bind:row="row" v-bind:index="$index">
 						<el-button type="text" @click="removeItem($index)">{{$t("formtable.remove")}}</el-button>
@@ -251,6 +254,8 @@ export default class ElFormTable extends Vue {
 	@Prop({ type: Number, default: -1 }) itemLimit!: number;
 	@Prop({ type: String, default: "" }) addText!: string;
 	@Prop({ type: Boolean, default: false }) showClear!: boolean;
+	@Prop({ type: Boolean, default: false }) noOptionCol!: boolean;
+	@Prop({ type: Boolean, default: false }) noAdd!: boolean;
 
 	@Model("input", { type: Array, default: () => [] }) value!: Record<string, any>[];
 

@@ -128,7 +128,11 @@ export declare type ElAutoMixinOptions =
 ```vue
 <template>
   <div>
-    <el-form-table :data="form" ref="EditForm" v-model="model"> </el-form-table>
+    <el-form-table :data="form" ref="EditForm" v-model="model"> 
+    <tempalte slot="daterange" slot-scope="{item,row,name}">
+      <el-date-picker :type="item.type" v-model="row[name]" v-bind="item.props"></el-date-picker>
+    </tempalte>
+    </el-form-table>
     <div style="margin-top: 20px">表单字段: {{ model }}</div>
   </div>
 </template>
@@ -139,6 +143,9 @@ export default {
     return {
       model: [],
       form: {
+        id:{
+          type:"hidden"
+        },
         remote: {
           label: "远程搜索(选过不可再选)",
           type: "select",
@@ -223,6 +230,7 @@ export default {
           rangeName: ["startDate", "endDate"],
           suffixTime: true,
           style: "width:100%",
+          slot: true,
         },
         date: {
           label: "日期",

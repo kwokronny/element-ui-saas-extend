@@ -375,7 +375,7 @@ export default class ElTablePage extends Vue {
 	public resetSearch(): void {
 		this.SearchForm.reset();
 		this.$nextTick(function () {
-			this.search();
+			this.search(1);
 		})
 	}
 
