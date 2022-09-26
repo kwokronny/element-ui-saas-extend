@@ -137,7 +137,12 @@ describe("NumberRange", () => {
     let spyBlur = sinon.spy();
     let vm = createVue(
       {
-        template: `<el-card header="all event"><el-number-range @focus="spyFocus" @clear="spyClear" @blur="spyBlur" @change="spyChange"></el-number-range></el-card>`,
+        template: `<el-card header="all event"><el-number-range v-model="range" @focus="spyFocus" @clear="spyClear" @blur="spyBlur" @change="spyChange"></el-number-range></el-card>`,
+        data() {
+          return {
+            range: [],
+          };
+        },
         methods: {
           spyChange,
           spyFocus,
@@ -155,10 +160,11 @@ describe("NumberRange", () => {
       triggerEvent(input, "change");
       input.blur();
     });
+    console.log(vm.range);
     let clearDOM = vm.$el.querySelector(".el-range__close-icon");
-    console.log(clearDOM)
     triggerClick(clearDOM);
     await waitImmediate();
+    console.log(vm.range);
     expect(spyChange.calledTwice).to.be.equal(true, "change event");
     expect(spyFocus.calledTwice).to.be.equal(true, "focus event");
     expect(spyBlur.calledTwice).to.be.equal(true, "blur event");

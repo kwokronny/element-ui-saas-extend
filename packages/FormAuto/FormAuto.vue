@@ -274,6 +274,8 @@ export default class ElFormAuto extends Vue {
 			}
 			field.name = name;
 			field.label = item.label;
+			field.required = item.required || false;
+			field.addRules = item.addRules || [];
 			field.on = Object.assign(field.on || {}, item.on);
 			field.props = Object.assign(field.props || {}, omit(item, ["value", "addRules", "label", "labelHidden", "allOption", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "notSubmit", "required", "col", "options"]))
 			field.type = item.type || "text"
@@ -436,14 +438,14 @@ export default class ElFormAuto extends Vue {
 					item.props.remoteMethod = item.remoteMethod;
 					item.props.remoteMethod("");
 				} else if (item.options) {
-					let remoteMethod = item.options;
-					item.remoteMethod = () => {
-						transformOptions(remoteMethod, item.type != 'cascader').then((options) => {
-							item.options = options
-							this.handleCheckedChange(item.name, this.model[item.name])
-						})
-					}
-					item.remoteMethod()
+					// let remoteMethod = item.options;
+					// item.remoteMethod = () => {
+					transformOptions(item.options, item.type != 'cascader').then((options) => {
+						item.options = options
+						this.handleCheckedChange(item.name, this.model[item.name])
+					})
+					// }
+					// item.remoteMethod()
 				}
 			})
 			this.asyncOptions = []
@@ -587,9 +589,9 @@ export default class ElFormAuto extends Vue {
 
 	public refreshOptions(fieldName: string) {
 		let field = this.fields[fieldName];
-		if (field && field.props.remoteMethod) {
+		if (field && field.remoteMethod) {
 			field.remoteParams.query = "refresh";
-			field.props.remoteMethod("");
+			field.remoteMethod("");
 			// this.echoOptions[fieldName] = [];
 		}
 	}

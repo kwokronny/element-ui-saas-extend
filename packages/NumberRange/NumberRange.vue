@@ -154,7 +154,7 @@ export default class ElNumberRange extends Vue {
 		this.$emit("blur")
 	}
 
-	@Prop({ type: Boolean, default: true }) clearable!: string
+	@Prop({ type: Boolean, default: true }) clearable!: boolean
 	@Prop({ type: String, default: "el-icon-circle-close" }) clearIcon!: string
 
 	private showClose: boolean = false;

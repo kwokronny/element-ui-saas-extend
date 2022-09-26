@@ -61,7 +61,13 @@ export default {
 ```vue
 <template>
   <div>
-    <el-number-range ref="range" v-model="range" :min="-5" :max="100"></el-number-range>
+    <el-number-range
+      ref="range"
+      v-model="range"
+      :min="-5"
+      :max="100"
+      @clear="clear"
+    ></el-number-range>
     <el-button @click="foc">focus</el-button>
   </div>
 </template>
@@ -85,15 +91,17 @@ export default {
 
 ### Props
 
-| 参数              | 描述                       | 类型       | 可选值 | 默认值 |
-| :---------------- | :------------------------- | :--------- | :----- | ------ |
-| v-model/value     | 绑定值                     | `number[]` | -      | -      |
-| disabled          | 禁用                       | `boolean`  | -      | false  |
-| min               | 范围最小值                 | `number`   | -      | -      |
-| max               | 范围最大值                 | `number`   | -      | -      |
-| start-placeholder | 范围输入时最小值的占位内容 | `string`   | -      | -      |
-| end-placeholder   | 范围输入时最大值的占位内容 | `string`   | -      | -      |
-| range-separator   | 范围输入时的分隔符         | `string`   | -      | -      |
+| 参数              | 描述                       | 类型       | 可选值 | 默认值                 |
+| :---------------- | :------------------------- | :--------- | :----- | ---------------------- |
+| v-model/value     | 绑定值                     | `number[]` | -      | -                      |
+| disabled          | 禁用                       | `boolean`  | -      | false                  |
+| min               | 范围最小值                 | `number`   | -      | -                      |
+| max               | 范围最大值                 | `number`   | -      | -                      |
+| clearable         | 是否可清空                 | `boolean`  | -      | true                   |
+| clear-icon        | 清空图标                   | `string`   | -      | 'el-icon-circle-close' |
+| start-placeholder | 范围输入时最小值的占位内容 | `string`   | -      | -                      |
+| end-placeholder   | 范围输入时最大值的占位内容 | `string`   | -      | -                      |
+| range-separator   | 范围输入时的分隔符         | `string`   | -      | -                      |
 
 ### Events
 
