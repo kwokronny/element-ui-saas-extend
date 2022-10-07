@@ -49,12 +49,6 @@ export default ({
   }
 
   Vue.prototype.$ELEMENT = {
-    tablePage: {
-      buttonStyle: {
-        round: true, //统一圆角,
-      },
-      pageLayout: "total, pager", //分页布局
-    },
     pickerOptions: {
       date: {
         shortcuts: [

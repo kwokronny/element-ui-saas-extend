@@ -528,7 +528,7 @@ export default class ElFormAuto extends Vue {
 					value[name] = _value
 					value[sn] = sd;
 					value[en] = ed;
-				} else if (/(date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
+				} else if (/(time|date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
 					if (Array.isArray(this.model[name])) {
 						value[name] = cloneDeep(this.model[name]).map(v => DATE_UNIX(v, "unix"))
 					} else {
@@ -554,7 +554,7 @@ export default class ElFormAuto extends Vue {
 					if (field.rangeName && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
 						if (value && value.length == 2) {
 							let [sd, ed] = value
-							if (sd && ed && /date|datetime|month|year/g.test(field.type) && field.valueFormat == "unix") {
+							if (sd && ed && /time|date|datetime|month|year/g.test(field.type) && field.valueFormat == "unix") {
 								sd = DATE_UNIX(sd, "timestamp");
 								ed = DATE_UNIX(ed, "timestamp");
 							}
@@ -567,7 +567,7 @@ export default class ElFormAuto extends Vue {
 						if (value) {
 							this.model[name] = value;
 						}
-					} else if (/(date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
+					} else if (/(time|date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
 						if (Array.isArray(value)) {
 							value = cloneDeep(value).map(v => DATE_UNIX(v, "timestamp"))
 							if (!isEqual(value, this.model[name])) {
