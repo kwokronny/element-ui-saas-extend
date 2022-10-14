@@ -66,7 +66,7 @@ const users = [
 	{ id: 9, name: "冯九", phone:"1311111119", email:"fengjiu@baijiaxin.cn"}
 ]
 export default {
-	name: "user-selector",
+	name: "UserSelector",
 	data() {
 		return {
 			phone: "",

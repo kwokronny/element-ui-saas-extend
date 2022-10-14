@@ -16,10 +16,10 @@ export default {
 				})
 				.then(res => {
 					return res.data.reduce((prev, curr) => {
-						if (item.username.indexOf(query) > -1) {
+						if (curr.username.indexOf(query) > -1) {
 							prev.push({
-								label: item.username,
-								value: item.id * page
+								label: curr.username,
+								value: curr.id * page
 							});
 						}
 						return prev;

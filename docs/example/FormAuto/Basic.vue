@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<el-card header="内联表单" style="margin-bottom: 15px;">
+		<el-card shadow="never" header="内联表单" style="margin-bottom: 15px;">
 			<el-form-auto
 				:data="filterForm"
 				ref="FilterForm"
@@ -9,17 +9,15 @@
 				label-width="70px"
 				inline
 			>
-				<el-button type="primary" @click="getList" icon="el-icon-search">筛选</el-button>
+				<div>{{filterModel}}</div>
 			</el-form-auto>
 		</el-card>
-		<el-card header="栅格表单（应用 el-row 可对表单项进行布局）">
+		<el-card shadow="never" header="栅格表单（应用 el-row 可对表单项进行布局）">
 			<el-form-auto :data="form" ref="EditForm" v-model="model" label-width="120px">
-				<template>
-					<el-button type="primary" @click="getValidModel">提交</el-button>
-					<el-button type="default" @click="reset">重置</el-button>
-					<el-button type="primary" @click="getModel">获取数据</el-button>
-					<el-button type="primary" @click="edit">编辑</el-button>
-				</template>
+				<div>{{model}}</div>
+				<el-button type="primary" @click="getValidModel">验证规则</el-button>
+				<el-button type="default" @click="reset">重置</el-button>
+				<el-button type="primary" @click="edit">编辑</el-button>
 			</el-form-auto>
 		</el-card>
 	</div>
@@ -93,6 +91,7 @@ export default {
 				text: {
 					col: 12,
 					label: "文本框",
+					notSubmit: true,
 					labelTooltip: "labelTooltip属性可以在标签旁增加图标，提示字段含义",
 					type: "text",
 					required: true
@@ -230,10 +229,11 @@ export default {
 			this.$refs["EditForm"].reset();
 		},
 		edit() {
+			this.form.password.disabled = true;
 			this.model = {
 				id: "123",
 				switch: 0,
-				// slider: 23,
+				slider: 23,
 				text: "文本",
 				password: "password123456",
 				textarea: null,
@@ -253,33 +253,10 @@ export default {
 				rate: 5
 			};
 		},
-		getModel() {
-			this.$msgbox({
-				title: "表单返回数据",
-				dangerouslyUseHTMLString: true,
-				message: `<pre>${JSON.stringify(this.model, undefined, 3)}</pre>`
-			});
-		},
 		async getValidModel() {
 			try {
 				await this.$refs["EditForm"].validate();
-				this.$msgbox({
-					title: "表单返回数据",
-					dangerouslyUseHTMLString: true,
-					message: `<pre>${JSON.stringify(this.model, undefined, 3)}</pre>`
-				});
 			} catch {}
-		},
-		handleAccountType(value) {
-			this.form.searchNumber.label = accountTypeOption[value];
-			return value;
-		},
-		getList() {
-			this.$msgbox({
-				title: "表单返回数据",
-				dangerouslyUseHTMLString: true,
-				message: `<pre>${JSON.stringify(this.model, undefined, 3)}</pre>`
-			});
 		}
 	}
 };

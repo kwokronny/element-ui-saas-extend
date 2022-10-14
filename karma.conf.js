@@ -18,7 +18,7 @@ module.exports = function(config) {
     // },
     reporters: ["spec"],
 
-    browsers: ["ChromeHeadless"],
+    browsers: ["Chrome"],
     client: {
       mocha: {
         timeout: 10000,

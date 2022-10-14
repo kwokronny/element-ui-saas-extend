@@ -210,13 +210,13 @@
 <script lang="ts">
 import { Vue, Component, Prop, Ref, Watch, Model } from "vue-property-decorator";
 import { Form } from "element-ui";
-import { forEach, cloneDeep, uniqBy, omit, isEqual } from "lodash-es";
+import { forEach, cloneDeep, uniqBy, omit } from "lodash-es";
 import { ElAutoMixinOptions, ElAutoOption, ElFormAutoField } from "../../types/saas-extend"
 import { transformOptions } from "../util"
 import locale from "../../src/mixin/locale"
 import selectScroll from "../../src/mixin/selectScroll"
 import { ValidateCallback } from "element-ui/types/form";
-import { toDate, } from "element-ui/src/utils/date-util.js"
+import { toDate } from "element-ui/src/utils/date-util.js"
 
 const DATE_UNIX = function (value, format) {
 	if (typeof value == 'number' && `${value}`.length == 10) {
@@ -250,7 +250,9 @@ export default class ElFormAuto extends Vue {
 	@Model("input", { type: Object, default: () => { return {} } }) value!: Record<string, any>;
 	@Watch("value", { immediate: true, deep: true })
 	private onValueChange(value: Record<string, any>) {
+		// if (value && !value._formauto_get) {
 		this.setModel(value)
+		// }
 	}
 
 	private model: Record<string, any> = {};
@@ -273,33 +275,72 @@ export default class ElFormAuto extends Vue {
 				field = this.fields[name];
 			}
 			field.name = name;
-			field.label = item.label;
-			field.required = item.required || false;
-			field.addRules = item.addRules || [];
+
+			// field.label = item.label;
+			// field.required = item.required || false;
+			// field.disabled = item.disabled || false;
+			// field.addRules = item.addRules || [];
+			let notProps = ["value", "addRules", "label", "labelHidden", "allOption", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "notSubmit", "required", "col", "options"];
+			notProps.forEach((key: string) => {
+				if (item[key] !== undefined && key != "on") {
+					field[key] = item[key];
+				}
+			})
 			field.on = Object.assign(field.on || {}, item.on);
-			field.props = Object.assign(field.props || {}, omit(item, ["value", "addRules", "label", "labelHidden", "allOption", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "notSubmit", "required", "col", "options"]))
-			field.type = item.type || "text"
+			field.props = Object.assign(field.props || {}, omit(item, notProps))
+			// field.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
 			if (item.slot) {
 				field.slot = typeof item.slot == "boolean" ? name : item.slot;
 			}
 			// 根据字段 type 设置 model 默认值
 			if (
-				/(check|range|cascader)/g.test(item.type) ||
-				(item.type == "select" && field.props.multiple === true) ||
-				(item.type == "slider" && field.props.range === true)
+				/(check|numberrange|cascader)/g.test(item.type) ||
+				(item.type == "select" && field.props.multiple === true)
 			) {
 				field.value = item.value || [];
-				if (item.type == "timerange") {
-					let defaultValue = ["00:00:00", "00:00:00"]
-					field.value = item.value || defaultValue;
-				} else if (item.type == "datetimerange") {
-					field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
-				}
+			} else if (item.type == "slider" && field.props.range === true) {
+				let min = field.props.min || 0
+				let max = field.props.max || 100
+				field.value = item.value || [min, max];
 			} else if (/rate|number|slider/.test(item.type)) {
 				field.value = parseInt(item.value) || 0;
 			} else if (item.type == "switch") {
 				field.value = item.value === undefined ? false : item.value;
+			} else if (/(date(s|time|)|time(?!select)|month|year)(range|)/.test(item.type)) {
+				// 针对日期时间类型组件设置统一日期格式及显示格式
+				field.props.valueFormat = field.valueFormat == "unix" ? "timestamp" : field.valueFormat;
+				if (/datetime/g.test(item.type)) {
+					field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss";
+					if (item.type == "datetimerange") {
+						field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
+					}
+				} else if (/date/g.test(field.type)) {
+					if (item.type == "daterange" && item.suffixTime) {
+						field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss"
+						field.props.defaultTime = ["00:00:00", "23:59:59"]
+					} else {
+						field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd"
+					}
+				} else if (/time/g.test(item.type)) {
+					field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
+				}
+				if (/range|dates/.test(item.type)) {
+					field.value = item.value || [];
+					if (item.type == "timerange") {
+						field.value = item.value || null;
+					} else if (field.valueFormat == "unix") {
+						field.value = field.value.map((v: string) => {
+							return DATE_UNIX(v, "timestamp")
+						})
+					}
+				} else {
+					if (field.valueFormat == "unix") {
+						field.value = DATE_UNIX(item.value, "timestamp")
+					} else {
+						field.value = item.value || ""
+					}
+				}
 			} else {
 				field.value = item.value === undefined ? "" : item.value;
 			}
@@ -313,33 +354,14 @@ export default class ElFormAuto extends Vue {
 					field.props.startPlaceholder = item.startPlaceholder || `${this.$t("formauto.start")}${item.label}`;
 					field.props.endPlaceholder = item.endPlaceholder || `${this.$t("formauto.end")}${item.label}`;
 				}
-			} if (/date|time|datetime|select|week|year|month|dates|cascader/g.test(item.type)) {
+			} if (/date(|time|s)|time|select|week|year|month|cascader/g.test(item.type)) {
 				field.props.placeholder = item.placeholder || `${this.$t("formauto.pleaseSelect")}${item.label}`;
 			} else {
 				field.props.placeholder = item.placeholder || `${this.$t("formauto.pleaseInput")}${item.label}`;
 			}
 
-			// 针对日期时间类型组件设置统一日期格式及显示格式
-			if (/(date(s|time|)|time|month|year)(range|)/.test(item.type)) {
-				field.props.valueFormat = field.valueFormat
-				if (field.valueFormat == "unix") {
-					field.props.valueFormat = "timestamp";
-				}
-				if (/datetime/g.test(item.type)) {
-					field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss";
-				} else if (/date/g.test(item.type)) {
-					if (item.type == "daterange" && item.suffixTime) {
-						field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss"
-						field.props.defaultTime = ["00:00:00", "23:59:59"]
-					} else {
-						field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd"
-					}
-				} else if (/time/g.test(item.type)) {
-					field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
-				}
-			}
 
-			if (this.$ELEMENT && this.$ELEMENT.pickerOptions && /date/g.test(item.type)) {
+			if (this.$ELEMENT && this.$ELEMENT.pickerOptions && /date(?!s)/g.test(item.type)) {
 				let type = /range/g.test(item.type) ? "range" : "date"
 				let pickerOptions = this.$ELEMENT.pickerOptions[type];
 				if (pickerOptions) {
@@ -351,7 +373,7 @@ export default class ElFormAuto extends Vue {
 				field.props.clearable = field.props.clearable == false ? false : true
 			}
 
-			if (/select|radio|check|cascader/.test(item.type)) {
+			if (/select|radio|check|cascader/.test(item.type) && item.type != "timeselect") {
 				if (item.options instanceof Function) {
 					if (item.options != field.originOption) {
 						field.options = item.options
@@ -368,28 +390,26 @@ export default class ElFormAuto extends Vue {
 			}
 
 			if (field.type == "select" && field.remote) {
-				if (!field.on) {
-					field.on = {}
-				}
 				let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
-				field.on["visible-change"] = function (visible) {
-					originVisibleChangeEvent(visible)
-					if (visible == false && field.options && field.options.length == 0) {
-						field.props.remoteMethod.call(item, "")
-					}
-				}
 				let originClearEvent = field.on.clear || (() => { })
 				let self = this;
-				field.on.clear = function () {
-					originClearEvent()
-					self.refreshOptions(name)
-				}
+				field.on = Object.assign(field.on, {
+					["visible-change"]: function (visible) {
+						originVisibleChangeEvent(visible)
+						if (visible == false && field.options && field.options.length == 0) {
+							field.props.remoteMethod.call(item, "")
+						}
+					},
+					clear: function () {
+						originClearEvent()
+						self.refreshOptions(name)
+					}
+				});
 			}
 			this.defaultValue[name] = field.value;
 			this.$set(this.model, name, this.model[name] === undefined ? field.value : this.model[name]);
 			this.fields[name] = field;
 		})
-		// this.setModel(this.defaultValue)
 		this.$nextTick(function () {
 			this.FormAuto && this.FormAuto.clearValidate()
 		})
@@ -442,7 +462,7 @@ export default class ElFormAuto extends Vue {
 					// item.remoteMethod = () => {
 					transformOptions(item.options, item.type != 'cascader').then((options) => {
 						item.options = options
-						this.handleCheckedChange(item.name, this.model[item.name])
+						item.type == "check" && !item.notAll && this.handleCheckedChange(item.name, this.model[item.name])
 					})
 					// }
 					// item.remoteMethod()
@@ -505,32 +525,26 @@ export default class ElFormAuto extends Vue {
 
 	public getModel(): Record<string, any> {
 		let value = {}
+		// value.property
 		for (let name in this.fields) {
 			let field = this.fields[name]
 			if (field && !field.notSubmit) {
 				if (field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
 					let [sn, en] = field.rangeName;
-					let _value: any[] = cloneDeep(this.model[name]);
-					if (!_value) {
-						if (field.type == "slider" && field.props && field.props.range == true) {
-							_value = [0, 0]
-						} else if (field.type == "numberrange") {
-							_value = ["", ""]
-						} else {
-							_value = [null, null]
+					if (this.model[name] && this.model[name].length == 2) {
+						let _value: any[] = cloneDeep(this.model[name]);
+						let [sd, ed] = _value;
+						if (sd && ed && field.valueFormat == "unix" && /date|time|month|year/g.test(field.type)) {
+							sd = DATE_UNIX(sd, "unix");
+							ed = DATE_UNIX(ed, "unix");
 						}
+						value[name] = _value
+						value[sn] = sd;
+						value[en] = ed;
 					}
-					let [sd, ed] = _value;
-					if (sd && ed && field.valueFormat == "unix" && /date|time|month|year/g.test(field.type)) {
-						sd = DATE_UNIX(sd, "unix");
-						ed = DATE_UNIX(ed, "unix");
-					}
-					value[name] = _value
-					value[sn] = sd;
-					value[en] = ed;
 				} else if (/(time|date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
 					if (Array.isArray(this.model[name])) {
-						value[name] = cloneDeep(this.model[name]).map(v => DATE_UNIX(v, "unix"))
+						value[name] = this.model[name].map(v => DATE_UNIX(v, "unix"))
 					} else {
 						value[name] = DATE_UNIX(this.model[name], "unix");
 					}
@@ -548,17 +562,14 @@ export default class ElFormAuto extends Vue {
 			if (field) {
 				let value = model[name];
 				if (value !== undefined) {
-					if (field.type == "check" && !field.notAll) {
-						this.handleCheckedChange(name, value);
-					}
-					if (field.rangeName && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
+					if (field.rangeName && field.type && (/range$/.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
 						if (value && value.length == 2) {
 							let [sd, ed] = value
-							if (sd && ed && /time|date|datetime|month|year/g.test(field.type) && field.valueFormat == "unix") {
+							if (sd && ed && /time|date(|time)|month|year/.test(field.type) && field.valueFormat == "unix") {
 								sd = DATE_UNIX(sd, "timestamp");
 								ed = DATE_UNIX(ed, "timestamp");
 							}
-							if (sd != this.model[name][0] || ed != this.model[name][1]) {
+							if (!this.model[name] || !this.model[name].length || sd != this.model[name][0] || ed != this.model[name][1]) {
 								this.model[name] = [sd, ed];
 							}
 						}
@@ -567,11 +578,18 @@ export default class ElFormAuto extends Vue {
 						if (value) {
 							this.model[name] = value;
 						}
-					} else if (/(time|date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
+					} else if (/(time|date(|time|s)|month|year)(?!range|select)$/.test(field.type) && field.valueFormat == "unix") {
 						if (Array.isArray(value)) {
-							value = cloneDeep(value).map(v => DATE_UNIX(v, "timestamp"))
-							if (!isEqual(value, this.model[name])) {
-								this.model[name] = value;
+							let hasChange = false
+							value = value.map((v: string, idx: number) => {
+								let _value = DATE_UNIX(v, "timestamp")
+								if (_value != this.model[name][idx]) {
+									hasChange = true
+								}
+								return _value
+							})
+							if (hasChange) {
+								this.model[name] = value
 							}
 						} else {
 							value = DATE_UNIX(value, "timestamp");
@@ -579,8 +597,15 @@ export default class ElFormAuto extends Vue {
 								this.model[name] = value;
 							}
 						}
-					} else {
+					} else if (value !== this.model[name]) {
+						if (field.type == "check" && !field.notAll) {
+							this.handleCheckedChange(name, value);
+						}
 						this.model[name] = value;
+					}
+				} else {
+					if (!field.notSubmit) {
+						this.model[name] = this.defaultValue[name]
 					}
 				}
 			}
@@ -591,7 +616,7 @@ export default class ElFormAuto extends Vue {
 		let field = this.fields[fieldName];
 		if (field && field.remoteMethod) {
 			field.remoteParams.query = "refresh";
-			field.remoteMethod("");
+			field.props.remoteMethod("");
 			// this.echoOptions[fieldName] = [];
 		}
 	}
@@ -676,13 +701,14 @@ export default class ElFormAuto extends Vue {
 	public reset(): void {
 		this.echoOptions = {}
 		if (this.FormAuto) {
+			this.FormAuto.resetFields();
 			this.$nextTick(function () {
-				this.FormAuto.resetFields();
+				this.FormAuto.clearValidate();
 				for (let name in this.fields) {
 					let field = this.fields[name];
 					this.model[name] = this.defaultValue[name];
 					if (field.type == "check" && field.notAll) {
-						this.check[name] = false;
+						this.handleCheckedChange(name, this.defaultValue[name])
 					}
 				}
 			})

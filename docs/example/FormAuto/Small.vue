@@ -1,5 +1,5 @@
 <template>
-	<el-form-auto :data="form" ref="EditForm" v-model="model" label-width="90px">{{ model }}</el-form-auto>
+	<el-form-auto :data="form" ref="EditForm" v-model="model">{{ model }}</el-form-auto>
 </template>
 <script>
 export default {
@@ -9,23 +9,49 @@ export default {
 				date: {
 					label: "日期",
 					type: "date",
-					valueFormat: "unix"
+					value: "2011-06-08"
 				},
 				daterange: {
 					label: "日期范围",
 					type: "daterange",
 					rangeName: ["startDate", "endDate"],
-					valueFormat: "unix"
+					suffixTime: true
+				},
+				daterangeUnix: {
+					label: "unix日期范围",
+					type: "daterange",
+					rangeName: ["startUnixDate", "endUnixDate"],
+					valueFormat: "unix",
+					value: [1665763200000, 1666022400000]
+				},
+				dates: {
+					label: "多个日期",
+					type: "dates",
+					valueFormat: "unix",
+					value: [1307462400000]
 				},
 				time: {
 					label: "时间",
 					type: "time",
 					valueFormat: "unix"
 				},
+				timeselect: {
+					label: "时间",
+					type: "timeselect"
+				},
+				timerange: {
+					label: "时间范围",
+					type: "timerange",
+					valueFormat: "unix",
+					rangeName: ["startTime", "endTime"]
+				},
 				slider: {
 					label: "范围",
 					type: "slider",
+					range: true,
 					rangeName: ["startNum", "endNum"],
+					min: 1,
+					max: 7
 				}
 			},
 			model: {}

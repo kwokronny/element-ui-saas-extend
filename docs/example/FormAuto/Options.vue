@@ -33,6 +33,27 @@ export default {
 							});
 					}
 				},
+				select: {
+					label: "选择框",
+					type: "select",
+					options: () => {
+						return axios
+							.get("https://jsonplaceholder.typicode.com/users")
+							.then(res => {
+								return res.data.map(item => {
+									return {
+										label: item.username,
+										value: item.id
+									};
+								});
+							});
+					},
+					on:{
+						change:()=>{
+							this.model.remoteCascader=1
+						}
+					}
+				},
 				remoteCascader: {
 					label: "级联框",
 					type: "cascader",

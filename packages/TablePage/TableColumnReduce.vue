@@ -23,6 +23,7 @@
 			></slot>
 			<template v-else-if="column.enum">
 				<enum-tags
+					v-if="typeof column.enum == 'object'"
 					:key="$index"
 					:enums="column.enum"
 					:value="row[column.prop]"

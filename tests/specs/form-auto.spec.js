@@ -288,6 +288,7 @@ describe("FormAuto", () => {
     );
 
     let error = recordValid(vm.model, {
+      __formauto_get__: true,
       id: "1",
       switch: true,
       slider: 10,
@@ -341,6 +342,7 @@ describe("FormAuto", () => {
     error = recordValid(
       vm.model,
       Object.assign(data, {
+        __formauto_get__: true,
         startTime: "00:00:00",
         endTime: "05:00:00",
         startDate: "2019-01-01 08:00:00",
@@ -377,10 +379,10 @@ describe("FormAuto", () => {
       true
     );
     let checkAll = vm.$refs.form.$children[0].$children[0].$children[1];
-    expect(checkAll.indeterminate).to.be.true;
+    expect(checkAll.indeterminate).to.equal(true, "check全选部分选中状态true");
     vm.model.check = [0, 1, 2];
     await waitImmediate();
-    expect(checkAll.indeterminate).to.be.false;
+    expect(checkAll.indeterminate).to.equal(false, "check全选部分选中状态false");
     expect(checkAll.value).to.be.true;
     // console.log(vm.$refs.form.$children[0].$children[0].$children[1]);
     // expect(vm.$refs.form.$children[0].$children[0].$children[1].name).to.equal("el-checkbox");
@@ -539,6 +541,51 @@ describe("FormAuto", () => {
     ]);
   });
 
+  it("date valueFormat and rangeName", async () => {
+    vm = createVue(
+      {
+        template: `<el-form-auto :data="form" ref="EditForm" v-model="model" label-width="90px">{{ model }}</el-form-auto>`,
+        data() {
+          return {
+            model: {},
+            form: {
+              date: {
+                label: "日期",
+                type: "date",
+                valueFormat: "unix"
+              },
+              daterange: {
+                label: "日期范围",
+                type: "daterange",
+                rangeName: ["startDate", "endDate"],
+                valueFormat: "unix"
+              },
+              dates: {
+                label: "多个日期",
+                type: "dates",
+                valueFormat: "unix"
+              },
+              time: {
+                label: "时间",
+                type: "time",
+                valueFormat: "unix"
+              },
+              slider: {
+                label: "范围",
+                type: "slider",
+                range: true,
+                rangeName: ["startNum", "endNum"]
+              }
+            },
+          };
+        },
+      },
+      true
+    );
+    
+  });
+
+  //#region 远程搜索相关
   it("select remote search", async () => {
     vm = createVue(
       {
@@ -641,12 +688,12 @@ describe("FormAuto", () => {
                 label: "remoteSelectReOpen",
                 type: "select",
                 remote: true,
-                options: async (query, page) => {
+                options: async (query) => {
                   return userData.reduce((perv, item) => {
                     if (item.username.indexOf(query) > -1) {
                       perv.push({
                         label: item.username,
-                        value: item.id * page,
+                        value: item.id,
                       });
                     }
                     return perv;
@@ -693,12 +740,12 @@ describe("FormAuto", () => {
                 type: "select",
                 remote: true,
                 clearable: true,
-                options: async (query, page) => {
+                options: async (query) => {
                   return userData.reduce((perv, item) => {
                     if (item.username.indexOf(query) > -1) {
                       perv.push({
                         label: item.username,
-                        value: item.id * page,
+                        value: item.id,
                       });
                     }
                     return perv;
@@ -717,6 +764,7 @@ describe("FormAuto", () => {
       },
       true
     );
+    await wait(250);
     await waitImmediate();
     let select = vm.$refs.form.$children[0].$children[0].$children[1];
     select.handleQueryChange("");
@@ -740,6 +788,7 @@ describe("FormAuto", () => {
     expect(vm.clearPass).to.be.true;
     expect(vm.$refs.form.fields.remoteSelect.options.length).to.equal(10);
   });
+  //#endregion
 
   it("method: reset", async () => {
     vm = createVue(
@@ -778,6 +827,7 @@ describe("FormAuto", () => {
     vm.$refs.form.reset();
     await waitImmediate();
     let error = recordValid(vm.model, {
+      __formauto_get__:true,
       id: "1",
       switch: true,
       slider: 10,
@@ -846,9 +896,7 @@ describe("FormAuto", () => {
       await vm.$refs.Form.validate();
       expect(true).to.be.false;
     } catch (e) {
-      expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(
-        14
-      );
+      expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(15 );
     }
   });
 

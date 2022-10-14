@@ -22,8 +22,14 @@ Vue.use(ElementUISaaSExtend);
 ## CDN 引入
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
-<link rel="stylesheet" href="https://unpkg.com/element-ui-saas-extend/lib/theme-chalk/index.css" />
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/element-ui-saas-extend/lib/theme-chalk/index.css"
+/>
 
 <script src="//unpkg.com/vue"></script>
 <script src="//unpkg.com/element-ui"></script>
@@ -42,12 +48,16 @@ Vue.use(ElementUISaaSExtend);
 | pickerOptions.date    | 设置默认 FormAuto 组件中 `type` 值为 `date` 或 `datetime` 的 `pickerOptions` 属性。           |
 | tablePage.buttonStyle | 设置 TablePage 中预设的 `<el-button>` 的默认样式属性。                                        |
 | tablePage.pageLayout  | 设置 TablePage 中预设的 `<el-pagination>` 的默认 `paeg-layout` 属性。                         |
+| tablePage.border      | 设置 TablePage 中预设的 `<el-table>` 的默认 `border` 属性。                                   |
 
 ```ts
 export interface SaaSInstallationOptions extends InstallationOptions {
   pickerOptions?: Record<"date" | "range", DatePickerOptions>;
   tablePage?: {
-    buttonStyle?: Record<"plain" | "round" | "size" | "style" | "class", string | boolean>;
+    buttonStyle?: Record<
+      "plain" | "round" | "size" | "style" | "class",
+      string | boolean
+    >;
     pageLayout?: string;
   };
 }
@@ -55,9 +65,9 @@ export interface SaaSInstallationOptions extends InstallationOptions {
 
 ```js static
 Vue.prototype.$ELEMENT = {
-  tablePage:{
-    buttonStyle:{
-      round: true //统一圆角,
+  tablePage: {
+    buttonStyle: {
+      round: true, //统一圆角,
     },
     pageLayout: "total, pager", //分页布局
   },
@@ -121,5 +131,4 @@ Vue.prototype.$ELEMENT = {
     },
   },
 };
-
 ```

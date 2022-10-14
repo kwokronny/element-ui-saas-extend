@@ -72,6 +72,7 @@ module.exports = {
           {
             text: '开源',
             items: [
+              { text: 'sprite-free-cli', link: 'https://github.com/kwokronny/sprite-free-cli' },
               { text: 'stylus-shortcut', link: 'https://kwokronny.github.io/stylus-shortcut/' },
             ]
           }

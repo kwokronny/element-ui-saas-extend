@@ -44,7 +44,7 @@ export default ({
     Vue.use(ElementUISaaSExtend);
     ElementUI.locale(en);
     import("./components/UserSelector.vue").then((module) => {
-      Vue.component(module.name, module);
+      Vue.component(module.default.name, module.default);
     });
   }
 
