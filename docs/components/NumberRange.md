@@ -66,20 +66,13 @@ export default {
       v-model="range"
       :min="-5"
       :max="100"
-      @clear="clear"
     ></el-number-range>
-    <el-button @click="foc">focus</el-button>
   </div>
 </template>
 <script>
 export default {
   data() {
     return { range: [] };
-  },
-  methods: {
-    foc() {
-      this.$refs["range"].focus();
-    },
   },
 };
 </script>

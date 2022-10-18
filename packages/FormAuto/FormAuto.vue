@@ -282,11 +282,11 @@ export default class ElFormAuto extends Vue {
 			// field.addRules = item.addRules || [];
 			let notProps = ["value", "addRules", "label", "labelHidden", "allOption", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "notSubmit", "required", "col", "options"];
 			notProps.forEach((key: string) => {
-				if (item[key] !== undefined && key != "on") {
+				if (item[key] !== undefined && !/on|options/.test(key)) {
 					field[key] = item[key];
 				}
 			})
-			field.on = Object.assign(field.on || {}, item.on);
+			field.on = Object.assign(field.on || {}, item.on)
 			field.props = Object.assign(field.props || {}, omit(item, notProps))
 			// field.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
@@ -393,83 +393,88 @@ export default class ElFormAuto extends Vue {
 				let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
 				let originClearEvent = field.on.clear || (() => { })
 				let self = this;
-				field.on = Object.assign(field.on, {
-					["visible-change"]: function (visible) {
-						originVisibleChangeEvent(visible)
-						if (visible == false && field.options && field.options.length == 0) {
-							field.props.remoteMethod.call(item, "")
-						}
-					},
-					clear: function () {
-						originClearEvent()
-						self.refreshOptions(name)
+				field.on["visible-change"] = function (visible) {
+					originVisibleChangeEvent(visible)
+					if (visible == false && field.options && field.options.length == 0) {
+						field.props.remoteMethod.call(item, "")
 					}
-				});
+				}
+				field.on.clear = function () {
+					originClearEvent()
+					self.refreshOptions(name)
+				}
 			}
 			this.defaultValue[name] = field.value;
 			this.$set(this.model, name, this.model[name] === undefined ? field.value : this.model[name]);
 			this.fields[name] = field;
-		})
-		this.$nextTick(function () {
-			this.FormAuto && this.FormAuto.clearValidate()
 		})
 		this.asyncOptionsRequest()
 	}
 
 	private asyncOptionsRequest(): void {
 		if (this.asyncOptions.length) {
-			this.asyncOptions.forEach((item) => {
-				if (item.remote && item.type == "select" && item.options instanceof Function) {
-					let remoteMethod = item.options;
-					item.props.filterable = true;
-					item.props.remote = true;
-					item.remoteParams = {
-						query: "",
-						page: 1,
-						loadFinish: false,
-						optionLoading: false,
-					};
-					item.remoteMethod = (query: string = "") => {
-						if (item.remoteParams.query != query) {
-							item.remoteParams.query = query;
-							item.remoteParams.page = 1;
-							item.remoteParams.loadFinish = false;
-						}
-						if (item.remoteParams.page == 1) {
-							item.options = []
-						}
-						if (item.remoteParams.loadFinish) return
-						item.remoteParams.optionLoading = true;
-						remoteMethod(item.remoteParams.query || "", item.remoteParams.page).then((options: ElAutoMixinOptions) => {
-							return transformOptions(options)
-						}).then((options: ElAutoOption[]) => {
-							item.remoteParams.optionLoading = false;
-							if (options.length == 0 && item.remoteParams.page > 1) {
-								item.remoteParams.loadFinish = true;
-								return;
+			let asyncList: Promise<void>[] = this.asyncOptions.map((item) => {
+				return new Promise((resolve, reject) => {
+					if (item.remote && item.type == "select" && item.options instanceof Function) {
+						let remoteMethod = item.options;
+						item.props.filterable = true;
+						item.props.remote = true;
+						item.remoteParams = {
+							query: "",
+							page: 1,
+							loadFinish: false,
+							optionLoading: false,
+						};
+						item.remoteMethod = (query: string) => {
+							if (item.remoteParams.query != query && query !== undefined) {
+								item.remoteParams.query = query;
+								item.remoteParams.page = 1;
+								item.remoteParams.loadFinish = false;
 							}
-							options = (item.options as ElAutoOption[]).concat(options)
-							item.options = options;
-							item.remoteParams.page = item.remoteParams.page + 1;
-						}).catch(() => {
-							item.remoteParams.optionLoading = false;
-						});
-					};
-					item.props.remoteMethod = item.remoteMethod;
-					item.props.remoteMethod("");
-				} else if (item.options) {
-					// let remoteMethod = item.options;
-					// item.remoteMethod = () => {
-					transformOptions(item.options, item.type != 'cascader').then((options) => {
-						item.options = options
-						item.type == "check" && !item.notAll && this.handleCheckedChange(item.name, this.model[item.name])
-					})
-					// }
-					// item.remoteMethod()
-				}
+							if (item.remoteParams.page == 1) {
+								item.options = []
+							}
+							if (item.remoteParams.loadFinish) return
+							item.remoteParams.optionLoading = true;
+							remoteMethod(item.remoteParams.query || "", item.remoteParams.page).then((options: ElAutoMixinOptions) => {
+								return transformOptions(options)
+							}).then((options: ElAutoOption[]) => {
+								item.remoteParams.optionLoading = false;
+								if (options.length == 0 && item.remoteParams.page > 1) {
+									item.remoteParams.loadFinish = true;
+									return;
+								}
+								options = (item.options as ElAutoOption[]).concat(options)
+								item.options = options;
+								item.remoteParams.page = item.remoteParams.page + 1;
+							}).catch(() => {
+								item.remoteParams.optionLoading = false;
+							});
+						};
+						item.props.remoteMethod = item.remoteMethod;
+						item.props.remoteMethod("");
+						resolve();
+					} else if (item.options) {
+						// let remoteMethod = item.options;
+						// item.remoteMethod = () => {
+						transformOptions(item.options, item.type != 'cascader').then((options) => {
+							item.options = options
+							item.type == "check" && !item.notAll && this.handleCheckedChange(item.name, this.model[item.name])
+							resolve();
+						})
+						// }
+						// item.remoteMethod()
+					}
+				})
 			})
-			this.asyncOptions = []
+			Promise.all(asyncList).then(() => {
+				this.asyncOptions = []
+				this.$nextTick(function () {
+					this.FormAuto && this.FormAuto.clearValidate()
+				})
+			})
 		}
+
 	}
 
 	private generateRule(): void {
@@ -707,7 +712,7 @@ export default class ElFormAuto extends Vue {
 				for (let name in this.fields) {
 					let field = this.fields[name];
 					this.model[name] = this.defaultValue[name];
-					if (field.type == "check" && field.notAll) {
+					if (field.type == "check" && !field.notAll) {
 						this.handleCheckedChange(name, this.defaultValue[name])
 					}
 				}

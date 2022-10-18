@@ -18,16 +18,17 @@ export default {
 					loadScroll: true,
 					options: (query = "", page = 1) => {
 						if (page > 3) return [];
+								console.log(query,page);
 						return axios
-							.get("https://jsonplaceholder.typicode.com/users")
+							.get(`https://jsonplaceholder.typicode.com/users`)
 							.then(res => {
 								return res.data.reduce((res, item) => {
-									if (item.username.indexOf(query) > -1) {
-										res.push({
-											label: item.username,
-											value: item.id * page
-										});
-									}
+									// if (item.username.indexOf(query) > -1) {
+									res.push({
+										label: item.username,
+										value: item.id * page
+									});
+									// }
 									return res;
 								}, []);
 							});
@@ -48,9 +49,9 @@ export default {
 								});
 							});
 					},
-					on:{
-						change:()=>{
-							this.model.remoteCascader=1
+					on: {
+						change: () => {
+							this.model.remoteCascader = 1;
 						}
 					}
 				},

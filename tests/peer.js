@@ -1,5 +1,6 @@
 import Vue from "vue";
 import "element-ui/lib/theme-chalk/index.css";
+import "../packages/theme-chalk/lib/index.css";
 import Element from "element-ui";
 import { shallowMount } from "@vue/test-utils";
 import ElementUISaaSExtend from "../packages/index";

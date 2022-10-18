@@ -11,6 +11,11 @@ export declare class ElFormTable extends ElForm {
   data: Record<string, ElFormAutoField>;
   getModel(): Record<string, any>[];
   setModel(model: Record<string, any>[]): void;
+  setItem(
+    index: number,
+    modelOrName: Record<string, any>[] | string,
+    value?: any
+  ): void;
   addItem(model?: Record<string, any>[]): void;
   removeItem(index: number): void;
   clear(): void;

@@ -19,7 +19,7 @@ pageClass: component-page
   > 原因是我也不知道为什么 JS 要多出 3 位毫秒，而后端时间格式可以如此多的想法。😭 
 2. `daterange|timerange|datetimerange|numberrange|slider`对应组件增加 rangeName 属性，方便快速迭代到对应接口传参内。
 3. `slider`对应组件增加 range 属性时，默认值为组件的 `[min, max]`。
-4. `select`组件远程搜索结果为空时，清空或打开下拉选框将重置筛选并重新请求。
+4. `select`组件远程搜索`remote:true`时 清空 或 搜索结果为空，再次点击下拉选框将重置筛选并重新请求。
 
 ::: demo
 
