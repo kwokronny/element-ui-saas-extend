@@ -1,5 +1,5 @@
 <template>
-	<el-form-auto :data="form" ref="EditForm" v-model="model">{{ model }}</el-form-auto>
+	<el-form-auto :data="form" ref="EditForm" v-model="model" label-width="110px">{{ model }}</el-form-auto>
 </template>
 <script>
 export default {

@@ -8,9 +8,8 @@
 				v-model="filterModel"
 				label-width="70px"
 				inline
-			>
-				<div>{{filterModel}}</div>
-			</el-form-auto>
+			></el-form-auto>
+			<div>{{filterModel}}</div>
 		</el-card>
 		<el-card shadow="never" header="栅格表单（应用 el-row 可对表单项进行布局）">
 			<el-form-auto :data="form" ref="EditForm" v-model="model" label-width="120px">

@@ -388,7 +388,6 @@ export default class ElFormAuto extends Vue {
 					this.$set(this.check, name, false);
 				}
 			}
-
 			if (field.type == "select" && field.remote) {
 				let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
 				let originClearEvent = field.on.clear || (() => { })
@@ -580,7 +579,7 @@ export default class ElFormAuto extends Vue {
 						}
 					} else if (field.type == "select" && field.remote) {
 						value = this.selectEcho(name, value);
-						if (value) {
+						if (value !== false) {
 							this.model[name] = value;
 						}
 					} else if (/(time|date(|time|s)|month|year)(?!range|select)$/.test(field.type) && field.valueFormat == "unix") {
@@ -635,7 +634,7 @@ export default class ElFormAuto extends Vue {
 		if (Array.isArray(options) && options.length > 0) {
 			let echoOptions = this.echoOptions[name];
 			let values: Array<string | number> = []
-			let isChange = false;
+			let isChange = options.length != this.model[name].length;
 			for (let i = 0; i < options.length; i++) {
 				if (options[i] && options[i].label && options[i].value) {
 					if (!echoOptions.find((option: Record<string, string>) => option.value == options[i].value)) {
@@ -644,6 +643,9 @@ export default class ElFormAuto extends Vue {
 					isChange = true;
 					values.push(options[i].value);
 				} else {
+					if (options[i] != this.model[name][i]) {
+						isChange = true;
+					}
 					values.push(options[i]);
 				}
 			}
@@ -651,6 +653,8 @@ export default class ElFormAuto extends Vue {
 		} else if (options && options.label && options.value) {
 			this.echoOptions[name] = [Object.assign({}, options)];
 			return options.value;
+		} else if (options != this.model[name]) {
+			return options
 		} else {
 			return false;
 		}
