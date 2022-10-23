@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { cloneDeep } from "lodash";
 import FormAuto from "../../packages/FormAuto";
 import userData from "../mock/user.json";
 import {
@@ -33,33 +34,27 @@ describe("FormAuto", () => {
     id: {
       label: "id",
       type: "hidden",
-      value: "1",
     },
     switch: {
       label: "开关",
       type: "switch",
-      value: true,
     },
     slider: {
       col: 12,
       label: "滑块",
       type: "slider",
-      value: 10,
     },
     text: {
       label: "文本框",
       type: "text",
-      value: "text",
     },
     password: {
       label: "密码框",
       type: "password",
-      value: "password",
     },
     cascader: {
       label: "级联框",
       type: "cascader",
-      value: [2, 6],
       options: [
         {
           label: "节点1",
@@ -84,77 +79,63 @@ describe("FormAuto", () => {
       label: "选择框",
       type: "select",
       options: defaultOption,
-      value: 0,
     },
     selects: {
       label: "选择框",
       type: "select",
       options: defaultOption,
       multiple: true,
-      value: [3, 2],
     },
     date: {
       label: "日期",
       type: "date",
-      value: "2018-01-01",
     },
     datetime: {
       label: "日期时间",
       type: "datetime",
-      value: "2018-01-01 00:00:00",
     },
     time: {
       label: "时间",
       type: "time",
-      value: "01:00:00",
     },
     timeRange: {
       label: "时间范围",
       type: "timerange",
       rangeName: ["startTime", "endTime"],
-      value: ["00:00:00", "01:00:00"],
     },
     dateRange: {
       label: "日期范围",
       type: "daterange",
       suffixTime: true,
       rangeName: ["startDate", "endDate"],
-      value: ["2018-01-01 00:00:00", "2018-01-02 23:59:59"],
     },
     datetimeRange: {
       label: "日期时间范围",
       type: "datetimerange",
       rangeName: ["startDT", "endDT"],
-      value: ["2018-01-01 00:00:00", "2018-01-02 00:00:00"],
     },
     radio: {
       label: "单选框",
       type: "radio",
       options: defaultOption,
-      value: 3,
     },
     radiobutton: {
       label: "单选按钮",
       type: "radiobutton",
       options: defaultOption,
-      value: 2,
     },
     check: {
       label: "复选框",
       type: "check",
       options: defaultOption,
-      value: [2],
     },
     rate: {
       label: "评分",
       type: "rate",
-      value: 3,
     },
     textarea: {
       label: "备注",
       type: "textarea",
-      showWordLimit: true,
-      value: "textarea",
     },
   };
 
@@ -274,21 +255,8 @@ describe("FormAuto", () => {
   //#endregion
 
   it("form default value and v-model valid", async () => {
-    vm = createVue(
-      {
-        template: `<el-card header="form default value and v-model valid"><el-form-auto :data="form" v-model="model" ref="form"></el-form-auto></el-card>`,
-        data() {
-          return {
-            model: {},
-            form: baseFormData,
-          };
-        },
-      },
-      true
-    );
-
-    let error = recordValid(vm.model, {
-      __formauto_get__: true,
+    let form = cloneDeep(baseFormData);
+    let defaultValues = {
       id: "1",
       switch: true,
       slider: 10,
@@ -314,41 +282,45 @@ describe("FormAuto", () => {
       select: 0,
       selects: [3, 2],
       cascader: [2, 6],
-    });
+    };
+    for (let key in form) {
+      if (defaultValues[key] !== undefined) {
+        form[key].value = defaultValues[key];
+      }
+    }
+    vm = createVue(
+      {
+        template: `<el-card header="form default value and v-model valid"><el-form-auto :data="form" v-model="model" ref="form"></el-form-auto></el-card>`,
+        data() {
+          return {
+            model: {},
+            form,
+          };
+        },
+      },
+      true
+    );
+    let error = recordValid(vm.model, defaultValues);
     expect(error).to.equal(false, `default value setting ${error}`);
     let data = {
-      id: 45,
-      switch: false,
-      slider: 23,
-      text: "textchange",
-      password: "passwordchange",
-      textarea: "textareachange",
-      date: "",
       datetime: "2019-02-01 10:00:00",
       dateRange: ["2019-01-01 08:00:00", "2019-01-02 08:00:00"],
       datetimeRange: ["2019-02-01 10:00:00", "2019-05-02 08:00:00"],
       time: "06:00:00",
       timeRange: ["00:00:00", "05:00:00"],
-      radio: 2,
-      radiobutton: 0,
-      check: [3],
-      rate: 3,
-      select: 0,
-      selects: [0, 2],
-      cascader: [1, 4, 5],
     };
     vm.model = Object.assign({}, data);
-    await waitImmediate();
+    (vm.model.password = "passwordchange"), await waitImmediate();
     error = recordValid(
       vm.model,
-      Object.assign(data, {
-        __formauto_get__: true,
+      Object.assign(defaultValues, data, {
         startTime: "00:00:00",
         endTime: "05:00:00",
         startDate: "2019-01-01 08:00:00",
         endDate: "2019-01-02 08:00:00",
         startDT: "2019-02-01 10:00:00",
         endDT: "2019-05-02 08:00:00",
+        password: "passwordchange",
       })
     );
     expect(error).to.equal(false, `v-model setting ${error}`);
@@ -382,7 +354,10 @@ describe("FormAuto", () => {
     expect(checkAll.indeterminate).to.equal(true, "check全选部分选中状态true");
     vm.model.check = [0, 1, 2];
     await waitImmediate();
-    expect(checkAll.indeterminate).to.equal(false, "check全选部分选中状态false");
+    expect(checkAll.indeterminate).to.equal(
+      false,
+      "check全选部分选中状态false"
+    );
     expect(checkAll.value).to.be.true;
     // console.log(vm.$refs.form.$children[0].$children[0].$children[1]);
     // expect(vm.$refs.form.$children[0].$children[0].$children[1].name).to.equal("el-checkbox");
@@ -552,37 +527,36 @@ describe("FormAuto", () => {
               date: {
                 label: "日期",
                 type: "date",
-                valueFormat: "unix"
+                valueFormat: "unix",
               },
               daterange: {
                 label: "日期范围",
                 type: "daterange",
                 rangeName: ["startDate", "endDate"],
-                valueFormat: "unix"
+                valueFormat: "unix",
               },
               dates: {
                 label: "多个日期",
                 type: "dates",
-                valueFormat: "unix"
+                valueFormat: "unix",
               },
               time: {
                 label: "时间",
                 type: "time",
-                valueFormat: "unix"
+                valueFormat: "unix",
               },
               slider: {
                 label: "范围",
                 type: "slider",
                 range: true,
-                rangeName: ["startNum", "endNum"]
-              }
+                rangeName: ["startNum", "endNum"],
+              },
             },
           };
         },
       },
       true
     );
-    
   });
 
   //#region 远程搜索相关
@@ -827,32 +801,25 @@ describe("FormAuto", () => {
     vm.$refs.form.reset();
     await waitImmediate();
     let error = recordValid(vm.model, {
-      __formauto_get__:true,
-      id: "1",
-      switch: true,
-      slider: 10,
-      text: "text",
-      password: "password",
-      textarea: "textarea",
-      date: "2018-01-01",
-      datetime: "2018-01-01 00:00:00",
-      dateRange: ["2018-01-01 00:00:00", "2018-01-02 23:59:59"],
-      startDate: "2018-01-01 00:00:00",
-      endDate: "2018-01-02 23:59:59",
-      datetimeRange: ["2018-01-01 00:00:00", "2018-01-02 00:00:00"],
-      startDT: "2018-01-01 00:00:00",
-      endDT: "2018-01-02 00:00:00",
-      time: "01:00:00",
-      timeRange: ["00:00:00", "01:00:00"],
-      startTime: "00:00:00",
-      endTime: "01:00:00",
-      radio: 3,
-      radiobutton: 2,
-      check: [2],
-      rate: 3,
-      select: 0,
-      selects: [3, 2],
-      cascader: [2, 6],
+      id: "",
+      switch: false,
+      slider: 0,
+      text: "",
+      password: "",
+      textarea: "",
+      date: "",
+      datetime: "",
+      dateRange: ["", ""],
+      datetimeRange: ["", ""],
+      time: "",
+      timeRange: ["", ""],
+      radio: "",
+      radiobutton: "",
+      check: [],
+      rate: 0,
+      select: "",
+      selects: [],
+      cascader: [],
     });
     expect(error).to.equal(false);
   });
@@ -896,7 +863,9 @@ describe("FormAuto", () => {
       await vm.$refs.Form.validate();
       expect(true).to.be.false;
     } catch (e) {
-      expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(15 );
+      expect(vm.$el.querySelectorAll(".el-form-item__error").length).to.equal(
+        15
+      );
     }
   });
 

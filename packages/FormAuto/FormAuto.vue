@@ -275,11 +275,6 @@ export default class ElFormAuto extends Vue {
 				field = this.fields[name];
 			}
 			field.name = name;
-
-			// field.label = item.label;
-			// field.required = item.required || false;
-			// field.disabled = item.disabled || false;
-			// field.addRules = item.addRules || [];
 			let notProps = ["value", "addRules", "label", "labelHidden", "allOption", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "notSubmit", "required", "col", "options"];
 			notProps.forEach((key: string) => {
 				if (item[key] !== undefined && !/on|options/.test(key)) {
@@ -413,7 +408,7 @@ export default class ElFormAuto extends Vue {
 	private asyncOptionsRequest(): void {
 		if (this.asyncOptions.length) {
 			let asyncList: Promise<void>[] = this.asyncOptions.map((item) => {
-				return new Promise((resolve, reject) => {
+				return new Promise((resolve) => {
 					if (item.remote && item.type == "select" && item.options instanceof Function) {
 						let remoteMethod = item.options;
 						item.props.filterable = true;
@@ -454,15 +449,11 @@ export default class ElFormAuto extends Vue {
 						item.props.remoteMethod("");
 						resolve();
 					} else if (item.options) {
-						// let remoteMethod = item.options;
-						// item.remoteMethod = () => {
 						transformOptions(item.options, item.type != 'cascader').then((options) => {
 							item.options = options
 							item.type == "check" && !item.notAll && this.handleCheckedChange(item.name, this.model[item.name])
 							resolve();
 						})
-						// }
-						// item.remoteMethod()
 					}
 				})
 			})
