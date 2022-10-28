@@ -18,11 +18,11 @@
 			:gutter="gutter"
 		>
 			<!--  @slot 表单内首部插槽-->
-			<template v-for="(item, name) in fields">
+			<template v-for="(item, name, index) in fields">
 				<component
 					:is="inline ? 'span' : 'el-col'"
 					:span="item.col || 24"
-					v-if="(!item.bindShow || item.bindShow(model)) && item.type!='hidden'"
+					v-if="(!item.bindShow || item.bindShow(model)) && item.type!='hidden' && (!overHidden || index < overHidden)"
 					:key="`col_${name}`"
 				>
 					<el-form-item :prop="name" :label-width="item.labelWidth" :data-prop="name">
@@ -56,41 +56,24 @@
 						<template v-else-if="item.type == 'number'">
 							<el-input-number
 								v-model="model[name]"
-								:readonly="item.disabled"
+								:readonly="item.props.disabled"
 								v-bind="item.props"
 								v-on="item.on"
 							></el-input-number>
 						</template>
 						<template v-else-if="item.type == 'slider'">
-							<el-slider
-								v-model="model[name]"
-								:disabled="item.disabled"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-slider>
+							<el-slider v-model="model[name]" v-bind="item.props" v-on="item.on"></el-slider>
 						</template>
 						<template v-else-if="item.type == 'switch'">
-							<el-switch
-								v-model="model[name]"
-								:disabled="item.disabled"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-switch>
+							<el-switch v-model="model[name]" v-bind="item.props" v-on="item.on"></el-switch>
 						</template>
 						<template v-else-if="/(year|month|week|date(s|time|))(range|)/.test(item.type)">
-							<el-date-picker
-								v-model="model[name]"
-								:type="item.type"
-								:readonly="item.disabled"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-date-picker>
+							<el-date-picker v-model="model[name]" :type="item.type" v-bind="item.props" v-on="item.on"></el-date-picker>
 						</template>
 						<template v-else-if="/time(select|range|)/.test(item.type)">
 							<el-time-select
 								v-if="item.type == 'timeselect'"
 								v-model="model[name]"
-								:readonly="item.disabled"
 								v-bind="item.props"
 								v-on="item.on"
 							></el-time-select>
@@ -98,7 +81,6 @@
 								v-else
 								:is-range="item.type == 'timerange'"
 								v-model="model[name]"
-								:readonly="item.disabled"
 								v-bind="item.props"
 								v-on="item.on"
 							></el-time-picker>
@@ -110,7 +92,7 @@
 									v-for="(option, key) in item.options"
 									:key="`${name}_${key}`"
 									:label="option.value"
-									:disabled="item.disabled || option.disabled"
+									:disabled="option.disabled"
 								>
 									<i v-if="option.icon" :class="option.icon"></i>
 									<span>{{ option.label }}</span>
@@ -136,7 +118,7 @@
 										v-for="(option, key) in item.options"
 										:key="`${name}_${key}`"
 										:label="option.value"
-										:disabled="item.disabled || option.disabled"
+										:disabled="option.disabled"
 									>
 										<i v-if="option.icon" :class="option.icon"></i>
 										<span>{{ option.label }}</span>
@@ -233,12 +215,11 @@ const DATE_UNIX = function (value, format) {
 	mixins: [locale, selectScroll],
 })
 export default class ElFormAuto extends Vue {
-
-
 	@Ref("FormAuto") readonly FormAuto!: Form;
 	@Prop({ type: Boolean, default: false }) readonly inline!: boolean;
 	@Prop({ type: Boolean, default: false }) readonly labelHidden!: boolean;
 	@Prop({ type: Boolean, default: false }) readonly allOption!: boolean;
+	@Prop({ type: [Number, Boolean], default: false }) readonly overHidden!: boolean | number;
 	@Prop(Object) readonly data!: Record<string, ElFormAutoField>;
 	@Prop({ type: Number, default: 15 }) readonly gutter!: number;
 
@@ -248,11 +229,9 @@ export default class ElFormAuto extends Vue {
 	}
 
 	@Model("input", { type: Object, default: () => { return {} } }) value!: Record<string, any>;
-	@Watch("value", { immediate: true, deep: true })
-	private onValueChange(value: Record<string, any>) {
-		// if (value && !value._formauto_get) {
+	@Watch("value", { deep: true })
+	private onValueChange(value: Record<string, any>, oldValue: Record<string, any>) {
 		this.setModel(value)
-		// }
 	}
 
 	private model: Record<string, any> = {};
@@ -293,14 +272,18 @@ export default class ElFormAuto extends Vue {
 				/(check|numberrange|cascader)/g.test(item.type) ||
 				(item.type == "select" && field.props.multiple === true)
 			) {
+				this.defaultValue[name] = []
 				field.value = item.value || [];
 			} else if (item.type == "slider" && field.props.range === true) {
 				let min = field.props.min || 0
 				let max = field.props.max || 100
+				this.defaultValue[name] = [min, max]
 				field.value = item.value || [min, max];
 			} else if (/rate|number|slider/.test(item.type)) {
+				this.defaultValue[name] = 0
 				field.value = parseInt(item.value) || 0;
 			} else if (item.type == "switch") {
+				this.defaultValue[name] = false
 				field.value = item.value === undefined ? false : item.value;
 			} else if (/(date(s|time|)|time(?!select)|month|year)(range|)/.test(item.type)) {
 				// 针对日期时间类型组件设置统一日期格式及显示格式
@@ -321,22 +304,13 @@ export default class ElFormAuto extends Vue {
 					field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
 				}
 				if (/range|dates/.test(item.type)) {
-					field.value = item.value || [];
-					if (item.type == "timerange") {
-						field.value = item.value || null;
-					} else if (field.valueFormat == "unix") {
-						field.value = field.value.map((v: string) => {
-							return DATE_UNIX(v, "timestamp")
-						})
-					}
+					this.defaultValue[name] = []
 				} else {
-					if (field.valueFormat == "unix") {
-						field.value = DATE_UNIX(item.value, "timestamp")
-					} else {
-						field.value = item.value || ""
-					}
+					this.defaultValue[name] = ""
 				}
+				field.value = item.value || this.defaultValue[name];
 			} else {
+				this.defaultValue[name] = ""
 				field.value = item.value === undefined ? "" : item.value;
 			}
 
@@ -398,8 +372,7 @@ export default class ElFormAuto extends Vue {
 					self.refreshOptions(name)
 				}
 			}
-			this.defaultValue[name] = field.value;
-			this.$set(this.model, name, this.model[name] === undefined ? field.value : this.model[name]);
+			this.$set(this.model, name, this.value[name] === undefined ? field.value : this.value[name]);
 			this.fields[name] = field;
 		})
 		this.asyncOptionsRequest()
@@ -475,11 +448,14 @@ export default class ElFormAuto extends Vue {
 			if (item.required === true) {
 				let requiredRule: any = {
 					required: true,
-					message: `${item.label} 不可为空`,
+					message: this.$t("formauto.requiredText").replace('{1}', item.label || ''),
 					trigger: "change",
 				};
 				switch (item.type) {
 					case "check":
+						requiredRule.type = "array";
+						break;
+					case "numberrange":
 					case "daterange":
 					case "timerange":
 					case "datetimerange":
@@ -520,7 +496,6 @@ export default class ElFormAuto extends Vue {
 
 	public getModel(): Record<string, any> {
 		let value = {}
-		// value.property
 		for (let name in this.fields) {
 			let field = this.fields[name]
 			if (field && !field.notSubmit) {
@@ -599,9 +574,7 @@ export default class ElFormAuto extends Vue {
 						this.model[name] = value;
 					}
 				} else {
-					if (!field.notSubmit) {
-						this.model[name] = this.defaultValue[name]
-					}
+					this.model[name] = this.defaultValue[name]
 				}
 			}
 		}
@@ -702,19 +675,20 @@ export default class ElFormAuto extends Vue {
 		this.echoOptions = {}
 		if (this.FormAuto) {
 			this.FormAuto.resetFields();
+			for (let name in this.fields) {
+				let field = this.fields[name];
+				this.model[name] = field.value;
+				if (field.type == "check" && !field.notAll) {
+					this.handleCheckedChange(name, field.value)
+				}
+			}
 			this.$nextTick(function () {
 				this.FormAuto.clearValidate();
-				for (let name in this.fields) {
-					let field = this.fields[name];
-					this.model[name] = this.defaultValue[name];
-					if (field.type == "check" && !field.notAll) {
-						this.handleCheckedChange(name, this.defaultValue[name])
-					}
-				}
 			})
 		}
 	}
 
+	//#region 继承Form相关方法
 	/**
 	 * @public
 	 * 异步验证成功后获取表单所有参数
@@ -727,9 +701,17 @@ export default class ElFormAuto extends Vue {
 	 * @public
 	 * 验证单个字段
 	 */
-	public validateField(props: string[] | string, callback: (errorMessage: string) => void): void {
+	public validateField(props: string[] | string, callback?: (errorMessage: string) => void): void {
 		return this.FormAuto && this.FormAuto.validateField(props, callback);
 	}
 
+	/**
+	 * @public
+	 * 清除验证
+	 */
+	public clearValidate(props?: string[] | string): void {
+		return this.FormAuto && this.FormAuto.clearValidate(props);
+	}
+	//#endregion
 }
 </script>

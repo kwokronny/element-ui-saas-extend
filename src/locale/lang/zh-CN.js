@@ -10,6 +10,7 @@ export default {
   formauto: {
     pleaseInput: "请输入",
     pleaseSelect: "请选择",
+    requiredText: "{1} 不可为空",
     selectLoading: "加载中...",
     checkAll: "全选",
     selectAll: "全部",
@@ -21,8 +22,10 @@ export default {
   tablepage: {
     search: "搜索",
     reset: "重置",
+    collapseOn: "展开",
+    collapseOff: "折叠",
     customColumns: "自定义列",
-    selection: ["已选择", "条"],
+    selection: "已选择 {1} 条",
     clear: "清空",
     sort: "排序",
     column: "表项",
@@ -40,6 +43,5 @@ export default {
   formtable: {
     add: "添加",
     remove: "删除",
-    clear: "清空",
   },
 };

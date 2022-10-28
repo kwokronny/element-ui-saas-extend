@@ -11,6 +11,7 @@ export default {
     pleaseInput: "Please input ",
     pleaseSelect: "Please select ",
     selectLoading: "Loading...",
+    requiredText: "{1} is required",
     checkAll: "Check all",
     selectAll: "All",
     min: "Min ",
@@ -21,8 +22,10 @@ export default {
   tablepage: {
     search: "Search",
     reset: "Reset",
+    collapseOn: "Expand",
+    collapseOff: "Fold",
     customColumns: "Custom Column",
-    selection: ["", "items selected "],
+    selection: "{1} items selected",
     clear: "Clear",
     sort: "Sort",
     column: "Column",
@@ -40,6 +43,5 @@ export default {
   formtable: {
     add: "Add",
     remove: "Remove",
-    clear: "Clear",
   },
 };

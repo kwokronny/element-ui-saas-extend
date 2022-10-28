@@ -10,18 +10,10 @@
 			<slot name="prepend">
 				<slot name="option_perpend"></slot>
 				<el-button
-					v-if="!noAdd"
 					@click="addItem()"
 					icon="el-icon-plus"
-					:disabled="itemLimit>-1 && value.length >= itemLimit"
-				>{{addText||$t("formtable.add")}}</el-button>
-				<el-button
-					v-if="showClear"
-					@click="clear()"
-					icon="el-icon-delete"
-					type="danger"
-					:disabled="value.length < 1"
-				>{{$t("formtable.clear")}}</el-button>
+					:disabled="maxlength>-1 && value.length >= maxlength"
+				>{{$t("formtable.add")}}</el-button>
 				<slot name="option_append"></slot>
 			</slot>
 		</div>
@@ -217,7 +209,7 @@
 <script lang="ts">
 import { Form } from "element-ui";
 import { Vue, Component, Prop, Model, Watch, Ref } from "vue-property-decorator";
-import { cloneDeep, forEach, isEqual, omit, uniqBy } from "lodash-es";
+import { cloneDeep, forEach, omit, uniqBy } from "lodash-es";
 import { ElAutoMixinOptions, ElAutoOption, ElFormAutoField } from "types/saas-extend";
 import { transformOptions } from "../util";
 import locale from "../../src/mixin/locale"
@@ -246,17 +238,11 @@ export default class ElFormTable extends Vue {
 	private fields: Record<string, ElFormAutoField> = {};
 	private rules: Record<string, any> = {};
 
-	@Prop(Object) readonly data!: Record<string, ElFormAutoField>;
-	@Watch("data", { immediate: true, deep: true })
-	private onDataChange(data: Record<string, ElFormAutoField>) {
-		data && (this.generateModel(), this.generateRule())
-	}
 
-	@Prop({ type: Number, default: -1 }) itemLimit!: number;
-	@Prop({ type: String, default: "" }) addText!: string;
-	@Prop({ type: Boolean, default: false }) showClear!: boolean;
-	@Prop({ type: Boolean, default: false }) noOptionCol!: boolean;
-	@Prop({ type: Boolean, default: false }) noAdd!: boolean;
+	@Prop({ type: Number, default: -1 }) maxlength!: number;
+
+	@Prop({ type: Boolean, default: false }) hiddenOption!: boolean;
+	@Prop({ type: Boolean, default: "top" }) createPosition!: string;
 
 	@Model("input", { type: Array, default: () => [] }) value!: Record<string, any>[];
 
@@ -306,7 +292,11 @@ export default class ElFormTable extends Vue {
 		return value
 	}
 
-	public setModel(model: Record<string, any>): void {
+	/**
+	 * @public
+	 * 设置表单
+	 */
+	public setModel(model: Record<string, any>[]): void {
 		let newModel: Record<string, any>[] = []
 		for (let i = 0; i < model.length; i++) {
 			let row: Record<string, any> = cloneDeep(this.defaultValue)
@@ -320,6 +310,7 @@ export default class ElFormTable extends Vue {
 		}
 		this.model = newModel
 	}
+
 
 	private valuePrehandle(index: number, name: string, value: any) {
 		let field = this.fields[name]
@@ -350,22 +341,8 @@ export default class ElFormTable extends Vue {
 		}
 	}
 
-	/**
-	 * @public
-	 * 异步验证成功后获取表单所有参数
-	 */
-	public validate(cb?: ValidateCallback): Promise<boolean> | void {
-		return cb ? this.FormTable.validate(cb) : this.FormTable.validate();
-	}
 
-	/**
-	 * @public
-	 * 验证单个字段
-	 */
-	public validateField(props: string[] | string, callback: (errorMessage: string) => void): void {
-		return this.FormTable && this.FormTable.validateField(props, callback);
-	}
-
+	//#region select回显相关
 	private echoOptions: Record<string, any> = {}
 
 	private selectEcho(name: string, idx: number, options: any): any {
@@ -415,11 +392,11 @@ export default class ElFormTable extends Vue {
 		}
 		return value
 	}
+	//#endregion
 
 
 	public addItem(model?: Record<string, any>) {
-		if (this.itemLimit > -1 && this.itemLimit < this.model.length) return;
-		// this.$set(this.model, this.model.length, Object.assign(model || {}, cloneDeep(this.defaultValue)))
+		if (this.maxlength > -1 && this.maxlength < this.model.length) return;
 		this.model.push(Object.assign(cloneDeep(this.defaultValue), model || {}));
 	}
 
@@ -445,9 +422,13 @@ export default class ElFormTable extends Vue {
 
 	private defaultValue: Record<string, any> = {};
 
-	/**
-	 * 规范生成 model 
-	 */
+	//#region 初始化
+	@Prop(Object) readonly data!: Record<string, ElFormAutoField>;
+	@Watch("data", { immediate: true, deep: true })
+	private onDataChange(data: Record<string, ElFormAutoField>) {
+		data && (this.generateModel(), this.generateRule())
+	}
+
 	private generateModel(): void {
 		forEach(this.data, (item, name) => {
 			let field: ElFormAutoField;
@@ -477,13 +458,14 @@ export default class ElFormTable extends Vue {
 				(item.type == "select" && field.props.multiple === true)) {
 				field.value = item.value || [];
 			} else if (item.type == "slider" && field.props.range === true) {
-
+				let min = field.props.min || 0
+				let max = field.props.max || 100
+				field.value = item.value || [min, max];
 			} else if (/rate|number|slider/.test(item.type)) {
 				field.value = parseInt(item.value) || 0;
 			} else if (item.type == "switch") {
 				field.value = item.value === undefined ? false : item.value;
 			} else if (/(date(s|time|)|time(?!select)|month|year)(range|)/.test(item.type)) {
-
 				field.props.valueFormat = field.valueFormat == "unix" ? "timestamp" : field.valueFormat;
 				if (/datetime/g.test(item.type)) {
 					field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss";
@@ -501,16 +483,15 @@ export default class ElFormTable extends Vue {
 					field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
 				}
 				if (/range|dates/.test(item.type)) {
-					field.value = item.value || [];
-					if (item.type == "timerange") {
-						field.value = item.value || null;
-					} else if (field.valueFormat == "unix") {
-						field.value = field.value.map((v: string) => {
+					if (field.valueFormat == "unix" && item.value) {
+						field.value = item.value.map((v: string) => {
 							return DATE_UNIX(v, "timestamp")
 						})
+					} else {
+						field.value = item.value || null;
 					}
 				} else {
-					if (field.valueFormat == "unix") {
+					if (field.valueFormat == "unix" && item.value) {
 						field.value = DATE_UNIX(item.value, "timestamp")
 					} else {
 						field.value = item.value || ""
@@ -647,11 +628,12 @@ export default class ElFormTable extends Vue {
 			if (item.required === true) {
 				let requiredRule: any = {
 					required: true,
-					message: `${item.label} 不可为空`,
+					message: this.$t("formauto.requiredText").replace('{1}', item.label || ''),
 					trigger: "change",
 				};
 				switch (item.type) {
 					case "check":
+					case "numberrange":
 					case "daterange":
 					case "timerange":
 					case "datetimerange":
@@ -693,5 +675,33 @@ export default class ElFormTable extends Vue {
 			}
 		});
 	}
+	//#endregion
+
+	
+	//#region 继承Form相关方法
+	/**
+	 * @public
+	 * 异步验证成功后获取表单所有参数
+	 */
+	public validate(cb?: ValidateCallback): Promise<boolean> | void {
+		return cb ? this.FormTable.validate(cb) : this.FormTable.validate();
+	}
+
+	/**
+	 * @public
+	 * 验证单个字段
+	 */
+	public validateField(props: string[] | string, callback?: (errorMessage: string) => void): void {
+		return this.FormTable && this.FormTable.validateField(props, callback);
+	}
+	
+	/**
+	 * @public
+	 * 清除验证
+	 */
+	public clearValidate(props?: string[] | string): void {
+		return this.FormTable && this.FormTable.clearValidate(props);
+	}
+	//#endregion
 }
 </script>

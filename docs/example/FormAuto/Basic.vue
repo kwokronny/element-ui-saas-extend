@@ -206,7 +206,7 @@ export default {
 					label: "复选框",
 					type: "check",
 					required: true,
-					options: { 1: "选项1", 2: "选项2", 3: "选项3" }
+					options: { 1: "选项1", 2: "选项2", 3: "选项3" },
 				},
 				rate: {
 					label: "评分",

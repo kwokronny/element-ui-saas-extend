@@ -7,38 +7,50 @@
 			class="el-table-page__search-card"
 		>
 			<slot name="search_prepend"></slot>
-			<el-form-auto
-				ref="SearchForm"
-				v-model="filter"
-				@keyup.enter.native="search(1)"
-				:data="searchForm"
-				v-bind="Object.assign({inline:true,allOption:true},searchProps)"
-			>
-				<template v-for="search in searchForm" :slot="search.slot" slot-scope="{item,model,name}">
-					<slot
-						v-if="search.slot"
-						:name="search.slot"
-						v-bind:item="item"
-						v-bind:model="model"
-						v-bind:name="name"
-					></slot>
-				</template>
-				<slot name="search_button">
-					<el-button
-						type="primary"
-						icon="el-icon-search"
-						@click="search(1)"
-						:loading="loading"
-						v-bind="defaultButtonStyle"
-					>{{$t("tablepage.search")}}</el-button>
-					<el-button
-						type="default"
-						@click="resetSearch"
-						v-bind="defaultButtonStyle"
-					>{{$t("tablepage.reset")}}</el-button>
-				</slot>
-				<slot name="search_button_append"></slot>
-			</el-form-auto>
+			<div class="el-table-page__filter-row">
+				<div class="el-table-page__filter-button-col">
+					<slot name="search_button">
+						<el-button
+							type="primary"
+							icon="el-icon-search"
+							@click="search(1)"
+							:loading="loading"
+							v-bind="defaultButtonStyle"
+						>{{$t("tablepage.search")}}</el-button>
+						<el-button
+							type="default"
+							@click="resetSearch"
+							v-bind="defaultButtonStyle"
+						>{{$t("tablepage.reset")}}</el-button>
+					</slot>
+					<slot name="search_button_append"></slot>
+					<el-button type="text" v-if="searchCollapse" @click="handleSwitchCollapse">
+						{{collapseStatus?$t("tablepage.collapseOn"):$t("tablepage.collapseOff")}}
+						<i
+							class="spac-ml_s1"
+							:class="collapseStatus?'el-icon-arrow-down':'el-icon-arrow-up'"
+						></i>
+					</el-button>
+				</div>
+				<el-form-auto
+					ref="SearchForm"
+					v-model="filter"
+					@keyup.enter.native="search(1)"
+					:data="searchForm"
+					:over-hidden="searchCollapse&&collapseStatus?searchCollapse:false"
+					v-bind="Object.assign({inline:true, allOption:true}, searchProps)"
+				>
+					<template v-for="search in searchForm" :slot="search.slot" slot-scope="{item,model,name}">
+						<slot
+							v-if="search.slot"
+							:name="search.slot"
+							v-bind:item="item"
+							v-bind:model="model"
+							v-bind:name="name"
+						></slot>
+					</template>
+				</el-form-auto>
+			</div>
 			<slot name="search_append"></slot>
 		</component>
 		<slot name="middle"></slot>
@@ -51,9 +63,7 @@
 							class="el-table-page_header-selected-text"
 							v-if="$attrs['row-key'] && multipleSelection"
 						>
-							{{$t("tablepage.selection[0]")}}
-							<b>{{multipleSelection.length}}</b>
-							{{$t("tablepage.selection[1]")}}
+							<b v-text="$t('tablepage.selection').replace('{1}', multipleSelection.length)"></b>
 							<el-button type="text" @click="clearSelection">{{$t("tablepage.clear")}}</el-button>
 						</span>
 					</slot>
@@ -167,7 +177,7 @@
 				>{{$t("tablepage.save")}}</el-button>
 			</div>
 		</el-dialog>
-	</div>
+	</div> 
 </template>
 <script lang="ts">
 import { Vue, Component, Prop, Ref, Watch, PropSync } from "vue-property-decorator"
@@ -201,6 +211,12 @@ export default class ElTablePage extends Vue {
 	@Prop(Object) searchProps!: Record<string, any>;
 
 	@Prop({ type: Boolean, default: false }) showOverflowTooltip!: boolean;
+	@Prop({ type: [Number, Boolean], default: false }) readonly searchCollapse!: boolean | number;
+	private collapseStatus = true
+	private handleSwitchCollapse() {
+		this.collapseStatus = !this.collapseStatus
+	}
+
 
 	@Prop({
 		type: Object,
@@ -208,6 +224,10 @@ export default class ElTablePage extends Vue {
 			return Object.keys(value).findIndex((val: string) => !/size|plain|round/.test(val)) > -1
 		}
 	}) buttonStyle!: Record<string, any>;
+
+	// get filterCollapse(): boolean|number {
+	// 	return this.searchCollapse || (this.$ELEMENT && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage.searchCollapse) || false
+	// }
 
 	get defaultButtonStyle(): Record<"size" | "plain" | "round", string | boolean> {
 		return this.buttonStyle || (this.$ELEMENT && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage.buttonStyle) || {}
@@ -236,6 +256,14 @@ export default class ElTablePage extends Vue {
 			this.search();
 			this.refresh = true;
 		})
+	}
+
+	private addSearchField(name: string, field: ElFormAutoField) {
+		if (field.slot) {
+			let slot_name = field.slot == true ? name : field.slot
+			field.slot = `search-${slot_name}`;
+		}
+		this.searchForm[name] = field
 	}
 
 	private reduceTransformColumn(columns: ElTablePageColumn[], isParent: boolean = false) {
@@ -314,33 +342,6 @@ export default class ElTablePage extends Vue {
 	// #region 搜索
 	private filter: Record<string, any> = {}
 
-	private addSearchField(name: string, field: ElFormAutoField) {
-		if (field.slot) {
-			let slot_name = field.slot == true ? name : field.slot
-			field.slot = `search-${slot_name}`;
-		}
-		// if (!field.on) {
-		// 	field.on = {}
-		// }
-		// let self = this;
-		// if (!field.notChangeRefresh) {
-		// 	if (/numberrange|text/.test(field.type)) {
-		// 		let originClearEvent = field.on["clear"] || (() => { })
-		// 		field.on["clear"] = function (value: any) {
-		// 			self.search();
-		// 			return originClearEvent(value)
-		// 		}
-		// 	} else if (!/password|textarea|number|slider|check/.test(field.type)) {
-		// 		let originChangeEvent = field.on["change"] || (() => { })
-		// 		field.on["change"] = function (value: any) {
-		// 			self.search();
-		// 			return originChangeEvent(value)
-		// 		}
-		// 	}
-		// }
-		this.searchForm[name] = field
-	}
-
 	public getParams(): Record<string, any> {
 		return this.filter;
 	}
@@ -359,7 +360,7 @@ export default class ElTablePage extends Vue {
 	private total: number = 0
 	private limit: number = 15;
 	@Prop(String) pageLayout!: string;
-	@Prop({ type: Array, default: () => [15, 30, 50, 100] }) pageSizes!: number[];
+	@Prop({ type: Array, default: () => [10, 15, 30, 50, 100] }) pageSizes!: number[];
 
 	get defaultPageLayout(): string {
 		return this.pageLayout || (this.$ELEMENT && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage.pageLayout) || "total, sizes, prev, pager, next, jumper"
@@ -398,12 +399,7 @@ export default class ElTablePage extends Vue {
 			}
 		} catch (e) {
 			this.loading = false;
-			this.record = []
-			this.page = 1
-			this.limit = this.limit
-			this.total = 0
 		}
-
 	}
 
 	private handlePageChange(page: number) {

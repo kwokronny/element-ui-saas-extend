@@ -1,5 +1,5 @@
 <template>
-	<el-table-page ref="TablePage" :columns="columns" :request="getList" :page-size="10"></el-table-page>
+	<el-table-page ref="TablePage" :search-collapse="2" :columns="columns" :request="getList"></el-table-page>
 </template>
 <script>
 export default {

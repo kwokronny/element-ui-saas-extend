@@ -38,8 +38,8 @@ pageClass: component-page
 
 :::
 
-## options 设置
-
+## options 设置 
+ 
 ```typescript
 export declare interface ElAutoOption {
   icon?: string;

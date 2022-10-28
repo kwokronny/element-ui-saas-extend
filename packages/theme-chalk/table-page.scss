@@ -1,4 +1,17 @@
 .el-table-page {
+  .el-table-page__search-card {
+    margin-bottom: 15px;
+    .el-table-page__filter-row {
+      &:after {
+        display: table;
+        clear: both;
+      }
+    }
+    .el-table-page__filter-button-col {
+      padding: 0 10px;
+      float: right;
+    }
+  }
   .el-table-page_header {
     display: flex;
     justify-content: space-between;
@@ -11,9 +24,6 @@
   .el-table-page_header-selected-text {
     font-size: 14px;
     margin-right: 10px;
-  }
-  .el-table-page__search-card {
-    margin-bottom: 15px;
   }
   .el-table-page_copy-icon {
     float: left;

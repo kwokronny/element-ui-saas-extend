@@ -12,12 +12,12 @@ pageClass: component-page
 
 ```vue
 <template>
-  <div>
-    <el-form-table :data="form" ref="EditForm" v-model="model">
+  <el-card shadow="never">
+    <el-form-table :data="form" ref="EditForm" v-model="model" size="small">
       <el-button slot="option_append" @click="setModel">赋值</el-button>
     </el-form-table>
     <div style="margin-top: 20px">表单字段: {{ model }}</div>
-  </div>
+  </el-card>
 </template>
 <script>
 export default {
@@ -127,14 +127,18 @@ export declare type ElAutoMixinOptions =
 
 ```vue
 <template>
-  <div>
-    <el-form-table :data="form" ref="EditForm" v-model="model"> 
-    <tempalte slot="daterange" slot-scope="{item,row,name}">
-      <el-date-picker :type="item.type" v-model="row[name]" v-bind="item.props"></el-date-picker>
-    </tempalte>
+  <el-card shadow="never">
+    <el-form-table :data="form" ref="EditForm" v-model="model">
+      <template slot="daterange" slot-scope="{ item, row, name }">
+        <el-date-picker
+          :type="item.type"
+          v-model="row[name]"
+          v-bind="item.props"
+        ></el-date-picker>
+      </template>
     </el-form-table>
     <div style="margin-top: 20px">表单字段: {{ model }}</div>
-  </div>
+  </el-card>
 </template>
 <script>
 export default {
@@ -143,8 +147,8 @@ export default {
     return {
       model: [],
       form: {
-        id:{
-          type:"hidden"
+        id: {
+          type: "hidden",
         },
         remote: {
           label: "远程搜索(选过不可再选)",
@@ -265,23 +269,23 @@ export default {
 
 ```vue
 <template>
-  <div>
+  <el-card shadow="never">
     <el-form-table :data="form" ref="EditForm" v-model="model">
       <el-tag slot="option_perpend" type="primary">首部操作区前置</el-tag>
       <el-tag slot="option_append" type="primary">首部操作区追加</el-tag>
-      <template slot-scope="{ item, row, name }" slot="customSlot">
+      <div slot="customSlot" slot-scope="{ item, row, name }">
         自定义 <el-input v-model="row[name]" style="width:100px"></el-input>
-      </template>
-      <template slot="table_body_option" slot-scope="{ row, index }">
+      </div>
+      <div slot="table_body_option" slot-scope="{ row, index }">
         <el-button
           icon="el-icon-remove"
           tpye="text"
           @click="remove(index)"
         ></el-button>
-      </template>
+      </div>
     </el-form-table>
     <div style="margin-top: 20px">表单字段: {{ model }}</div>
-  </div>
+  </el-card>
 </template>
 <script>
 export default {
