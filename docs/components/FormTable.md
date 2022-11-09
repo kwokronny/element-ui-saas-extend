@@ -13,7 +13,7 @@ pageClass: component-page
 ```vue
 <template>
   <el-card shadow="never">
-    <el-form-table :data="form" ref="EditForm" v-model="model" size="small">
+    <el-form-table :data="form" ref="EditForm" v-model="model">
       <el-button slot="option_append" @click="setModel">赋值</el-button>
     </el-form-table>
     <div style="margin-top: 20px">表单字段: {{ model }}</div>
@@ -29,7 +29,7 @@ export default {
           label: "坐席名称",
           type: "text",
           placeholder: "请输入1-20字符",
-          maxLength: 20,
+          maxlength: 20,
           showWordLimit: true,
           required: true,
         },
@@ -271,12 +271,12 @@ export default {
 <template>
   <el-card shadow="never">
     <el-form-table :data="form" ref="EditForm" v-model="model">
-      <el-tag slot="option_perpend" type="primary">首部操作区前置</el-tag>
-      <el-tag slot="option_append" type="primary">首部操作区追加</el-tag>
+      <el-tag slot="add_perpend" type="primary">添加按钮前置</el-tag>
+      <el-tag slot="add_append" type="primary">添加按钮追加</el-tag>
       <div slot="customSlot" slot-scope="{ item, row, name }">
         自定义 <el-input v-model="row[name]" style="width:100px"></el-input>
       </div>
-      <div slot="table_body_option" slot-scope="{ row, index }">
+      <div slot="row_option" slot-scope="{ row, index }">
         <el-button
           icon="el-icon-remove"
           tpye="text"
@@ -343,7 +343,7 @@ export default {
   },
   methods: {
     remove(index) {
-      this.$refs["EditForm"].removeItem(index);
+      this.$refs["EditForm"].removeRow(index);
     },
   },
 };
@@ -360,9 +360,10 @@ export default {
 | :-------------- | :-------------------------- | :---------------------------------------------------------- | :----- | ------ |
 | v-model         | 表单数据对象                | `Array<Record<string,any>>`                                 | -      | []     |
 | data            | 表单项配置                  | [Record&lt;name:string,FormTableField&gt;](#FormTableField) | -      | {}     |
-| item-limit      | 限制最大成员数量            | `number`                                                    | -      | -1     |
-| add-text        | 添加按钮文案                | `string`                                                    | -      | 添加   |
-| showClear       | 显示清空按钮                | `boolean`                                                   | -      | false  |
+| maxlength       | 限制最大行数量              | `number`                                                    | -      | -1     |
+| table-props     | 限制最大成员数量            | `Record<string, any>`                                       | -      | -1     |
+| hidden-add      | 限制最大成员数量            | `boolean`                                                   | -      | -1     |
+| hidden-option   | 限制最大成员数量            | `boolean`                                                   | -      | -1     |
 | `[prop:string]` | 继承 `<el-table>` 所有 Prop | `any`                                                       | -      | -      |
 
 ### FormTableField
@@ -389,6 +390,7 @@ export default {
 | 表单相关设置    |                                                                                              |                                 |        |
 | required        | 是否必填                                                                                     | `boolean`                       | false  |
 | addRules        | 追加验证规则                                                                                 | `array`                         | -      |
+| columnProps     | `<el-table-column>` Prop 属性设置                                                            | `Record<string,any>`            | -      |
 
 ### type Enum
 
@@ -421,31 +423,34 @@ export default {
 
 ### Method
 
-| 方法名          | 描述                         | 参数                                                   | 返回                   |
-| :-------------- | :--------------------------- | :----------------------------------------------------- | ---------------------- |
-| clear()         | 清空所有                     | -                                                      | -                      |
-| validate()      | 对整个表单进行校验的方法     | `valid:boolean`                                        | `Promise<void> | void` |
-| validateField() | 对部分表单字段进行校验的方法 | `(prop:array | string,callback:(errMsg:string)=>void)` | -                      |
-| addItem()       | 添加项                       | `model?:Record<string,any>`                            | -                      |
-| removeItem()    | 获取表单所有参数             | `index:number`                                         | -                      |
+| 方法名          | 描述                         | 参数                                                                    | 返回                   |
+| :-------------- | :--------------------------- | :---------------------------------------------------------------------- | ---------------------- |
+| validate()      | 对整个表单进行校验的方法     | `valid:boolean`                                                         | `Promise<void> | void` |
+| validateField() | 对部分表单字段进行校验的方法 | `prop:array | string, callback?:(errMsg:string)=>void,index?:number`    | -                      |
+| clearValidate() | 对部分表单字段进行校验的方法 | `prop?:array | string`                                                  | -                      |
+| getModel()      | 获取表格数据                 | -                                                                       | -                      |
+| setModel()      | 设置表格                     | `model:Record<string,any>[]`                                            | -                      |
+| addRow()        | 添加行                       | `row?:Record<string,any>`                                               | -                      |
+| setRow()        | 修改行或行内某项             | `index: number, modelOrName: Record<string, any> | string, value?: any` | -                      |
+| removeRow()     | 获取表单所有参数             | `index:number`                                                          | -                      |
 
 ### Slot
 
-| 插槽           | 描述           |
-| :------------- | :------------- |
-| option_prepend | 首部操作区前置 |
-| option_append  | 首部操作区追加 |
-| prepend        | 表格上方操作区 |
+| 插槽          | 描述           |
+| :------------ | :------------- |
+| add_perpend   | 首部操作区前置 |
+| add_append    | 首部操作区追加 |
+| table_prepend | 表格上方操作区 |
 
 ### Scope Slot
 
-| 插槽名称          | 描述                                              |
-| :---------------- | :------------------------------------------------ |
-| 自定义名称        | 自定义表单项的内容，参数为 { item, row, name }    |
-| table_body_option | 自定义表格右侧操作列的内容，参数为 { row, index } |
+| 插槽名称   | 描述                                              |
+| :--------- | :------------------------------------------------ |
+| 自定义名称 | 自定义表单项的内容，参数为 { item, row, name }    |
+| row_option | 自定义表格右侧操作列的内容，参数为 { row, index } |
 
 ### Event
 
-| 事件名称     | 说明                                 | 回调参数 |
-| :----------- | :----------------------------------- | :------- |
-| [event:name] | 可直接追加 &lt;el-table&gt; 所有事件 | -        |
+| 事件名称     | 说明                                | 回调参数 |
+| :----------- | :---------------------------------- | :------- |
+| [event:name] | 可直接追加 &lt;el-form&gt; 所有事件 | -        |

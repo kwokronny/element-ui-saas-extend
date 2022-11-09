@@ -254,7 +254,7 @@ export default class ElFormAuto extends Vue {
 				field = this.fields[name];
 			}
 			field.name = name;
-			let notProps = ["value", "addRules", "label", "labelHidden", "allOption", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "notSubmit", "required", "col", "options"];
+			let notProps = ["value", "addRules", "label", "labelHidden", "allOption", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "required", "col", "options"];
 			notProps.forEach((key: string) => {
 				if (item[key] !== undefined && !/on|options/.test(key)) {
 					field[key] = item[key];
@@ -372,7 +372,13 @@ export default class ElFormAuto extends Vue {
 					self.refreshOptions(name)
 				}
 			}
-			this.$set(this.model, name, this.value[name] === undefined ? field.value : this.value[name]);
+			let value = field.value
+			if(this.model[name]!==undefined){
+				value=this.model[name];
+			} else if(this.value[name]!==undefined){
+				value=this.value[name]
+			}
+			this.$set(this.model, name, value);
 			this.fields[name] = field;
 		})
 		this.asyncOptionsRequest()
@@ -498,7 +504,7 @@ export default class ElFormAuto extends Vue {
 		let value = {}
 		for (let name in this.fields) {
 			let field = this.fields[name]
-			if (field && !field.notSubmit) {
+			if (field) {
 				if (field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
 					let [sn, en] = field.rangeName;
 					if (this.model[name] && this.model[name].length == 2) {

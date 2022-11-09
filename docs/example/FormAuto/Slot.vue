@@ -26,7 +26,6 @@ export default {
 					labelTooltip: "自定义的组件，可直接使用",
 					type: "component",
 					component: "user-selector",
-					notSubmit: true,
 					on: {
 						select: item => {
 							this.model.id = item.id;
@@ -46,7 +45,6 @@ export default {
 					col: 12,
 					label: "姓名",
 					type: "plain",
-					notSubmit: true,
 					value: "未选择"
 				},
 				phone: {
@@ -54,7 +52,6 @@ export default {
 					label: "手机",
 					type: "plain",
 					value: "未选择",
-					notSubmit: true
 				},
 				email: {
 					col: 12,

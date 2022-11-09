@@ -103,6 +103,7 @@ export declare interface ElFormAutoField {
    */
   addRules?: any[];
   /**
+   * [弃用]
    * 表单返回数据时不获取该字段
    * @default false
    */

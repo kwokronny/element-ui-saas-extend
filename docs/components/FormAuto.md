@@ -37,7 +37,7 @@ pageClass: component-page
 <<< @/docs/example/FormAuto/BindShow.vue
 
 :::
-
+ 
 ## options 设置 
  
 ```typescript
@@ -115,7 +115,6 @@ export declare type ElAutoMixinOptions =
 | value           | 字段默认值                                                                                   | `any`                           | -             |
 | 控件相关设置    |                                                                                              |                                 |               |
 | type            | 必填，控件类型                                                                               | [参照 type Enum 表](#type-enum) | -             |
-| notSubmit       | 绑定值不返回该字段                                                                           | `boolean`                       | false         |
 | slot            | 自定义动态插槽，设为 true 时，slot 为 name，详情可参考 [自定义动态插槽示例](#自定义动态插槽) | `string` / `boolean`            | false         |
 | component       | 组件名称，type 为 `component` 时有效                                                         | `string`                        | -             |
 | `[prop:string]` | 可直接追加 type 对应组件的 prop                                                              | `any`                           | -             |

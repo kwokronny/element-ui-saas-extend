@@ -3,13 +3,19 @@ import {
   ElAutoOption,
   ElFormAutoField,
 } from "./saas-extend";
-import { ElForm } from "element-ui/types/form";
+import { ElForm, ValidateFieldCallback } from "element-ui/types/form";
 
 export declare class ElFormTable extends ElForm {
   /** 表单项配置 */
   maxlength: number;
 
   data: Record<string, ElFormAutoField>;
+
+  hiddenOption: boolean;
+
+  hiddenAdd: boolean;
+
+  removeConfirmMessage: string | boolean;
 
   getModel(): Record<string, any>[];
 
@@ -25,5 +31,9 @@ export declare class ElFormTable extends ElForm {
 
   removeItem(index: number): void;
 
-  clear(): void;
+  validateField(
+    props: string | string[],
+    callback?: ValidateFieldCallback | undefined,
+    index?: number
+  ): void;
 }

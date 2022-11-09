@@ -1,5 +1,15 @@
+@import "./node_modules/element-ui/packages/theme-chalk/src/common/var";
 .el-form-table {
-  &__option {
+  &__header {
     margin-bottom: 10px;
+  }
+  &__remove {
+    color: $--color-danger;
+    &:hover {
+      color: $--color-danger;
+    }
+  }
+  .el-table td {
+    vertical-align: top;
   }
 }

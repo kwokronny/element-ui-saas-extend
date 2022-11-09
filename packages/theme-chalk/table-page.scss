@@ -2,14 +2,14 @@
   .el-table-page__search-card {
     margin-bottom: 15px;
     .el-table-page__filter-row {
-      &:after {
-        display: table;
-        clear: both;
-      }
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
     }
     .el-table-page__filter-button-col {
       padding: 0 10px;
-      float: right;
+      text-align: right;
+      flex-shrink: 0;
     }
   }
   .el-table-page_header {

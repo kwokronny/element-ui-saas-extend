@@ -664,7 +664,6 @@ export default {
 |                 | form setting collect                                                                                          |                                |         |
 | col             | occupy span                                                                                                   | `number`                       | 24      |
 | required        | whether required                                                                                              | `boolean`                      | false   |
-| notSubmit       | whether submit field                                                                                          | `boolean`                      | false   |
 | bindShow        | whether bind                                                                                                  | `(model)=>boolean`             | -       |
 | addRules        | append validate rule.                                                                                         | `array`                        | -       |
 

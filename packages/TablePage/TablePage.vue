@@ -8,6 +8,24 @@
 		>
 			<slot name="search_prepend"></slot>
 			<div class="el-table-page__filter-row">
+				<el-form-auto
+					ref="SearchForm"
+					v-model="filter"
+					@keyup.enter.native="search(1)"
+					:data="searchForm"
+					:over-hidden="searchCollapse&&collapseStatus?searchCollapse:false"
+					v-bind="Object.assign({inline:true, allOption:true}, searchProps)"
+				>
+					<template v-for="search in searchForm" :slot="search.slot" slot-scope="{item,model,name}">
+						<slot
+							v-if="search.slot"
+							:name="search.slot"
+							v-bind:item="item"
+							v-bind:model="model"
+							v-bind:name="name"
+						></slot>
+					</template>
+				</el-form-auto>
 				<div class="el-table-page__filter-button-col">
 					<slot name="search_button">
 						<el-button
@@ -32,24 +50,6 @@
 						></i>
 					</el-button>
 				</div>
-				<el-form-auto
-					ref="SearchForm"
-					v-model="filter"
-					@keyup.enter.native="search(1)"
-					:data="searchForm"
-					:over-hidden="searchCollapse&&collapseStatus?searchCollapse:false"
-					v-bind="Object.assign({inline:true, allOption:true}, searchProps)"
-				>
-					<template v-for="search in searchForm" :slot="search.slot" slot-scope="{item,model,name}">
-						<slot
-							v-if="search.slot"
-							:name="search.slot"
-							v-bind:item="item"
-							v-bind:model="model"
-							v-bind:name="name"
-						></slot>
-					</template>
-				</el-form-auto>
 			</div>
 			<slot name="search_append"></slot>
 		</component>
@@ -177,7 +177,7 @@
 				>{{$t("tablepage.save")}}</el-button>
 			</div>
 		</el-dialog>
-	</div> 
+	</div>
 </template>
 <script lang="ts">
 import { Vue, Component, Prop, Ref, Watch, PropSync } from "vue-property-decorator"
@@ -217,7 +217,6 @@ export default class ElTablePage extends Vue {
 		this.collapseStatus = !this.collapseStatus
 	}
 
-
 	@Prop({
 		type: Object,
 		validator: (value: Record<string, boolean | string>) => {
@@ -247,6 +246,7 @@ export default class ElTablePage extends Vue {
 	private async handleColumnsChange() {
 		this.refresh = false;
 		this.headers = cloneDeep(this.columns)
+		this.searchForm = {};
 		this.reduceTransformColumn(this.headers, true)
 		if (this.customColumns) {
 			// 从localStorage获取存储的自定义列配置
@@ -342,8 +342,16 @@ export default class ElTablePage extends Vue {
 	// #region 搜索
 	private filter: Record<string, any> = {}
 
-	public getParams(): Record<string, any> {
-		return this.filter;
+	public getParams(name?: string): Record<string, any> | any {
+		return name ? this.filter[name] : this.filter;
+	}
+
+	public setParams(modelOrName: string | Record<string, any>, value?: any) {
+		if (typeof modelOrName == "string") {
+			this.filter[modelOrName] = value
+		} else {
+			this.filter = modelOrName
+		}
 	}
 
 	public searchForm: Record<string, ElFormAutoField> = {}

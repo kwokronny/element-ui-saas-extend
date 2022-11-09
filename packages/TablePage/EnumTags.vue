@@ -21,7 +21,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 
 @Component({})
 export default class EnumTags extends Vue {
-	@Prop({ type: [Number, String, Array], default: () => [] }) value!: string | string[]
+	@Prop({ default: () => [] }) value!: any
 	@Prop(Object) enums!: Record<string, ElAutoOption>
 	@Prop(String) splitChar!: string
 	@Prop({ type: String, default: "span" }) enumTag!: string
@@ -29,7 +29,7 @@ export default class EnumTags extends Vue {
 	get values(): string[] {
 		if (Array.isArray(this.value)) {
 			return this.value
-		} else if (this.splitChar) {
+		} else if (this.splitChar && typeof this.value == "string") {
 			return this.value.split(this.splitChar)
 		} else {
 			return [this.value]

@@ -74,6 +74,10 @@ export default {
 					label: "id",
 					type: "hidden"
 				},
+				plain: {
+					label: "id",
+					type: "plain",
+				},
 				switch: {
 					col: 4,
 					label: "开关",
@@ -90,7 +94,6 @@ export default {
 				text: {
 					col: 12,
 					label: "文本框",
-					notSubmit: true,
 					labelTooltip: "labelTooltip属性可以在标签旁增加图标，提示字段含义",
 					type: "text",
 					required: true
@@ -231,6 +234,7 @@ export default {
 			this.form.password.disabled = true;
 			this.model = {
 				id: "123",
+				plain: "无需提交",
 				switch: 0,
 				slider: 23,
 				text: "文本",

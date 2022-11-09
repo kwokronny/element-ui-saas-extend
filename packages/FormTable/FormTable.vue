@@ -4,27 +4,28 @@
 		ref="FormTable"
 		:model="{model: value}"
 		:rules="rules"
+		v-bind="$attrs"
+		v-on="$listeners"
 		:validate-on-rule-change="false"
 	>
-		<div class="el-form-table__option">
-			<slot name="prepend">
-				<slot name="option_perpend"></slot>
-				<el-button
-					@click="addItem()"
-					icon="el-icon-plus"
-					:disabled="maxlength>-1 && value.length >= maxlength"
-				>{{$t("formtable.add")}}</el-button>
-				<slot name="option_append"></slot>
-			</slot>
+		<div class="el-form-table__header" v-if="!hiddenAdd">
+			<slot name="add_perpend"></slot>
+			<el-button
+				class="el-form-table__add-button"
+				@click="addRow()"
+				icon="el-icon-plus"
+				:disabled="maxlength>-1 && value.length >= maxlength"
+			>{{$t("formtable.add")}}</el-button>
+			<slot name="add_append"></slot>
 		</div>
-		<el-table :data="model" v-bind="$attrs" v-on="$listeners">
+		<slot name="table_prepend"></slot>
+		<el-table :data="model" v-bind="tableProps">
 			<template v-for="(item,name) in fields">
 				<el-table-column
 					v-if="item.type!='hidden'"
 					:prop="name"
 					:label="item.label"
-					:width="item.width"
-					:fixed="item.fixed"
+					v-bind="item.columnProps"
 					:resizable="false"
 					:key="name"
 				>
@@ -63,12 +64,7 @@
 								<el-number-range v-model="row[name]" v-bind="item.props" v-on="item.on"></el-number-range>
 							</template>
 							<template v-else-if="item.type == 'number'">
-								<el-input-number
-									v-model="row[name]"
-									:readonly="item.disabled"
-									v-bind="item.props"
-									v-on="item.on"
-								></el-input-number>
+								<el-input-number v-model="row[name]" v-bind="item.props" v-on="item.on"></el-input-number>
 							</template>
 							<template v-else-if="item.type == 'slider'">
 								<el-slider v-model="row[name]" :disabled="item.disabled" v-bind="item.props" v-on="item.on"></el-slider>
@@ -77,19 +73,12 @@
 								<el-switch v-model="row[name]" :disabled="item.disabled" v-bind="item.props" v-on="item.on"></el-switch>
 							</template>
 							<template v-else-if="/(year|month|week|date(s|time|))(range|)/.test(item.type)">
-								<el-date-picker
-									v-model="row[name]"
-									:type="item.type"
-									:readonly="item.disabled"
-									v-bind="item.props"
-									v-on="item.on"
-								></el-date-picker>
+								<el-date-picker v-model="row[name]" :type="item.type" v-bind="item.props" v-on="item.on"></el-date-picker>
 							</template>
 							<template v-else-if="/time(select|range|)/.test(item.type)">
 								<el-time-select
 									v-if="item.type == 'timeselect'"
 									v-model="row[name]"
-									:readonly="item.disabled"
 									v-bind="item.props"
 									v-on="item.on"
 								></el-time-select>
@@ -97,7 +86,6 @@
 									v-else
 									:is-range="item.type == 'timerange'"
 									v-model="row[name]"
-									:readonly="item.disabled"
 									v-bind="item.props"
 									v-on="item.on"
 								></el-time-picker>
@@ -109,7 +97,7 @@
 										v-for="(option, key) in item.options"
 										:key="`${name}_${key}`"
 										:label="option.value"
-										:disabled="item.disabled || option.disabled"
+										:disabled="option.disabled"
 									>
 										<i v-if="option.icon" :class="option.icon"></i>
 										<span>{{ option.label }}</span>
@@ -136,7 +124,7 @@
 											v-for="(option, key) in item.options"
 											:key="`${name}_${key}`"
 											:label="option.value"
-											:disabled="item.disabled || option.disabled"
+											:disabled="option.disabled"
 										>
 											<i v-if="option.icon" :class="option.icon"></i>
 											<span>{{ option.label }}</span>
@@ -185,7 +173,6 @@
 								<el-rate
 									v-model="row[name]"
 									:style="{ marginTop: '8px' }"
-									:disabled="item.disabled"
 									show-score
 									v-bind="item.props"
 									v-on="item.on"
@@ -195,10 +182,29 @@
 					</template>
 				</el-table-column>
 			</template>
-			<el-table-column v-if="!noOptionCol" prop="options" label width="80" fixed="right">
+			<el-table-column v-if="!hiddenOption" prop="options" label width="80" fixed="right">
 				<template slot-scope="{row, $index}">
-					<slot name="table_body_option" v-bind:row="row" v-bind:index="$index">
-						<el-button type="text" @click="removeItem($index)">{{$t("formtable.remove")}}</el-button>
+					<slot name="row_option" v-bind:row="row" v-bind:index="$index">
+						<el-popconfirm
+							v-if="removeConfirmMessage"
+							icon="el-icon-info"
+							icon-color="red"
+							:title="removeConfirmMessage"
+							@confirm="removeRow($index)"
+						>
+							<el-button
+								type="text"
+								slot="reference"
+								class="el-form-table__remove"
+							>{{$t("formtable.remove")}}</el-button>
+						</el-popconfirm>
+						<el-button
+							v-else
+							type="text"
+							slot="reference"
+							class="el-form-table__remove"
+							@click="removeRow($index)"
+						>{{$t("formtable.remove")}}</el-button>
 					</slot>
 				</template>
 			</el-table-column>
@@ -235,14 +241,11 @@ const DATE_UNIX = function (value, format) {
 export default class ElFormTable extends Vue {
 	@Ref("FormTable") readonly FormTable!: Form;
 
-	private fields: Record<string, ElFormAutoField> = {};
-	private rules: Record<string, any> = {};
-
-
+	@Prop(Object) tableProps!: Record<string, any>;
 	@Prop({ type: Number, default: -1 }) maxlength!: number;
-
 	@Prop({ type: Boolean, default: false }) hiddenOption!: boolean;
-	@Prop({ type: Boolean, default: "top" }) createPosition!: string;
+	@Prop({ type: [String, Boolean], default: false }) removeConfirmMessage!: boolean | string;
+	@Prop({ type: Boolean, default: false }) hiddenAdd!: boolean;
 
 	@Model("input", { type: Array, default: () => [] }) value!: Record<string, any>[];
 
@@ -252,6 +255,34 @@ export default class ElFormTable extends Vue {
 		this.$emit("input", this.getModel())
 	}
 
+	private valuePrehandle(index: number, name: string, value: any) {
+		let field = this.fields[name]
+		if (field) {
+			if (field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
+				if (value && value.length == 2) {
+					let [sd, ed] = value
+					if (sd && ed && /date|datetime|month|year/g.test(field.type) && field.valueFormat == "unix") {
+						sd = DATE_UNIX(sd, "timestamp");
+						ed = DATE_UNIX(ed, "timestamp");
+					}
+					return [sd, ed];
+				}
+			} else if (field.type == "select" && field.remote) {
+				value = this.selectEcho(name, index, value);
+				return value;
+			} else if (/(date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
+				if (Array.isArray(value)) {
+					value = cloneDeep(value).map(v => DATE_UNIX(v, "timestamp"))
+					return value;
+				} else {
+					value = DATE_UNIX(value, "timestamp");
+					return value;
+				}
+			} else {
+				return value;
+			}
+		}
+	}
 	/**
 	 * @public
 	 * 获取表单所有参数
@@ -262,7 +293,7 @@ export default class ElFormTable extends Vue {
 			let row: Record<string, any> = {}
 			for (let name in this.fields) {
 				let field = this.fields[name]
-				if (field && !field.notSubmit) {
+				if (field) {
 					if (field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
 						let [sn, en] = field.rangeName;
 						if (this.model[i][name] && this.model[i][name].length == 2) {
@@ -311,36 +342,26 @@ export default class ElFormTable extends Vue {
 		this.model = newModel
 	}
 
+	public addRow(model?: Record<string, any>) {
+		if (this.maxlength > -1 && this.maxlength < this.model.length) return;
+		this.model.push(Object.assign(cloneDeep(this.defaultValue), model || {}));
+	}
 
-	private valuePrehandle(index: number, name: string, value: any) {
-		let field = this.fields[name]
-		if (field) {
-			if (field.rangeName && field.type && (/range$/g.test(field.type) || (field.type == "slider" && field.props && field.props.range == true))) {
-				if (value && value.length == 2) {
-					let [sd, ed] = value
-					if (sd && ed && /date|datetime|month|year/g.test(field.type) && field.valueFormat == "unix") {
-						sd = DATE_UNIX(sd, "timestamp");
-						ed = DATE_UNIX(ed, "timestamp");
-					}
-					return [sd, ed];
-				}
-			} else if (field.type == "select" && field.remote) {
-				value = this.selectEcho(name, index, value);
-				return value;
-			} else if (/(date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
-				if (Array.isArray(value)) {
-					value = cloneDeep(value).map(v => DATE_UNIX(v, "timestamp"))
-					return value;
-				} else {
-					value = DATE_UNIX(value, "timestamp");
-					return value;
-				}
-			} else {
-				return value;
+	public setRow(index: number, modelOrName: Record<string, any> | string, value?: any) {
+		if (!this.model[index] || !modelOrName) return;
+		if (typeof modelOrName == "string") {
+			this.model[index][modelOrName] = this.valuePrehandle(index, modelOrName, value);
+		} else if (Object.keys(modelOrName).length > 0) {
+			for (let name in modelOrName) {
+				this.model[index][name] = this.valuePrehandle(index, name, modelOrName[name])
 			}
+			this.model.splice(index, 1, modelOrName);
 		}
 	}
 
+	public async removeRow(index: number) {
+		this.model.splice(index, 1);
+	}
 
 	//#region select回显相关
 	private echoOptions: Record<string, any> = {}
@@ -394,36 +415,13 @@ export default class ElFormTable extends Vue {
 	}
 	//#endregion
 
-
-	public addItem(model?: Record<string, any>) {
-		if (this.maxlength > -1 && this.maxlength < this.model.length) return;
-		this.model.push(Object.assign(cloneDeep(this.defaultValue), model || {}));
-	}
-
-	public setItem(index: number, modelOrName: Record<string, any> | string, value?: any) {
-		if (!this.model[index] || !modelOrName) return;
-		if (typeof modelOrName == "string") {
-			this.model[index][modelOrName] = this.valuePrehandle(index, modelOrName, value);
-		} else if (Object.keys(modelOrName).length > 0) {
-			for (let name in modelOrName) {
-				this.model[index][name] = this.valuePrehandle(index, name, modelOrName[name])
-			}
-			this.model.splice(index, 1, modelOrName);
-		}
-	}
-
-	public removeItem(index: number) {
-		this.model.splice(index, 1);
-	}
-
-	public clear() {
-		this.model.splice(0, this.model.length);
-	}
-
-	private defaultValue: Record<string, any> = {};
-
 	//#region 初始化
 	@Prop(Object) readonly data!: Record<string, ElFormAutoField>;
+
+	private fields: Record<string, ElFormAutoField> = {};
+	private defaultValue: Record<string, any> = {};
+	private rules: Record<string, any> = {};
+
 	@Watch("data", { immediate: true, deep: true })
 	private onDataChange(data: Record<string, ElFormAutoField>) {
 		data && (this.generateModel(), this.generateRule())
@@ -439,13 +437,15 @@ export default class ElFormTable extends Vue {
 			}
 			// field.name = name;
 			// field.label = item.label;
-			let notProps = ["value", "addRules", "fixed", "label", "labelTooltip", "width", "type", "on", "slot", "bindShow", "rangeName", "valueFormat", "suffixTime", "notSubmit", "required", "options"]
+			let notProps = ["value", "addRules", "fixed", "label", "labelTooltip", "width", "type", "on", "slot", "bindShow", "rangeName", "valueFormat", "suffixTime", "required", "options"]
+			// let columnProps = ["fixed", "align", "width", "minWidth", "headerAlign", "showOverflowTooltip"]
 			notProps.forEach((key: string) => {
 				if (item[key] !== undefined && !/on|options/.test(key)) {
 					field[key] = item[key];
 				}
 			})
 			field.props = Object.assign(field.props || {}, omit(item, notProps))
+			field.columnProps = Object.assign(field.columnProps || {}, item.columnProps || {})
 			field.on = item.on || {}
 			// field.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
@@ -559,7 +559,7 @@ export default class ElFormTable extends Vue {
 			this.fields[name] = field
 		})
 		if (this.model.length < 1) {
-			this.addItem()
+			this.addRow()
 		}
 		this.asyncOptionsRequest()
 	}
@@ -567,56 +567,65 @@ export default class ElFormTable extends Vue {
 	private asyncOptions: ElFormAutoField[] = [] //统一处理options
 	private asyncOptionsRequest(): void {
 		if (this.asyncOptions.length) {
-			this.asyncOptions.forEach((item) => {
-				if (item.remote && item.type == "select" && item.options instanceof Function) {
-					let remoteMethod = item.options;
-					item.props.filterable = true;
-					item.props.remote = true;
-					item.remoteParams = {
-						query: "",
-						page: 1,
-						loadFinish: false,
-						optionLoading: false,
-					};
-					item.remoteMethod = (query: string) => {
-						if (item.remoteParams.query != query && query !== undefined) {
-							item.remoteParams.query = query;
-							item.remoteParams.page = 1;
-							item.remoteParams.loadFinish = false;
-						}
-						if (item.remoteParams.page == 1) {
-							item.options = []
-						}
-						if (item.remoteParams.loadFinish) return
-						item.remoteParams.optionLoading = true;
-						remoteMethod(item.remoteParams.query || "", item.remoteParams.page).then((options: ElAutoMixinOptions) => {
-							return transformOptions(options)
-						}).then((options: ElAutoOption[]) => {
-							item.remoteParams.optionLoading = false;
-							if (options.length == 0 && item.remoteParams.page > 1) {
-								item.remoteParams.loadFinish = true;
-								return;
+			let asyncList: Promise<void>[] = this.asyncOptions.map((item) => {
+				return new Promise((resolve) => {
+					if (item.remote && item.type == "select" && item.options instanceof Function) {
+						let remoteMethod = item.options;
+						item.props.filterable = true;
+						item.props.remote = true;
+						item.remoteParams = {
+							query: "",
+							page: 1,
+							loadFinish: false,
+							optionLoading: false,
+						};
+						item.remoteMethod = (query: string) => {
+							if (item.remoteParams.query != query && query !== undefined) {
+								item.remoteParams.query = query;
+								item.remoteParams.page = 1;
+								item.remoteParams.loadFinish = false;
 							}
-							options = (item.options as ElAutoOption[]).concat(options)
-							item.options = options;
-							item.remoteParams.page = item.remoteParams.page + 1;
-						}).catch(() => {
-							item.remoteParams.optionLoading = false;
-						});
-					};
-					item.props.remoteMethod = item.remoteMethod;
-					item.props.remoteMethod("");
-				} else if (item.options) {
-					let remoteMethod = item.options;
-					item.remoteMethod = () => {
-						transformOptions(remoteMethod, item.type != 'cascader').then((options) => {
-							item.options = options
-						})
+							if (item.remoteParams.page == 1) {
+								item.options = []
+							}
+							if (item.remoteParams.loadFinish) return
+							item.remoteParams.optionLoading = true;
+							remoteMethod(item.remoteParams.query || "", item.remoteParams.page).then((options: ElAutoMixinOptions) => {
+								return transformOptions(options)
+							}).then((options: ElAutoOption[]) => {
+								item.remoteParams.optionLoading = false;
+								if (options.length == 0 && item.remoteParams.page > 1) {
+									item.remoteParams.loadFinish = true;
+									return;
+								}
+								options = (item.options as ElAutoOption[]).concat(options)
+								item.options = options;
+								item.remoteParams.page = item.remoteParams.page + 1;
+							}).catch(() => {
+								item.remoteParams.optionLoading = false;
+							});
+						};
+						item.props.remoteMethod = item.remoteMethod;
+						item.props.remoteMethod("");
+						resolve();
+					} else if (item.options) {
+						let remoteMethod = item.options;
+						item.remoteMethod = () => {
+							transformOptions(remoteMethod, item.type != 'cascader').then((options) => {
+								item.options = options
+								resolve();
+							})
+						}
+						item.remoteMethod()
 					}
-					item.remoteMethod()
-				}
+				})
 			})
-			this.asyncOptions = []
+			Promise.all(asyncList).then(() => {
+				this.asyncOptions = []
+				this.$nextTick(function () {
+					this.FormTable && this.FormTable.clearValidate()
+				})
+			})
 		}
 	}
 
@@ -677,7 +686,7 @@ export default class ElFormTable extends Vue {
 	}
 	//#endregion
 
-	
+
 	//#region 继承Form相关方法
 	/**
 	 * @public
@@ -689,12 +698,20 @@ export default class ElFormTable extends Vue {
 
 	/**
 	 * @public
-	 * 验证单个字段
+	 * 验证所有行或单个行的多个字段
 	 */
-	public validateField(props: string[] | string, callback?: (errorMessage: string) => void): void {
-		return this.FormTable && this.FormTable.validateField(props, callback);
+	public validateField(props: string[] | string, callback?: (errorMessage: string) => void, index?: number): void {
+		let _props: string[] | string = []
+		if (index) {
+			_props = Array.isArray(props) ? props.map((prop: string) => `model.${index}.${prop}`) : `model.${index}.${props}`
+		} else {
+			for (let i = 0; i <= this.model.length; i++) {
+				Array.isArray(props) ? _props.push(...props.map((prop: string) => `model.${i}.${prop}`)) : _props.push(`model.${i}.${props}`)
+			}
+		}
+		return this.FormTable && this.FormTable.validateField(_props, callback);
 	}
-	
+
 	/**
 	 * @public
 	 * 清除验证
