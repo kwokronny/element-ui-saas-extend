@@ -166,7 +166,6 @@ export declare interface ElFormAutoField {
    */
   suffixTime?: boolean;
   component?: string;
-
   [name: string]: any;
   /**
    * 自定义增加事件

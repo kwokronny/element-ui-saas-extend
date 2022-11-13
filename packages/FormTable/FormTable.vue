@@ -211,13 +211,12 @@
 		</el-table>
 	</el-form>
 </template>
-
 <script lang="ts">
 import { Form } from "element-ui";
 import { Vue, Component, Prop, Model, Watch, Ref } from "vue-property-decorator";
 import { cloneDeep, forEach, omit, uniqBy } from "lodash-es";
 import { ElAutoMixinOptions, ElAutoOption, ElFormAutoField } from "types/saas-extend";
-import { transformOptions } from "../util";
+import { transformOptions } from "../../src/util";
 import locale from "../../src/mixin/locale"
 import selectScroll from "../../src/mixin/selectScroll"
 import { ValidateCallback } from "element-ui/types/form";

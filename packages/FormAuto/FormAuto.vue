@@ -194,7 +194,7 @@ import { Vue, Component, Prop, Ref, Watch, Model } from "vue-property-decorator"
 import { Form } from "element-ui";
 import { forEach, cloneDeep, uniqBy, omit } from "lodash-es";
 import { ElAutoMixinOptions, ElAutoOption, ElFormAutoField } from "../../types/saas-extend"
-import { transformOptions } from "../util"
+import { transformOptions } from "../../src/util"
 import locale from "../../src/mixin/locale"
 import selectScroll from "../../src/mixin/selectScroll"
 import { ValidateCallback } from "element-ui/types/form";
@@ -373,10 +373,10 @@ export default class ElFormAuto extends Vue {
 				}
 			}
 			let value = field.value
-			if(this.model[name]!==undefined){
-				value=this.model[name];
-			} else if(this.value[name]!==undefined){
-				value=this.value[name]
+			if (this.model[name] !== undefined) {
+				value = this.model[name];
+			} else if (this.value[name] !== undefined) {
+				value = this.value[name]
 			}
 			this.$set(this.model, name, value);
 			this.fields[name] = field;

@@ -186,7 +186,7 @@ import { omit, cloneDeep, keyBy } from "lodash-es"
 import ElTableDraggable from "element-ui-el-table-draggable"
 import { ElFormAutoField } from "../../types/saas-extend"
 import { ElTablePageColumn, ElTablePageDataMap } from "types/table-page"
-import { transformOptions } from "../util"
+import { transformOptions } from "../../src/util"
 import ElFormAuto from "../FormAuto";
 import TableColumnReduce from "./TableColumnReduce.vue"
 import locale from "../../src/mixin/locale"
@@ -293,6 +293,10 @@ export default class ElTablePage extends Vue {
 				}
 				if (column.enum) {
 					let options = await transformOptions(column.enum)
+					options.map((option: any) => {
+						option.props = omit(option, ["label", "value", "disabled", "icon", "children"]);
+						return option
+					})
 					column.enum = keyBy(options, "value")
 				}
 				column.props.showOverflowTooltip = column.props.showOverflowTooltip || this.showOverflowTooltip;

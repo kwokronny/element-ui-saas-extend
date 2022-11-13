@@ -22,7 +22,8 @@ export declare class ElTablePage extends ElTable {
   resetSearch(): void;
   openCustomColumnDialog(): void;
   clearSelection(): void;
-  getParams(): Record<string, any>;
+  getParams(name?: string): Record<string, any> | any;
+  setParams(modelOrName: string | Record<string, any>, value?: any): Record<string, any>;
 }
 
 export declare type ElTablePageDataMap = "page" | "pageSize" | "total" | "record";

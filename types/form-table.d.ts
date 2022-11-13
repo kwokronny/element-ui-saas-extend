@@ -5,6 +5,10 @@ import {
 } from "./saas-extend";
 import { ElForm, ValidateFieldCallback } from "element-ui/types/form";
 
+export declare interface ElFormTableField extends ElFormAutoField {
+  columnProps?: Record<string, any>;
+}
+
 export declare class ElFormTable extends ElForm {
   /** 表单项配置 */
   maxlength: number;
