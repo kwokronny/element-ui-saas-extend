@@ -40,7 +40,7 @@ export default {
 					search: {
 						type: "daterange",
 						value: ["2021-01-03", "2021-01-25"],
-						suffixTime: true,
+						defaultTime: ["00:00:00", "23:59:59"],
 						rangeName: ["startDate", "endDate"]
 					}
 				},

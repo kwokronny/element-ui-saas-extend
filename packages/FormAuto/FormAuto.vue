@@ -22,7 +22,7 @@
 				<component
 					:is="inline ? 'span' : 'el-col'"
 					:span="item.col || 24"
-					v-if="(!item.bindShow || item.bindShow(model)) && item.type!='hidden' && (!overHidden || index < overHidden)"
+					v-if="(!item.bindShow || item.bindShow(model)) && item.type!='hidden' && (!overCollapse || index < overCollapse)"
 					:key="`col_${name}`"
 				>
 					<el-form-item :prop="name" :label-width="item.labelWidth" :data-prop="name">
@@ -67,7 +67,7 @@
 						<template v-else-if="item.type == 'switch'">
 							<el-switch v-model="model[name]" v-bind="item.props" v-on="item.on"></el-switch>
 						</template>
-						<template v-else-if="/(year|month|week|date(s|time|))(range|)/.test(item.type)">
+						<template v-else-if="/(year(|s)|month(|s)|week|date(s|time|))(range|)/.test(item.type)">
 							<el-date-picker v-model="model[name]" :type="item.type" v-bind="item.props" v-on="item.on"></el-date-picker>
 						</template>
 						<template v-else-if="/time(select|range|)/.test(item.type)">
@@ -87,6 +87,10 @@
 						</template>
 						<template v-else-if="/radio(|button)/.test(item.type)">
 							<el-radio-group v-model="model[name]" v-bind="item.props" v-on="item.on">
+								<el-radio-button
+									v-if="item.type=='radiobutton' && (item.addAllOption!==false && addAllOption===true || item.addAllOption===true)"
+									label
+								>{{$t('formauto.selectAll')}}</el-radio-button>
 								<component
 									:is="item.type=='radio'?'el-radio':'el-radio-button'"
 									v-for="(option, key) in item.options"
@@ -134,13 +138,13 @@
 								v-on="item.on"
 							>
 								<el-option
-									v-if="!item.props.multiple && (item.allOption!==false && allOption===true || item.allOption===true)"
+									v-if="!item.props.multiple && (item.addAllOption!==false && addAllOption===true || item.addAllOption===true)"
 									value
 									:label="$t('formauto.selectAll')"
 								></el-option>
 								<template v-if="Array.isArray(item.options)">
 									<el-option
-										v-for="(option,key) in selectOptions(item,name)"
+										v-for="(option,key) in selectOptions(name)"
 										:key="`${name}_${key}`"
 										:label="option.label"
 										:value="option.value"
@@ -192,7 +196,7 @@
 <script lang="ts">
 import { Vue, Component, Prop, Ref, Watch, Model } from "vue-property-decorator";
 import { Form } from "element-ui";
-import { forEach, cloneDeep, uniqBy, omit } from "lodash-es";
+import { forEach, cloneDeep, uniqBy, omit, keyBy } from "lodash-es";
 import { ElAutoMixinOptions, ElAutoOption, ElFormAutoField } from "../../types/saas-extend"
 import { transformOptions } from "../../src/util"
 import locale from "../../src/mixin/locale"
@@ -218,8 +222,8 @@ export default class ElFormAuto extends Vue {
 	@Ref("FormAuto") readonly FormAuto!: Form;
 	@Prop({ type: Boolean, default: false }) readonly inline!: boolean;
 	@Prop({ type: Boolean, default: false }) readonly labelHidden!: boolean;
-	@Prop({ type: Boolean, default: false }) readonly allOption!: boolean;
-	@Prop({ type: [Number, Boolean], default: false }) readonly overHidden!: boolean | number;
+	@Prop({ type: Boolean, default: false }) readonly addaddAllOption!: boolean;
+	@Prop({ type: [Number, Boolean], default: false }) readonly overCollapse!: boolean | number;
 	@Prop(Object) readonly data!: Record<string, ElFormAutoField>;
 	@Prop({ type: Number, default: 15 }) readonly gutter!: number;
 
@@ -254,7 +258,7 @@ export default class ElFormAuto extends Vue {
 				field = this.fields[name];
 			}
 			field.name = name;
-			let notProps = ["value", "addRules", "label", "labelHidden", "allOption", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "required", "col", "options"];
+			let notProps = ["value", "addRules", "label", "labelHidden", "addAllOption", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "required", "col", "options"];
 			notProps.forEach((key: string) => {
 				if (item[key] !== undefined && !/on|options/.test(key)) {
 					field[key] = item[key];
@@ -285,7 +289,7 @@ export default class ElFormAuto extends Vue {
 			} else if (item.type == "switch") {
 				this.defaultValue[name] = false
 				field.value = item.value === undefined ? false : item.value;
-			} else if (/(date(s|time|)|time(?!select)|month|year)(range|)/.test(item.type)) {
+			} else if (/(date(s|time|)|time(?!select)|month(|s)|year|(|s)|week)(range|)/.test(item.type)) {
 				// 针对日期时间类型组件设置统一日期格式及显示格式
 				field.props.valueFormat = field.valueFormat == "unix" ? "timestamp" : field.valueFormat;
 				if (/datetime/g.test(item.type)) {
@@ -293,7 +297,7 @@ export default class ElFormAuto extends Vue {
 					if (item.type == "datetimerange") {
 						field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
 					}
-				} else if (/date/g.test(field.type)) {
+				} else if (/date|week/g.test(field.type)) {
 					if (item.type == "daterange" && item.suffixTime) {
 						field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss"
 						field.props.defaultTime = ["00:00:00", "23:59:59"]
@@ -302,9 +306,13 @@ export default class ElFormAuto extends Vue {
 					}
 				} else if (/time/g.test(item.type)) {
 					field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
+				} else if (/month/g.test(item.type)) {
+					field.props.valueFormat = field.props.valueFormat || "yyyy-MM";
+				} else if (/year/g.test(item.type)) {
+					field.props.valueFormat = field.props.valueFormat || "yyyy";
 				}
-				if (/range|dates/.test(item.type)) {
-					this.defaultValue[name] = []
+				if (/range|dates|years|months/.test(item.type)) {
+					this.defaultValue[name] = null
 				} else {
 					this.defaultValue[name] = ""
 				}
@@ -457,40 +465,17 @@ export default class ElFormAuto extends Vue {
 					message: this.$t("formauto.requiredText").replace('{1}', item.label || ''),
 					trigger: "change",
 				};
-				switch (item.type) {
-					case "check":
-						requiredRule.type = "array";
-						break;
-					case "numberrange":
-					case "daterange":
-					case "timerange":
-					case "datetimerange":
-						requiredRule.type = "array";
-						break;
-					case "cascader":
-						if (item.props && item.props.emitPath == true) {
-							requiredRule.type = "array";
-						}
-						break;
-					case "slider":
-						requiredRule.type = item.props && item.props.range == true ? "array" : "number";
-						break;
-					case "select":
-						if (item.props.multiple) {
-							requiredRule.type = "array";
-						} else {
-							requiredRule.type = "string";
-							requiredRule.transform = function (v) { return `${v}` }
-						}
-						break;
-					case "radio":
-					case "radiobutton":
-						requiredRule.type = "string";
-						requiredRule.transform = function (v) { return `${v}` }
-						break;
-					case "rate":
-						requiredRule.type = "number";
-						break;
+				if (/check|(date(time|)|time|month|year|number)(range|s)/.test(item.type) || (item.type == "select" && item.props.multiple) || (item.type == "cascader" && item.props && item.props.emitPath == true) || (item.type == "cascader" && item.props && item.props.range == true)) {
+					requiredRule.type = "array";
+				} else if (/slider|rate/) {
+					requiredRule.type = "number"
+				} else if (/select|radio|radiobutton/.test(item.type)) {
+					requiredRule.type = "string";
+					requiredRule.transform = function (v) { return `${v}` }
+				} else if (item.type == "switch") {
+					requiredRule.type = "boolean"
+				} else {
+					requiredRule.type = "string";
 				}
 				this.rules[name].push(requiredRule);
 			}
@@ -510,15 +495,15 @@ export default class ElFormAuto extends Vue {
 					if (this.model[name] && this.model[name].length == 2) {
 						let _value: any[] = cloneDeep(this.model[name]);
 						let [sd, ed] = _value;
-						if (sd && ed && field.valueFormat == "unix" && /date|time|month|year/g.test(field.type)) {
+						if (sd && ed && field.valueFormat == "unix" && /date|time|month|week|year/g.test(field.type)) {
 							sd = DATE_UNIX(sd, "unix");
 							ed = DATE_UNIX(ed, "unix");
 						}
-						value[name] = _value
+						value[name] = [sd, ed]
 						value[sn] = sd;
 						value[en] = ed;
 					}
-				} else if (/(time|date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
+				} else if (/(time|date(|time|s)|month(|s)|year(|s))(?!range)/.test(field.type) && field.valueFormat == "unix") {
 					if (Array.isArray(this.model[name])) {
 						value[name] = this.model[name].map(v => DATE_UNIX(v, "unix"))
 					} else {
@@ -554,7 +539,7 @@ export default class ElFormAuto extends Vue {
 						if (value !== false) {
 							this.model[name] = value;
 						}
-					} else if (/(time|date(|time|s)|month|year)(?!range|select)$/.test(field.type) && field.valueFormat == "unix") {
+					} else if (/(time|date(|time|s)|(month|year)(|s))(?!range|select)$/.test(field.type) && field.valueFormat == "unix") {
 						if (Array.isArray(value)) {
 							let hasChange = false
 							value = value.map((v: string, idx: number) => {
@@ -630,12 +615,17 @@ export default class ElFormAuto extends Vue {
 		}
 	}
 
-	private selectOptions(field: ElFormAutoField, name: string) {
-		if (Array.isArray(field.options) && field.remote && Array.isArray(this.echoOptions[name])) {
+	private selectOptions(name: string) {
+		let field: ElFormAutoField = this.fields[name]
+		if (field && Array.isArray(field.options) && field.remote && Array.isArray(this.echoOptions[name])) {
 			let echoOpitons = this.echoOptions[name] || []
 			return uniqBy(echoOpitons.concat(field.options), "value")
 		}
 		return field.options
+	}
+
+	public getOptions(fieldName: string): Record<string, any> {
+		return keyBy(this.selectOptions(fieldName), "value")
 	}
 
 	// #region 复选框全选相关处理

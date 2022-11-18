@@ -13,13 +13,13 @@ pageClass: component-page
 ```vue
 <template>
   <el-more-popover>
-    <el-tag v-for="name in selected" style="margin:5px">{{ name }}</el-tag>
+    <el-tag v-for="name in selected" :key="name"  style="margin:5px">{{ name }}</el-tag>
   </el-more-popover>
   <el-more-popover :limit="5">
-    <el-tag v-for="name in selected" style="margin:5px">{{ name }}</el-tag>
+    <el-tag v-for="name in selected" :key="name"  style="margin:5px">{{ name }}</el-tag>
   </el-more-popover>
   <el-more-popover more-text="其它">
-    <el-tag v-for="name in selected" style="margin:5px">{{ name }}</el-tag>
+    <el-tag v-for="name in selected" :key="name"  style="margin:5px">{{ name }}</el-tag>
   </el-more-popover>
 </template>
 <script>

@@ -305,17 +305,20 @@ export default class ElTablePage extends Vue {
 		})
 	}
 
-	private localFilter: Record<string, any> = this.$parent.$options.filters as Record<string, any>
 	private transfromFilter(filter: string | Array<string | string[]>): (value: string) => any {
+		let localFilter: Record<string, any> = {}
+		if (this.$parent) {
+			localFilter = this.$parent.$options.filters as Record<string, any>
+		}
 		if (typeof filter == "string") {
-			let filterFunc = this.localFilter[filter] || Vue.filter(filter);
+			let filterFunc = localFilter[filter] || Vue.filter(filter);
 			if (filterFunc) {
 				return filterFunc as (value: string) => any;
 			}
 		} else if (Array.isArray(filter)) {
 			return filter.reduce((prev: any, current: any) => {
 				if (typeof current == "string") {
-					let filterFunc = this.localFilter[current] || Vue.filter(current);
+					let filterFunc = localFilter[current] || Vue.filter(current);
 					if (filterFunc) {
 						return (value: string) => {
 							return filterFunc(prev(value))
@@ -324,7 +327,7 @@ export default class ElTablePage extends Vue {
 						return prev
 					}
 				} else if (Array.isArray(current)) {
-					let filterFunc = this.localFilter[current[0]] || Vue.filter(current[0]);
+					let filterFunc = localFilter[current[0]] || Vue.filter(current[0]);
 					if (filterFunc) {
 						return (value: string) => {
 							return filterFunc(prev(value), ...current.slice(1, current.length))

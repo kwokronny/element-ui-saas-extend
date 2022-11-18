@@ -1,10 +1,8 @@
-import {
-  ElAutoMixinOptions,
-  ElAutoOption,
-  ElFormAutoField,
-} from "./saas-extend";
+import { ElAutoOption, ElAutoMixinOptions, ElFormAutoField } from "./form-auto";
 import { ElForm, ValidateFieldCallback } from "element-ui/types/form";
 
+export interface ElAutoMixinOptions extends ElAutoMixinOptions {}
+export interface ElAutoOption extends ElAutoOption {}
 export declare interface ElFormTableField extends ElFormAutoField {
   columnProps?: Record<string, any>;
 }
@@ -25,15 +23,15 @@ export declare class ElFormTable extends ElForm {
 
   setModel(model: Record<string, any>[]): void;
 
-  setItem(
+  setRow(
     index: number,
     modelOrName: Record<string, any>[] | string,
     value?: any
   ): void;
 
-  addItem(model?: Record<string, any>[]): void;
+  addRow(model?: Record<string, any>[]): void;
 
-  removeItem(index: number): void;
+  removeRow(index: number): void;
 
   validateField(
     props: string | string[],

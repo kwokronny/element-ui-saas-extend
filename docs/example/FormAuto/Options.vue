@@ -18,7 +18,6 @@ export default {
 					loadScroll: true,
 					options: (query = "", page = 1) => {
 						if (page > 3) return [];
-								console.log(query,page);
 						return axios
 							.get(`https://jsonplaceholder.typicode.com/users`)
 							.then(res => {
@@ -33,6 +32,9 @@ export default {
 								}, []);
 							});
 					}
+				},
+				selectName: {
+					type: "hidden"
 				},
 				select: {
 					label: "选择框",
@@ -50,8 +52,13 @@ export default {
 							});
 					},
 					on: {
-						change: () => {
-							this.model.remoteCascader = 1;
+						change: val => {
+							this.$nextTick(function(){
+								this.model.selectName = this.$refs["EditForm"].getOptions(
+									"select"
+								)[val].label;
+							})
+							return val;
 						}
 					}
 				},

@@ -15,7 +15,7 @@ export default {
 					label: "日期范围",
 					type: "daterange",
 					rangeName: ["startDate", "endDate"],
-					suffixTime: true
+					defaultTime: ["00:00:00", "23:59:59"]
 				},
 				daterangeUnix: {
 					label: "unix日期范围",

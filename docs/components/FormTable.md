@@ -232,7 +232,7 @@ export default {
           type: "daterange",
           valueFormat: "unix",
           rangeName: ["startDate", "endDate"],
-          suffixTime: true,
+          defaultTime: ["00:00:00", "23:59:59"],
           style: "width:100%",
           slot: true,
         },
@@ -356,15 +356,15 @@ export default {
 
 ### Props
 
-| 参数            | 描述                        | 类型                                                        | 可选值 | 默认值 |
-| :-------------- | :-------------------------- | :---------------------------------------------------------- | :----- | ------ |
-| v-model         | 表单数据对象                | `Array<Record<string,any>>`                                 | -      | []     |
-| data            | 表单项配置                  | [Record&lt;name:string,FormTableField&gt;](#FormTableField) | -      | {}     |
-| maxlength       | 限制最大行数量              | `number`                                                    | -      | -1     |
-| table-props     | 限制最大成员数量            | `Record<string, any>`                                       | -      | -1     |
-| hidden-add      | 限制最大成员数量            | `boolean`                                                   | -      | -1     |
-| hidden-option   | 限制最大成员数量            | `boolean`                                                   | -      | -1     |
-| `[prop:string]` | 继承 `<el-table>` 所有 Prop | `any`                                                       | -      | -      |
+| 参数            | 描述                       | 类型                                                        | 可选值 | 默认值 |
+| :-------------- | :------------------------- | :---------------------------------------------------------- | :----- | ------ |
+| v-model         | 表单数据对象               | `Array<Record<string,any>>`                                 | -      | []     |
+| data            | 表单项配置                 | [Record&lt;name:string,FormTableField&gt;](#FormTableField) | -      | {}     |
+| maxlength       | 限制最大行数量             | `number`                                                    | -      | -1     |
+| table-props     | `<el-table>` Prop          | `Record<string, any>`                                       | -      | {}     |
+| hidden-add      | 隐藏添加按钮               | `boolean`                                                   | -      | false  |
+| hidden-option   | 隐藏操作列                 | `boolean`                                                   | -      | false  |
+| `[prop:string]` | 继承 `<el-form>` 所有 Prop | `any`                                                       | -      | -      |
 
 ### FormTableField
 

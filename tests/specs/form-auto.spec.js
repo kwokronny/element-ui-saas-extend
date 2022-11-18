@@ -460,7 +460,6 @@ describe("FormAuto", () => {
         disabled: false,
         icon: false,
         children: [],
-        props: {},
       },
       {
         label: "option1",
@@ -468,7 +467,6 @@ describe("FormAuto", () => {
         disabled: false,
         icon: false,
         children: [],
-        props: {},
       },
       {
         label: "option2",
@@ -476,7 +474,6 @@ describe("FormAuto", () => {
         disabled: false,
         icon: false,
         children: [],
-        props: {},
       },
     ]);
     expect(fields.select.options).to.have.deep.members([
@@ -486,7 +483,6 @@ describe("FormAuto", () => {
         disabled: true,
         icon: false,
         children: [],
-        props: {},
       },
       {
         label: "option1",
@@ -494,7 +490,6 @@ describe("FormAuto", () => {
         disabled: false,
         icon: false,
         children: [],
-        props: {},
       },
       {
         label: "option2",
@@ -502,7 +497,6 @@ describe("FormAuto", () => {
         disabled: false,
         icon: false,
         children: [],
-        props: {},
       },
     ]);
     expect(fields.radio.options).to.have.deep.members([
@@ -512,7 +506,6 @@ describe("FormAuto", () => {
         disabled: false,
         icon: false,
         children: [],
-        props: {},
       },
       {
         label: "option2",
@@ -520,7 +513,6 @@ describe("FormAuto", () => {
         disabled: false,
         icon: false,
         children: [],
-        props: {},
       },
       {
         label: "option3",
@@ -528,7 +520,6 @@ describe("FormAuto", () => {
         disabled: false,
         icon: false,
         children: [],
-        props: {},
       },
     ]);
     expect(fields.asyncSelect.options).to.have.deep.members([
@@ -538,7 +529,6 @@ describe("FormAuto", () => {
         disabled: false,
         icon: false,
         children: [],
-        props: {},
       },
       {
         label: "option1",
@@ -546,7 +536,6 @@ describe("FormAuto", () => {
         disabled: false,
         icon: false,
         children: [],
-        props: {},
       },
       {
         label: "option2",
@@ -554,7 +543,6 @@ describe("FormAuto", () => {
         disabled: false,
         icon: false,
         children: [],
-        props: {},
       },
     ]);
   });

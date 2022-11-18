@@ -65,6 +65,11 @@ export default {
 					label: "选择框",
 					type: "select",
 					options: { 1: "正常", 2: "禁用" }
+				},
+				radiobutton: {
+					label: "选择框",
+					type: "radiobutton",
+					options: { 1: "正常", 2: "禁用" }
 				}
 			},
 			filterModel: {},
@@ -154,6 +159,18 @@ export default {
 					type: "dates",
 					required: true
 				},
+				months: {
+					col: 12,
+					label: "多个月份",
+					type: "months",
+					required: true
+				},
+				years: {
+					col: 12,
+					label: "多个年份",
+					type: "years",
+					required: true
+				},
 				datetime: {
 					col: 12,
 					label: "日期时间",
@@ -184,6 +201,13 @@ export default {
 					col: 12,
 					label: "日期范围",
 					type: "daterange",
+					rangeName: ["startDate", "endDate"],
+					required: true
+				},
+				monthRange: {
+					col: 12,
+					label: "月份范围",
+					type: "monthrange",
 					rangeName: ["startDate", "endDate"],
 					required: true
 				},

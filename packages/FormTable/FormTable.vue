@@ -72,7 +72,7 @@
 							<template v-else-if="item.type == 'switch'">
 								<el-switch v-model="row[name]" :disabled="item.disabled" v-bind="item.props" v-on="item.on"></el-switch>
 							</template>
-							<template v-else-if="/(year|month|week|date(s|time|))(range|)/.test(item.type)">
+							<template v-else-if="/(year(|s)|month(|s)|week|date(s|time|))(range|)/.test(item.type)">
 								<el-date-picker v-model="row[name]" :type="item.type" v-bind="item.props" v-on="item.on"></el-date-picker>
 							</template>
 							<template v-else-if="/time(select|range|)/.test(item.type)">
@@ -215,7 +215,7 @@
 import { Form } from "element-ui";
 import { Vue, Component, Prop, Model, Watch, Ref } from "vue-property-decorator";
 import { cloneDeep, forEach, omit, uniqBy } from "lodash-es";
-import { ElAutoMixinOptions, ElAutoOption, ElFormAutoField } from "types/saas-extend";
+import { ElAutoMixinOptions, ElAutoOption, ElFormTableField } from "types/form-table";
 import { transformOptions } from "../../src/util";
 import locale from "../../src/mixin/locale"
 import selectScroll from "../../src/mixin/selectScroll"
@@ -302,13 +302,13 @@ export default class ElFormTable extends Vue {
 								sd = DATE_UNIX(sd, "unix");
 								ed = DATE_UNIX(ed, "unix");
 							}
-							row[name] = _value
+							row[name] = [sd, ed]
 							row[sn] = sd;
 							row[en] = ed;
 						}
-					} else if (/(date(|time|s)|month|year)(?!range)/g.test(field.type) && field.valueFormat == "unix") {
+					} else if (/(time|date(|time|s)|month(|s)|year(|s))(?!range)/.test(field.type) && field.valueFormat == "unix") {
 						if (Array.isArray(this.model[i][name])) {
-							row[name] = cloneDeep(this.model[i][name]).map(v => DATE_UNIX(v, "unix"))
+							row[name] = this.model[i][name].map(v => DATE_UNIX(v, "unix"))
 						} else {
 							row[name] = DATE_UNIX(this.model[i][name], "unix");
 						}
@@ -358,7 +358,7 @@ export default class ElFormTable extends Vue {
 		}
 	}
 
-	public async removeRow(index: number) {
+	public removeRow(index: number) {
 		this.model.splice(index, 1);
 	}
 
@@ -396,7 +396,7 @@ export default class ElFormTable extends Vue {
 		}
 	}
 
-	private selectOptions(field: ElFormAutoField, name: string, idx: number) {
+	private selectOptions(field: ElFormTableField, name: string, idx: number) {
 		if (Array.isArray(field.options) && field.remote && this.echoOptions[name]) {
 			let echoOpitons = this.echoOptions[name][idx] || []
 			return uniqBy(echoOpitons.concat(field.options), "value")
@@ -404,7 +404,7 @@ export default class ElFormTable extends Vue {
 		return field.options
 	}
 
-	private handleSelectChange(field: ElFormAutoField, name: string, idx: number, value: Array<string | number> | string | number) {
+	private handleSelectChange(field: ElFormTableField, name: string, idx: number, value: Array<string | number> | string | number) {
 		let option = (field.options as ElAutoOption[]).filter((option: ElAutoOption) => (Array.isArray(value) && value.includes(option.value)) || value == option.value);
 		option && this.selectEcho(name, idx, option);
 		if (field.on && field.on.change) {
@@ -415,29 +415,26 @@ export default class ElFormTable extends Vue {
 	//#endregion
 
 	//#region 初始化
-	@Prop(Object) readonly data!: Record<string, ElFormAutoField>;
+	@Prop(Object) readonly data!: Record<string, ElFormTableField>;
 
-	private fields: Record<string, ElFormAutoField> = {};
+	private fields: Record<string, ElFormTableField> = {};
 	private defaultValue: Record<string, any> = {};
 	private rules: Record<string, any> = {};
 
 	@Watch("data", { immediate: true, deep: true })
-	private onDataChange(data: Record<string, ElFormAutoField>) {
+	private onDataChange(data: Record<string, ElFormTableField>) {
 		data && (this.generateModel(), this.generateRule())
 	}
 
 	private generateModel(): void {
 		forEach(this.data, (item, name) => {
-			let field: ElFormAutoField;
+			let field: ElFormTableField;
 			if (!this.fields[name]) {
 				field = cloneDeep(item);
 			} else {
 				field = this.fields[name];
 			}
-			// field.name = name;
-			// field.label = item.label;
 			let notProps = ["value", "addRules", "fixed", "label", "labelTooltip", "width", "type", "on", "slot", "bindShow", "rangeName", "valueFormat", "suffixTime", "required", "options"]
-			// let columnProps = ["fixed", "align", "width", "minWidth", "headerAlign", "showOverflowTooltip"]
 			notProps.forEach((key: string) => {
 				if (item[key] !== undefined && !/on|options/.test(key)) {
 					field[key] = item[key];
@@ -480,21 +477,15 @@ export default class ElFormTable extends Vue {
 					}
 				} else if (/time/g.test(item.type)) {
 					field.props.valueFormat = field.props.valueFormat || "HH:mm:ss";
+				} else if (/month/g.test(item.type)) {
+					field.props.valueFormat = field.props.valueFormat || "yyyy-MM";
+				} else if (/year/g.test(item.type)) {
+					field.props.valueFormat = field.props.valueFormat || "yyyy";
 				}
-				if (/range|dates/.test(item.type)) {
-					if (field.valueFormat == "unix" && item.value) {
-						field.value = item.value.map((v: string) => {
-							return DATE_UNIX(v, "timestamp")
-						})
-					} else {
-						field.value = item.value || null;
-					}
+				if (/range|dates|years|months/.test(item.type)) {
+					field.value = item.value || null;
 				} else {
-					if (field.valueFormat == "unix" && item.value) {
-						field.value = DATE_UNIX(item.value, "timestamp")
-					} else {
-						field.value = item.value || ""
-					}
+					field.value = item.value || ""
 				}
 			} else {
 				field.value = item.value === undefined ? "" : item.value;
@@ -563,7 +554,7 @@ export default class ElFormTable extends Vue {
 		this.asyncOptionsRequest()
 	}
 
-	private asyncOptions: ElFormAutoField[] = [] //统一处理options
+	private asyncOptions: ElFormTableField[] = [] //统一处理options
 	private asyncOptionsRequest(): void {
 		if (this.asyncOptions.length) {
 			let asyncList: Promise<void>[] = this.asyncOptions.map((item) => {

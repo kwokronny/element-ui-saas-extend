@@ -15,18 +15,18 @@ pageClass: component-page
 :::
 
 ## 对组件增加的预设
+
 1. 所有日期时间相关组件 `valueFormat` 增加 `unix` 10 位时间戳转化功能，并对 `valueFormat` 增加默认值。
-  > 原因是我也不知道为什么 JS 要多出 3 位毫秒，而后端时间格式可以如此多的想法。😭 
+   > 原因是我也不知道为什么 JS 要多出 3 位毫秒，而后端时间格式可以如此多的想法。😭
 2. `daterange|timerange|datetimerange|numberrange|slider`对应组件增加 rangeName 属性，方便快速迭代到对应接口传参内。
 3. `slider`对应组件增加 range 属性时，默认值为组件的 `[min, max]`。
 4. `select`组件远程搜索 `remote: true` 时 清空 或 搜索结果为空，再次点击下拉选框将重置筛选并重新请求。
 
-
 ::: demo
 
-<<< @/docs/example/FormAuto/Small.vue 
+<<< @/docs/example/FormAuto/Small.vue
 
-:::  
+:::
 
 ## 绑定显隐
 
@@ -37,9 +37,9 @@ pageClass: component-page
 <<< @/docs/example/FormAuto/BindShow.vue
 
 :::
- 
-## options 设置 
- 
+
+## options 设置
+
 ```typescript
 export declare interface ElAutoOption {
   icon?: string;
@@ -125,7 +125,7 @@ export declare type ElAutoMixinOptions =
 | suffixTime      | type 为 daterange 选填，为日期范围增加 00:00:00 - 23:59:59                                   | `boolean`                       | false         |
 | valueFormat     | type 为 日期类控件 选填，格式与 element-ui 一致，增加 `unix` 10 位时间戳格式                 | `string`                        | -             |
 | options         | type 为 check/radio/select 必填，详情可参考 [options 设置](#options-设置)                    | `object` / `array` / `Promise`  | []            |
-| all-option      | type 为 select 有效，为选项框增加 全部 option                                                | `boolean`                       | 继承组件 prop |
+| allOption       | type 为 select/radiobutton 有效，为选项框增加 全部 option                                    | `boolean`                       | 继承组件 prop |
 | remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                       | false         |
 | notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                       | false         |
 | 表单相关设置    |                                                                                              |                                 |               |
@@ -165,15 +165,16 @@ export declare type ElAutoMixinOptions =
 | component     | &lt;component :is="item.component"&gt;      | 自定义组件       |
 
 ### Method
- 
-| 方法名           | 描述                     | 参数                                                 |
-| :--------------- | :----------------------- | :--------------------------------------------------- |
-| reset()          | 重置表单                 | -                                                    |
-| refreshOptions() | 刷新选项                 | `(fieldName: string)=>void`                          |
-| validate()       | 对整个表单进行校验的方法 | `Promise<void> | (valid:boolean)=>void`              |
-| validateField()  | 对整个表单进行校验的方法 | `(prop:string,callback:(errMsg:string)=>void)=>void` |
-| getModel()       | 获取表单所有参数         |                                                      |
-| setModel()       | 设置表单对应参数         | `Record<string,any>`                                 |
+
+| 方法名           | 描述                                             | 参数                                                 |
+| :--------------- | :----------------------------------------------- | :--------------------------------------------------- |
+| reset()          | 重置表单                                         | -                                                    |
+| refreshOptions() | 刷新选项                                         | `(fieldName: string)=>void`                          |
+| validate()       | 对整个表单进行校验的方法                         | `Promise<void> | (valid:boolean)=>void`              |
+| validateField()  | 对整个表单进行校验的方法                         | `(prop:string,callback:(errMsg:string)=>void)=>void` |
+| getModel()       | 获取表单所有参数                                 | `()=>Record<string,any>`                             |
+| setModel()       | 设置表单对应参数                                 | `(model:Record<string,any>)=>void`                   |
+| getOptions       | 获取字段对应的 options，返回 value 为 key 的集合 | `(name:string)=>Record<string, any>`                 |
 
 ### Slot
 

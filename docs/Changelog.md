@@ -3,11 +3,25 @@ sidebarDepth: 0
 ---
 # 更新日志
 
-## 1.0.35-beta.0 <small>2022-07-18</small>
+## 1.0.35 <small>2022-11-15</small>
 - #### 新增
 	- 新增 FormTable 组件
+	- FormAuto
+		- 增加属性 `over-collapse`、`add-all-option`
+		- 增加方法 `getOptions`
+		- 对 date类输入组件 `valueFormat` 增加 `unix` 10位时间戳 处理
+		- type增加 `years, months, monthrange` 类型对应组件
 - #### 优化
-	- TablePage 列属性同时设置了 copy 和 showOverflowTooltip 属性时样式交互
+	- 更新所有组件中插槽的动态组件应用方式
+	- FormAuto
+		- 优化组件赋值与返回值逻辑
+		- 优化组件 reset() 逻辑
+		- 弃用 notSubmit 属性
+		- 优化组件对options的处理
+		- 更新部分国际化字典
+- #### 修复
+	- FormAuto
+		- 
 
 ## 1.0.34 <small>2022-06-05</small>
 - #### 新增
