@@ -263,6 +263,9 @@ export default class ElTablePage extends Vue {
 			let slot_name = field.slot == true ? name : field.slot
 			field.slot = `search-${slot_name}`;
 		}
+		if (/radio|select/.test(field.type)) {
+			field.allOption = field.allOption !== undefined ? field.allOption : true;
+		}
 		this.searchForm[name] = field
 	}
 

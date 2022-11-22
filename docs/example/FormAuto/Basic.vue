@@ -4,7 +4,6 @@
 			<el-form-auto
 				:data="filterForm"
 				ref="FilterForm"
-				all-option
 				v-model="filterModel"
 				label-width="70px"
 				inline
@@ -81,7 +80,7 @@ export default {
 				},
 				plain: {
 					label: "id",
-					type: "plain",
+					type: "plain"
 				},
 				switch: {
 					col: 4,
@@ -233,7 +232,7 @@ export default {
 					label: "复选框",
 					type: "check",
 					required: true,
-					options: { 1: "选项1", 2: "选项2", 3: "选项3" },
+					options: { 1: "选项1", 2: "选项2", 3: "选项3" }
 				},
 				rate: {
 					label: "评分",

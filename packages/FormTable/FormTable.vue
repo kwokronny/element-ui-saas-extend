@@ -630,42 +630,17 @@ export default class ElFormTable extends Vue {
 					message: this.$t("formauto.requiredText").replace('{1}', item.label || ''),
 					trigger: "change",
 				};
-				switch (item.type) {
-					case "check":
-					case "numberrange":
-					case "daterange":
-					case "timerange":
-					case "datetimerange":
-						requiredRule.type = "array";
-						break;
-					case "cascader":
-						if (item.props && item.props.emitPath == true) {
-							requiredRule.type = "array";
-						}
-						break;
-					case "slider":
-						if (item.props && item.props.range) {
-							requiredRule.type = "array";
-						} else {
-							requiredRule.type = "number";
-						}
-						break;
-					case "select":
-						if (item.props.multiple) {
-							requiredRule.type = "array";
-						} else {
-							requiredRule.type = "string";
-							requiredRule.transform = function (v) { return `${v}` }
-						}
-						break;
-					case "radio":
-					case "radiobutton":
-						requiredRule.type = "string";
-						requiredRule.transform = function (v) { return `${v}` }
-						break;
-					case "rate":
-						requiredRule.type = "number";
-						break;
+				if (/check|(date(time|)|time|month|year|number)(range|s)/.test(item.type) || (item.type == "select" && item.props.multiple) || (item.type == "cascader" && item.props && item.props.emitPath == true) || (item.type == "slider" && item.props && item.props.range == true)) {
+					requiredRule.type = "array";
+				} else if (/slider|rate/.test(item.type)) {
+					requiredRule.type = "number"
+				} else if (/select|radio/.test(item.type)) {
+					requiredRule.type = "string";
+					requiredRule.transform = function (v) { return `${v}` }
+				} else if (item.type == "switch") {
+					requiredRule.type = "boolean"
+				} else {
+					requiredRule.type = "string";
 				}
 				this.rules[name].push(requiredRule);
 			}

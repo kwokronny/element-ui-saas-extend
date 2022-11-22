@@ -87,10 +87,11 @@
 						</template>
 						<template v-else-if="/radio(|button)/.test(item.type)">
 							<el-radio-group v-model="model[name]" v-bind="item.props" v-on="item.on">
-								<el-radio-button
-									v-if="item.type=='radiobutton' && (item.addAllOption!==false && addAllOption===true || item.addAllOption===true)"
+								<component
+									:is="item.type=='radio'?'el-radio':'el-radio-button'"
+									v-if="item.allOption"
 									label
-								>{{$t('formauto.selectAll')}}</el-radio-button>
+								>{{$t('formauto.selectAll')}}</component>
 								<component
 									:is="item.type=='radio'?'el-radio':'el-radio-button'"
 									v-for="(option, key) in item.options"
@@ -138,7 +139,7 @@
 								v-on="item.on"
 							>
 								<el-option
-									v-if="!item.props.multiple && (item.addAllOption!==false && addAllOption===true || item.addAllOption===true)"
+									v-if="!item.props.multiple && item.allOption"
 									value
 									:label="$t('formauto.selectAll')"
 								></el-option>
@@ -222,7 +223,6 @@ export default class ElFormAuto extends Vue {
 	@Ref("FormAuto") readonly FormAuto!: Form;
 	@Prop({ type: Boolean, default: false }) readonly inline!: boolean;
 	@Prop({ type: Boolean, default: false }) readonly labelHidden!: boolean;
-	@Prop({ type: Boolean, default: false }) readonly addaddAllOption!: boolean;
 	@Prop({ type: [Number, Boolean], default: false }) readonly overCollapse!: boolean | number;
 	@Prop(Object) readonly data!: Record<string, ElFormAutoField>;
 	@Prop({ type: Number, default: 15 }) readonly gutter!: number;
@@ -258,7 +258,7 @@ export default class ElFormAuto extends Vue {
 				field = this.fields[name];
 			}
 			field.name = name;
-			let notProps = ["value", "addRules", "label", "labelHidden", "addAllOption", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "required", "col", "options"];
+			let notProps = ["value", "addRules", "label", "labelHidden", "allOption", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "required", "col", "options"];
 			notProps.forEach((key: string) => {
 				if (item[key] !== undefined && !/on|options/.test(key)) {
 					field[key] = item[key];
@@ -465,11 +465,11 @@ export default class ElFormAuto extends Vue {
 					message: this.$t("formauto.requiredText").replace('{1}', item.label || ''),
 					trigger: "change",
 				};
-				if (/check|(date(time|)|time|month|year|number)(range|s)/.test(item.type) || (item.type == "select" && item.props.multiple) || (item.type == "cascader" && item.props && item.props.emitPath == true) || (item.type == "cascader" && item.props && item.props.range == true)) {
+				if (/check|(date(time|)|time|month|year|number)(range|s)/.test(item.type) || (item.type == "select" && item.props.multiple) || (item.type == "cascader" && item.props && item.props.emitPath == true) || (item.type == "slider" && item.props && item.props.range == true)) {
 					requiredRule.type = "array";
-				} else if (/slider|rate/) {
+				} else if (/slider|rate/.test(item.type)) {
 					requiredRule.type = "number"
-				} else if (/select|radio|radiobutton/.test(item.type)) {
+				} else if (/select|radio/.test(item.type)) {
 					requiredRule.type = "string";
 					requiredRule.transform = function (v) { return `${v}` }
 				} else if (item.type == "switch") {
