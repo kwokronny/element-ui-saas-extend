@@ -3,31 +3,29 @@ sidebarDepth: 0
 ---
 # 更新日志
 
-## 1.0.35 <small>2022-11-15</small>
+## 1.0.35 <small>2022-11-24</small>
 - #### 新增
 	- 新增 FormTable 组件
 	- FormAuto
 		- 增加属性 `over-collapse`
-		- 增加方法 `getOptions`
+		- 增加方法 `getOptions()`
 		- 对 date类输入组件 `valueFormat` 增加 `unix` 10位时间戳 处理
 		- 对 select、radio 类组件增加 `allOption` 属性
 		- type 增加 `years, months, monthrange` 类型对应组件
 	- TablePage
-		- 增加属性 `search-collapse` 筛选框折叠
 		- 支持多级表头
+		- 增加属性 `search-collapse` 折叠筛选框
 
 - #### 优化
 	- 更新所有组件中插槽的动态组件应用方式
+	- 更新部分国际化字典
 	- FormAuto
 		- 优化组件赋值与返回值逻辑
 		- 优化组件 `reset()` 逻辑
 		- 弃用 `notSubmit` 属性
 		- 优化组件对options的处理
-		- 更新部分国际化字典
-- #### 修复
-	- FormAuto
-		- 修复对验证规则及表单数据处理相关逻辑
-
+		- 优化对验证规则及表单数据处理相关逻辑
+		
 ## 1.0.34 <small>2022-06-05</small>
 - #### 新增
 	- 新增 MorePopover 组件

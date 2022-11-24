@@ -3,7 +3,7 @@
 # Element SaaS 扩展
 [![](https://img.shields.io/npm/v/element-ui-saas-extend)](https://www.npmjs.com/package/element-ui-saas-extend)&nbsp;[![](https://data.jsdelivr.com/v1/package/npm/element-ui-saas-extend/badge)](https://www.jsdelivr.com/package/npm/element-ui-saas-extend)
 
-由于近期工作主要偏向 SaaS 业务开发，在表单和表格的交互上的开发有很高重复性，为减少重复工作量，决定整理个针对SaaS业务的预设组件库。项目在 Element UI 套件的基础上开发，就作为他的扩展组件库吧。
+由于近期工作主要偏向 SaaS 业务开发，在表单和表格的交互上的开发有很高重复性，为减少重复工作量，针对SaaS业务的开发预设组件库。项目在 Element UI 套件的基础上开发，就作为他的扩展组件库吧。
 
 ## 文档
 

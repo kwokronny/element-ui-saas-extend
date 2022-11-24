@@ -78,21 +78,24 @@ export default {
 					label: "id",
 					type: "hidden"
 				},
-				plain: {
-					label: "id",
-					type: "plain"
-				},
 				switch: {
-					col: 4,
+					col: 12,
 					label: "开关",
 					type: "switch",
 					required: true
 				},
 				slider: {
-					col: 8,
-					label: "滑块",
+					col: 12,
+					label: "滑块",  
 					type: "slider",
 					value: 10,
+					required: true
+				},
+				sliderRange: {
+					col: 12,
+					label: "滑块",  
+					type: "slider",
+					range: true,
 					required: true
 				},
 				text: {
@@ -119,6 +122,9 @@ export default {
 					label: "级联框",
 					type: "cascader",
 					required: true,
+					props:{
+						emitPath: false
+					},
 					options: [
 						{
 							label: "节点1",

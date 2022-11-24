@@ -13,8 +13,8 @@
 					v-model="filter"
 					@keyup.enter.native="search(1)"
 					:data="searchForm"
-					:over-hidden="searchCollapse&&collapseStatus?searchCollapse:false"
-					v-bind="Object.assign({inline:true, allOption:true}, searchProps)"
+					:over-collapse="searchCollapse&&collapseStatus?searchCollapse:false"
+					v-bind="Object.assign({inline:true}, searchProps)"
 				>
 					<template v-for="search in searchForm" :slot="search.slot" slot-scope="{item,model,name}">
 						<slot

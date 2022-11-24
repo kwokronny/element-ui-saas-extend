@@ -10,7 +10,7 @@ pageClass: component-page
 
 ::: demo
 
-<<< @/docs/example/FormAuto/Basic.vue 
+<<< @/docs/example/FormAuto/Basic.vue
 
 :::
 
@@ -101,6 +101,7 @@ export declare type ElAutoMixinOptions =
 | v-model         | 表单数据对象               | `object`                                                  | -      | {}     |
 | data            | 表单项配置                 | [Record&lt;name:string,FormAutoField&gt;](#FormAutoField) | -      | {}     |
 | gutter          | &lt;el-row&gt; 属性 gutter | `number`                                                  | -      | 15     |
+| over-collapse   | 超出 设定值 表单项隐藏     | `number` / `boolean`                                      | -      | false  |
 | `[prop:string]` | 继承 el-form 所有 Prop     | `any`                                                     | -      | -      |
 
 ### FormAutoField
@@ -125,7 +126,7 @@ export declare type ElAutoMixinOptions =
 | suffixTime      | type 为 daterange 选填，为日期范围增加 00:00:00 - 23:59:59                                   | `boolean`                       | false         |
 | valueFormat     | type 为 日期类控件 选填，格式与 element-ui 一致，增加 `unix` 10 位时间戳格式                 | `string`                        | -             |
 | options         | type 为 check/radio/select 必填，详情可参考 [options 设置](#options-设置)                    | `object` / `array` / `Promise`  | []            |
-| allOption       | type 为 select/radiobutton 有效，为选项框增加 全部 option                                    | `boolean`                       | 继承组件 prop |
+| allOption       | type 为 select/radio/radiobutton 有效，为选项框增加 全部 option                              | `boolean`                       | 继承组件 prop |
 | remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                       | false         |
 | notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                       | false         |
 | 表单相关设置    |                                                                                              |                                 |               |
@@ -145,7 +146,9 @@ export declare type ElAutoMixinOptions =
 | numberrange   | &lt;el-number-range&gt;                     | 数值范围         |
 | date          | &lt;el-date-picker type="date"&gt;          | 日期选择         |
 | year          | &lt;el-date-picker type="year"&gt;          | 年份选择         |
+| years         | &lt;el-date-picker type="years"&gt;         | 多年份选择       |
 | month         | &lt;el-date-picker type="month"&gt;         | 月份选择         |
+| months        | &lt;el-date-picker type="months"&gt;        | 多月份选择       |
 | week          | &lt;el-date-picker type="week"&gt;          | 周选择           |
 | dates         | &lt;el-date-picker type="dates"&gt;         | 多日期选择       |
 | datetime      | &lt;el-date-picker type="datetime"&gt;      | 日期时间选择     |
@@ -174,7 +177,7 @@ export declare type ElAutoMixinOptions =
 | validateField()  | 对整个表单进行校验的方法                         | `(prop:string,callback:(errMsg:string)=>void)=>void` |
 | getModel()       | 获取表单所有参数                                 | `()=>Record<string,any>`                             |
 | setModel()       | 设置表单对应参数                                 | `(model:Record<string,any>)=>void`                   |
-| getOptions       | 获取字段对应的 options，返回 value 为 key 的集合 | `(name:string)=>Record<string, any>`                 |
+| getOptions()     | 获取字段对应的 options，返回 value 为 key 的集合 | `(name:string)=>Record<string, any>`                 |
 
 ### Slot
 

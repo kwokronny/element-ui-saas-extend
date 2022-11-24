@@ -461,7 +461,7 @@ export default class ElFormTable extends Vue {
 				field.value = parseInt(item.value) || 0;
 			} else if (item.type == "switch") {
 				field.value = item.value === undefined ? false : item.value;
-			} else if (/(date(s|time|)|time(?!select)|month|year)(range|)/.test(item.type)) {
+			} else if (/(date(s|time|)|time(?!select)|month(|s)|year(|s)|week)(range|)/.test(item.type)) {
 				field.props.valueFormat = field.valueFormat == "unix" ? "timestamp" : field.valueFormat;
 				if (/datetime/g.test(item.type)) {
 					field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss";
@@ -630,11 +630,11 @@ export default class ElFormTable extends Vue {
 					message: this.$t("formauto.requiredText").replace('{1}', item.label || ''),
 					trigger: "change",
 				};
-				if (/check|(date(time|)|time|month|year|number)(range|s)/.test(item.type) || (item.type == "select" && item.props.multiple) || (item.type == "cascader" && item.props && item.props.emitPath == true) || (item.type == "slider" && item.props && item.props.range == true)) {
+				if (/check|((date(time|)|time|month|year|number)(range|s))/.test(item.type) || (item.type == "select" && item.props.multiple) || (item.type == "cascader" && (!item.props.props || item.props.props.emitPath !== false)) || (item.type == "slider" && item.props.range == true)) {
 					requiredRule.type = "array";
 				} else if (/slider|rate/.test(item.type)) {
 					requiredRule.type = "number"
-				} else if (/select|radio/.test(item.type)) {
+				} else if (/select|radio|cascader/.test(item.type)) {
 					requiredRule.type = "string";
 					requiredRule.transform = function (v) { return `${v}` }
 				} else if (item.type == "switch") {
