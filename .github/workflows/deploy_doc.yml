@@ -31,5 +31,5 @@ jobs:
         user: ${{ secrets.SSH_USER }}
         port: ${{ secrets.SSH_PORT }}
         key: ${{ secrets.SSH_KEY }}
-        source: "dist"
-        target: "/app/nginx/www/doc.kwokronny.com/element-ui-saas-extend"
+        src: "dist"
+        remote: "/app/nginx/www/doc.kwokronny.com/element-ui-saas-extend"

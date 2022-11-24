@@ -3,7 +3,7 @@ sidebarDepth: 0
 ---
 # 更新日志
 
-## 1.0.35 <small>2022-11-24</small>
+## 1.0.36 <small>2022-11-24</small>
 - #### 新增
 	- 新增 FormTable 组件
 	- FormAuto
