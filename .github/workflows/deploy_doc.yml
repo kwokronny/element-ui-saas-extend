@@ -19,17 +19,17 @@ jobs:
         yarn install
         yarn build
         yarn build:doc
-    # - name: Deploy
-    #   uses: JamesIves/github-pages-deploy-action@4.1.5
-    #   with:
-    #     branch: gh-pages
-    #     folder: dist
-    - name: Deploy Site
-      uses: nogsantos/scp-deploy@master
+    - name: Deploy
+      uses: JamesIves/github-pages-deploy-action@4.1.5
       with:
-        host: ${{ secrets.SSH_HOST }}
-        user: ${{ secrets.SSH_USER }}
-        port: ${{ secrets.SSH_PORT }}
-        key: ${{ secrets.SSH_KEY }}
-        src: "dist"
-        remote: "/app/nginx/www/doc.kwokronny.com/element-ui-saas-extend"
+        branch: gh-pages
+        folder: dist
+    # - name: Deploy Site
+    #   uses: nogsantos/scp-deploy@master
+    #   with:
+    #     host: ${{ secrets.SSH_HOST }}
+    #     user: ${{ secrets.SSH_USER }}
+    #     port: ${{ secrets.SSH_PORT }}
+    #     key: ${{ secrets.SSH_KEY }}
+    #     src: "dist"
+    #     remote: "/app/nginx/www/doc.kwokronny.com/element-ui-saas-extend"
