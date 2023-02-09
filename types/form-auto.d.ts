@@ -170,8 +170,9 @@ export declare class ElFormAuto extends ElForm {
   /** 所有表单项标签是否隐藏 */
   labelHidden: boolean;
   reset(): void;
-  refreshOptions(fieldName: string): void;
+  refreshOptions(fieldName: string, clearEcho: boolean = true): void;
   getModel(): Record<string, any>;
   setModel(model: Record<string, any>): void;
   getOptions(fieldName: string): Record<string, any>;
+  // clearEchoOptions(fieldName: string): Record<string, any>;
 }

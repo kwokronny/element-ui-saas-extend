@@ -70,7 +70,7 @@ export declare type ElAutoMixinOptions =
 
 ## 远程选择框的回显
 
-> type 为 select 并且 开启远程搜索的功能时，需要提供回显能力。
+> type 为 select 并且 开启远程搜索的功能时，需要提供回显能力。清空时，默认删除回显值
 
 ::: demo
 
@@ -172,7 +172,7 @@ export declare type ElAutoMixinOptions =
 | 方法名           | 描述                                             | 参数                                                 |
 | :--------------- | :----------------------------------------------- | :--------------------------------------------------- |
 | reset()          | 重置表单                                         | -                                                    |
-| refreshOptions() | 刷新选项                                         | `(fieldName: string)=>void`                          |
+| refreshOptions() | 刷新选项                                         | `(fieldName: string, clearEcho:boolean=true)=>void`  |
 | validate()       | 对整个表单进行校验的方法                         | `Promise<void> | (valid:boolean)=>void`              |
 | validateField()  | 对整个表单进行校验的方法                         | `(prop:string,callback:(errMsg:string)=>void)=>void` |
 | getModel()       | 获取表单所有参数                                 | `()=>Record<string,any>`                             |

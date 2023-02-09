@@ -630,7 +630,7 @@ export default class ElFormTable extends Vue {
 					message: this.$t("formauto.requiredText").replace('{1}', item.label || ''),
 					trigger: "change",
 				};
-				if (/check|((date(time|)|time|month|year|number)(range|s))/.test(item.type) || (item.type == "select" && item.props.multiple) || (item.type == "cascader" && (!item.props.props || item.props.props.emitPath !== false)) || (item.type == "slider" && item.props.range == true)) {
+				if (/check|((date(time|)|time|month|year|number)(range|s)$)/.test(item.type) || (item.type == "select" && item.props.multiple) || (item.type == "cascader" && (!item.props.props || item.props.props.emitPath !== false)) || (item.type == "slider" && item.props.range == true)) {
 					requiredRule.type = "array";
 				} else if (/slider|rate/.test(item.type)) {
 					requiredRule.type = "number"

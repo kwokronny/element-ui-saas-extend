@@ -2,6 +2,11 @@
 sidebarDepth: 0
 ---
 # 更新日志
+## 1.0.37 <small>2023-02-08</small>
+- #### 优化
+	- FormAuto 组件 refreshOptions 增加是否删除回显值
+- #### 修复
+	- FormTable 和 FormAuto 对 timeselect 类型验证规则生成问题
 
 ## 1.0.36 <small>2022-11-24</small>
 - #### 新增

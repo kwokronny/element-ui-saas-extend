@@ -465,7 +465,7 @@ export default class ElFormAuto extends Vue {
 					message: this.$t("formauto.requiredText").replace('{1}', item.label || ''),
 					trigger: "change",
 				};
-				if (/check|((date(time|)|time|month|year|number)(range|s))/.test(item.type) || (item.type == "select" && item.props.multiple) || (item.type == "cascader" && (!item.props.props || item.props.props.emitPath !== false)) || (item.type == "slider" && item.props.range == true)) {
+				if (/check|((date(time|)|time|month|year|number)(range|s)$)/.test(item.type) || (item.type == "select" && item.props.multiple) || (item.type == "cascader" && (!item.props.props || item.props.props.emitPath !== false)) || (item.type == "slider" && item.props.range == true)) {
 					requiredRule.type = "array";
 				} else if (/slider|rate/.test(item.type)) {
 					requiredRule.type = "number"
@@ -571,12 +571,12 @@ export default class ElFormAuto extends Vue {
 		}
 	}
 
-	public refreshOptions(fieldName: string) {
+	public refreshOptions(fieldName: string, clearEcho: boolean = true) {
 		let field = this.fields[fieldName];
 		if (field && field.remoteMethod) {
 			field.remoteParams.query = "refresh";
 			field.props.remoteMethod("");
-			// this.echoOptions[fieldName] = [];
+			clearEcho && (this.echoOptions[fieldName] = []);
 		}
 	}
 
@@ -624,6 +624,10 @@ export default class ElFormAuto extends Vue {
 		return field.options
 	}
 
+	/**
+	 * 获取字段当前所有项（包含回显值）
+	 * @param fieldName [string] 字段名
+	 */
 	public getOptions(fieldName: string): Record<string, any> {
 		return keyBy(this.selectOptions(fieldName), "value")
 	}

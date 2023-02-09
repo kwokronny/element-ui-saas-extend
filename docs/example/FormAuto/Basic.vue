@@ -86,14 +86,14 @@ export default {
 				},
 				slider: {
 					col: 12,
-					label: "滑块",  
+					label: "滑块",
 					type: "slider",
 					value: 10,
 					required: true
 				},
 				sliderRange: {
 					col: 12,
-					label: "滑块",  
+					label: "滑块",
 					type: "slider",
 					range: true,
 					required: true
@@ -122,7 +122,7 @@ export default {
 					label: "级联框",
 					type: "cascader",
 					required: true,
-					props:{
+					props: {
 						emitPath: false
 					},
 					options: [
