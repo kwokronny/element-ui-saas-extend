@@ -87,16 +87,15 @@ export declare interface ElFormAutoField {
    */
   required?: boolean;
   /**
+   * 改变字段验证类型
+   * 根据asyncValidator方式
+   */
+  ruleType?: string;
+  /**
    * 字段追加验证规则
    * 根据element rules方式
    */
   addRules?: any[];
-  /**
-   * [弃用]
-   * 表单返回数据时不获取该字段
-   * @default false
-   */
-  notSubmit?: boolean;
   /**
    * 改用动态插槽自定义
    * @default false
@@ -124,6 +123,11 @@ export declare interface ElFormAutoField {
    * @default true
    */
   notAll?: boolean;
+  /**
+   * type为radio时
+   * 去除 全选复选框
+   * @default true
+   */
   allOption?: boolean;
   /**
    * type为select时
@@ -149,7 +153,7 @@ export declare interface ElFormAutoField {
    */
   rangeName?: [string, string];
   /**
-   * 【选填】type为 daterange 时，弃用
+   * 【选填】type为 daterange 时
    * @default false
    */
   suffixTime?: boolean;

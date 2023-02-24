@@ -1,3 +1,7 @@
+---
+pageClass: component-page
+---
+
 # 安装
 
 ## npm 安装
@@ -42,13 +46,16 @@ Vue.use(ElementUISaaSExtend);
 
 用法同 Element UI 设置一致 [点击查看](https://element.eleme.io/#/zh-CN/component/quickstart#quan-ju-pei-zhi)
 
-| 属性                  | 描述                                                                                          |
-| :-------------------- | :-------------------------------------------------------------------------------------------- |
-| pickerOptions.range   | 设置默认 FormAuto 组件中 `type` 值为 `daterange` 或 `datetimerange` 的 `pickerOptions` 属性。 |
-| pickerOptions.date    | 设置默认 FormAuto 组件中 `type` 值为 `date` 或 `datetime` 的 `pickerOptions` 属性。           |
-| tablePage.buttonStyle | 设置 TablePage 中预设的 `<el-button>` 的默认样式属性。                                        |
-| tablePage.pageLayout  | 设置 TablePage 中预设的 `<el-pagination>` 的默认 `paeg-layout` 属性。                         |
-| tablePage.border      | 设置 TablePage 中预设的 `<el-table>` 的默认 `border` 属性。                                   |
+| 属性                          | 描述                                                                                          | 类型                | 默认值             |
+| :---------------------------- | :-------------------------------------------------------------------------------------------- | :------------------ | :----------------- |
+| pickerOptions.range           | 设置默认 FormAuto 组件中 `type` 值为 `daterange` 或 `datetimerange` 的 `pickerOptions` 属性。 |                     |                    |
+| pickerOptions.date            | 设置默认 FormAuto 组件中 `type` 值为 `date` 或 `datetime` 的 `pickerOptions` 属性。           |                     |                    |
+| tablePage.buttonStyle         | 设置 TablePage 中预设的 `<el-button>` 的默认样式属性。                                        |                     |                    |
+| tablePage.pageSizes           | 设置 TablePage 中预设的 `<el-pagination>` 的默认页码可选项。                                  | `number[]`          | `[10, 15, 30, 50]` |
+| tablePage.layoutType          | 设置 TablePage 的默认的布局方式。                                                             | `default` \| `card` | `default`          |
+| tablePage.showOverflowTooltip | 设置 TablePage 中预设的 `<el-table-column>` 的默认是否超出省略 tooltip 属性。                 |                     |                    |
+| tablePage.pageLayout          | 设置 TablePage 中预设的 `<el-pagination>` 的默认 `paeg-layout` 属性。                         |                     |                    |
+| tablePage.border              | 设置 TablePage 中预设的 `<el-table>` 的默认 `border` 属性。                                   |                     |                    |
 
 ```ts
 export interface SaaSInstallationOptions extends InstallationOptions {
@@ -58,7 +65,11 @@ export interface SaaSInstallationOptions extends InstallationOptions {
       "plain" | "round" | "size" | "style" | "class",
       string | boolean
     >;
+    pageSizes?: number[];
+    showOverflowTooltip?: boolean;
+    searchCollapse?: boolean | number;
     pageLayout?: string;
+    layoutType?: "card" | "default";
   };
 }
 ```

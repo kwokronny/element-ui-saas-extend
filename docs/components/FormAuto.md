@@ -106,34 +106,35 @@ export declare type ElAutoMixinOptions =
 
 ### FormAutoField
 
-| 参数            | 描述                                                                                         | 类型                            | 默认值        |
-| :-------------- | :------------------------------------------------------------------------------------------- | :------------------------------ | :------------ |
-| 标签相关设置    |                                                                                              |                                 |               |
-| label           | 标签名                                                                                       | `string`                        | -             |
-| labelHidden     | 是否隐藏标签                                                                                 | `boolean`                       | false         |
-| labelTooltip    | 表单项提示                                                                                   | `string` / `boolean`            | false         |
-| labelWidth      | 标签宽度                                                                                     | `string`                        | -             |
-| value           | 字段默认值                                                                                   | `any`                           | -             |
-| 控件相关设置    |                                                                                              |                                 |               |
-| type            | 必填，控件类型                                                                               | [参照 type Enum 表](#type-enum) | -             |
-| slot            | 自定义动态插槽，设为 true 时，slot 为 name，详情可参考 [自定义动态插槽示例](#自定义动态插槽) | `string` / `boolean`            | false         |
-| component       | 组件名称，type 为 `component` 时有效                                                         | `string`                        | -             |
-| `[prop:string]` | 可直接追加 type 对应组件的 prop                                                              | `any`                           | -             |
-| disabled        | 是否禁用字段                                                                                 | `boolean`                       | false         |
-| placeholder     | 占位符                                                                                       | `array`                         | -             |
-| on              | 设置 type 对应组件的事件                                                                     | `object`                        | {}            |
-| rangeName       | 日期范围名 type 为 daterange/timerange/datetimerange/numberrange/slider 选填                 | `array<string>`                 | false         |
-| suffixTime      | type 为 daterange 选填，为日期范围增加 00:00:00 - 23:59:59                                   | `boolean`                       | false         |
-| valueFormat     | type 为 日期类控件 选填，格式与 element-ui 一致，增加 `unix` 10 位时间戳格式                 | `string`                        | -             |
-| options         | type 为 check/radio/select 必填，详情可参考 [options 设置](#options-设置)                    | `object` / `array` / `Promise`  | []            |
-| allOption       | type 为 select/radio/radiobutton 有效，为选项框增加 全部 option                              | `boolean`                       | 继承组件 prop |
-| remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                       | false         |
-| notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                       | false         |
-| 表单相关设置    |                                                                                              |                                 |               |
-| col             | 占用栅格                                                                                     | `number`                        | 24            |
-| required        | 是否必填                                                                                     | `boolean`                       | false         |
-| bindShow        | 绑定显示                                                                                     | `(model)=>boolean`              | -             |
-| addRules        | 追加验证规则                                                                                 | `array`                         | -             |
+| 参数            | 描述                                                                                         | 类型                            | 默认值 |
+| :-------------- | :------------------------------------------------------------------------------------------- | :------------------------------ | :----- |
+| 标签相关设置    |                                                                                              |                                 |        |
+| label           | 标签名                                                                                       | `string`                        | -      |
+| labelHidden     | 是否隐藏标签                                                                                 | `boolean`                       | false  |
+| labelTooltip    | 表单项提示                                                                                   | `string` / `boolean`            | false  |
+| labelWidth      | 标签宽度                                                                                     | `string`                        | -      |
+| value           | 字段默认值                                                                                   | `any`                           | -      |
+| 控件相关设置    |                                                                                              |                                 |        |
+| type            | 必填，控件类型                                                                               | [参照 type Enum 表](#type-enum) | -      |
+| slot            | 自定义动态插槽，设为 true 时，slot 为 name，详情可参考 [自定义动态插槽示例](#自定义动态插槽) | `string` / `boolean`            | false  |
+| component       | 组件名称，type 为 `component` 时有效                                                         | `string`                        | -      |
+| `[prop:string]` | 可直接追加 type 对应组件的 prop                                                              | `any`                           | -      |
+| disabled        | 是否禁用字段                                                                                 | `boolean`                       | false  |
+| placeholder     | 占位符                                                                                       | `array`                         | -      |
+| on              | 设置 type 对应组件的事件                                                                     | `object`                        | {}     |
+| rangeName       | 日期范围名 type 为 daterange/timerange/datetimerange/numberrange/slider 选填                 | `array<string>`                 | false  |
+| suffixTime      | type 为 daterange 选填，为日期范围增加 00:00:00 - 23:59:59                                   | `boolean`                       | false  |
+| valueFormat     | type 为 日期类控件 选填，格式与 element-ui 一致，增加 `unix` 10 位时间戳格式                 | `string`                        | -      |
+| options         | type 为 check/radio/select 必填，详情可参考 [options 设置](#options-设置)                    | `object` / `array` / `Promise`  | []     |
+| allOption       | type 为 select/radio/radiobutton 有效，为选项框增加 全部 option                              | `boolean`                       | false  |
+| remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                       | false  |
+| notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                       | false  |
+| 表单相关设置    |                                                                                              |                                 |        |
+| col             | 占用栅格                                                                                     | `number`                        | 24     |
+| required        | 是否必填                                                                                     | `boolean`                       | false  |
+| ruleType        | 为 async-validator 必填设置另外配置类型                                                      | `string`                        | -      |
+| bindShow        | 绑定显示                                                                                     | `(model)=>boolean`              | -      |
+| addRules        | 追加验证规则                                                                                 | `array`                         | -      |
 
 ### type Enum
 

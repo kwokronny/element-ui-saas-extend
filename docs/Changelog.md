@@ -2,6 +2,14 @@
 sidebarDepth: 0
 ---
 # 更新日志
+
+## 1.0.38 <small>2023-02-24</small>
+- #### 新增
+	- FormAuto 组件字段增加 ruleType 属性
+	- TablePage 组件 `pageSizes`、`layoutType`、`showOverflowTooltip` 属性增加至全局配置
+- #### 修复
+	- FormAuto 遗漏 number 类型验证规则生成问题
+
 ## 1.0.37 <small>2023-02-08</small>
 - #### 优化
 	- FormAuto 组件 refreshOptions 增加是否删除回显值

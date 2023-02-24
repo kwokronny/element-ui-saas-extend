@@ -115,7 +115,7 @@
 					v-if="total > 0"
 					:current-page="page"
 					:page-size.sync="limit"
-					:page-sizes="pageSizes"
+					:page-sizes="defaultPageSizes"
 					:total="total"
 					:layout="defaultPageLayout"
 					@size-change="search()"
@@ -210,11 +210,15 @@ export default class ElTablePage extends Vue {
 
 	@Prop(Object) searchProps!: Record<string, any>;
 
-	@Prop({ type: Boolean, default: false }) showOverflowTooltip!: boolean;
 	@Prop({ type: [Number, Boolean], default: false }) readonly searchCollapse!: boolean | number;
 	private collapseStatus = true
 	private handleSwitchCollapse() {
 		this.collapseStatus = !this.collapseStatus
+	}
+
+	@Prop(Boolean) showOverflowTooltip!: boolean;
+	get defaultShowOverflowTooltip(): boolean {
+		return this.showOverflowTooltip || (this.$ELEMENT && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage.showOverflowTooltip) || false
 	}
 
 	@Prop({
@@ -223,19 +227,26 @@ export default class ElTablePage extends Vue {
 			return Object.keys(value).findIndex((val: string) => !/size|plain|round/.test(val)) > -1
 		}
 	}) buttonStyle!: Record<string, any>;
-
-	// get filterCollapse(): boolean|number {
-	// 	return this.searchCollapse || (this.$ELEMENT && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage.searchCollapse) || false
-	// }
-
 	get defaultButtonStyle(): Record<"size" | "plain" | "round", string | boolean> {
 		return this.buttonStyle || (this.$ELEMENT && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage.buttonStyle) || {}
 	}
 
-	@Prop({ type: String, validator: (value: string) => { return (new RegExp("card|default")).test(value) }, default: "default" }) layoutType!: string
+	@Prop({ type: String, validator: (value: string) => { return (new RegExp("card|default")).test(value) } }) layoutType!: string
 	get wrapComponment(): string {
-		return this.layoutType == "card" ? "el-card" : "div"
+		let layoutType = this.layoutType || (this.$ELEMENT && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage.layoutType) || "default"
+		return layoutType == "card" ? "el-card" : "div"
 	}
+
+	@Prop(Array) pageSizes!: number[];
+	get defaultPageSizes(): number[] {
+		return this.pageSizes || (this.$ELEMENT && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage.pageSizes) || [10, 15, 30, 50]
+	}
+
+	@Prop(String) pageLayout!: string;
+	get defaultPageLayout(): string {
+		return this.pageLayout || (this.$ELEMENT && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage.pageLayout) || "total, sizes, prev, pager, next, jumper"
+	}
+
 
 	// #region 列相关
 	@Prop({ type: Array, required: true, default: () => [] }) columns!: ElTablePageColumn[];
@@ -302,7 +313,7 @@ export default class ElTablePage extends Vue {
 					})
 					column.enum = keyBy(options, "value")
 				}
-				column.props.showOverflowTooltip = column.props.showOverflowTooltip || this.showOverflowTooltip;
+				column.props.showOverflowTooltip = column.props.showOverflowTooltip !== undefined ? column.props.showOverflowTooltip : this.defaultShowOverflowTooltip;
 			}
 			isParent && this.$set(this.headers, index, column)
 		})
@@ -377,12 +388,6 @@ export default class ElTablePage extends Vue {
 	private page: number = 1
 	private total: number = 0
 	private limit: number = 15;
-	@Prop(String) pageLayout!: string;
-	@Prop({ type: Array, default: () => [10, 15, 30, 50, 100] }) pageSizes!: number[];
-
-	get defaultPageLayout(): string {
-		return this.pageLayout || (this.$ELEMENT && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage && this.$ELEMENT.tablePage.pageLayout) || "total, sizes, prev, pager, next, jumper"
-	}
 
 	@Watch("request")
 	private handleRequestChange() {
@@ -404,6 +409,7 @@ export default class ElTablePage extends Vue {
 				await this.SearchForm.validate()
 			}
 			this.loading = true;
+			this.limit = this.defaultPageSizes.indexOf(this.limit) > -1 ? this.limit : this.defaultPageSizes[0];
 			let data = await this.request(page, this.filter, this.limit)
 			this.loading = false;
 			if (Array.isArray(data)) {

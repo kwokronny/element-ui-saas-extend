@@ -30,8 +30,11 @@ export interface SaaSInstallationOptions extends InstallationOptions {
       "plain" | "round" | "size" | "style" | "class",
       string | boolean
     >;
+    pageSizes?: number[];
+    showOverflowTooltip?: boolean;
     searchCollapse?: boolean | number;
     pageLayout?: string;
+    layoutType?: "card" | "default";
   };
 }
 
