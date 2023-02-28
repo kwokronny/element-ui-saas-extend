@@ -478,6 +478,7 @@ export default class ElFormAuto extends Vue {
 					requiredRule.type = "boolean"
 				} else {
 					requiredRule.type = "string";
+					requiredRule.transform = function (v) { return `${v}` }
 				}
 				this.rules[name].push(requiredRule);
 			}

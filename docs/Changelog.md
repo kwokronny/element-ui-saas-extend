@@ -2,6 +2,9 @@
 sidebarDepth: 0
 ---
 # 更新日志
+## 1.0.39 <small>2023-02-28</small>
+- #### 优化
+	- FormAuto 和 FormTable 同步优化对 text 类型必填类型生成规则调整
 
 ## 1.0.38 <small>2023-02-24</small>
 - #### 新增

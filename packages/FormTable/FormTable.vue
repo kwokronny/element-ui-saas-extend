@@ -630,9 +630,11 @@ export default class ElFormTable extends Vue {
 					message: this.$t("formauto.requiredText").replace('{1}', item.label || ''),
 					trigger: "change",
 				};
-				if (/check|((date(time|)|time|month|year|number)(range|s)$)/.test(item.type) || (item.type == "select" && item.props.multiple) || (item.type == "cascader" && (!item.props.props || item.props.props.emitPath !== false)) || (item.type == "slider" && item.props.range == true)) {
+				if (item.ruleType) {
+					requiredRule.type = item.ruleType
+				} else if (/check|((date(time|)|time|month|year|number)(range|s)$)/.test(item.type) || (item.type == "select" && item.props.multiple) || (item.type == "cascader" && (!item.props.props || item.props.props.emitPath !== false)) || (item.type == "slider" && item.props.range == true)) {
 					requiredRule.type = "array";
-				} else if (/slider|rate/.test(item.type)) {
+				} else if (/slider|rate|number/.test(item.type)) {
 					requiredRule.type = "number"
 				} else if (/select|radio|cascader/.test(item.type)) {
 					requiredRule.type = "string";
@@ -641,6 +643,7 @@ export default class ElFormTable extends Vue {
 					requiredRule.type = "boolean"
 				} else {
 					requiredRule.type = "string";
+					requiredRule.transform = function (v) { return `${v}` }
 				}
 				this.rules[name].push(requiredRule);
 			}
