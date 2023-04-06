@@ -123,7 +123,7 @@ export declare type ElAutoMixinOptions =
 | `[prop:string]` | 可直接追加 type 对应组件的 prop                                                              | `any`                           | -      |
 | on              | 设置 type 对应组件的事件                                                                     | `object`                        | {}     |
 | rangeName       | 日期范围名 type 为 daterange/timerange/monthrange/datetimerange/numberrange/slider 选填      | `array<string>`                 | false  |
-| suffixTime      | type 为 daterange 选填，为日期范围增加 00:00:00 - 23:59:59                                   | `boolean`                       | false  |
+| suffixTime      | type 为 daterange 选填，快捷为 daterange 增加 `defaultTime: [00:00:00 - 23:59:59]`                                   | `boolean`                       | false  |
 | valueFormat     | type 为 日期类控件 选填，格式与 element-ui 一致，增加 `unix` 10 位时间戳格式                 | `string`                        | -      |
 | options         | type 为 check/radio/radiobutton/select/cascader 必填，详情可参考 [options 设置](#options-设置)                    | `object` / `array` / `Promise`  | []     |
 | allOption       | type 为 select/radio/radiobutton 有效，为选项框增加 全部 option                              | `boolean`                       | false  |
