@@ -303,7 +303,7 @@ export default () => {
 		let form = pickBy(cloneDeep(baseFormData), (field, name) => name != 'timeselect' && /select/.test(name));
 		vm = createVue({
 			template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
-			data() { return { model: {}, form, visiblePass: false,clearPass:false }; },
+			data() { return { model: {}, form, visiblePass: false, clearPass: false }; },
 		}, true);
 		let options = userData.reduce((record, item) => {
 			record.push({
@@ -342,69 +342,66 @@ export default () => {
 		}
 	})
 
-	// it("remote and loadScroll", async () => {
-	// 	let form = pickBy(cloneDeep(baseFormData), (field) => field.type=="select");
-	// 	vm = createVue({
-	// 		template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
-	// 		data() { return { model: {}, form, visiblePass: false,clearPass:false }; },
-	// 		methods: {
-	// 			handleVisibleChange() {
-	// 				this.visiblePass = true
-	// 			},
-	// 			handleClear() {
-	// 				this.clearPass = true
-	// 			}
-	// 		}
-	// 	}, true);
-	// 	let options = userData.reduce((record, item) => {
-	// 		record.push({
-	// 			label: item.username,
-	// 			value: item.id,
-	// 			children: [],
-	// 			icon: false,
-	// 			disabled: false
-	// 		});
-	// 		return record;
-	// 	}, [])
-	// 		expect(fields[name].options, `init ${name} remote fetch: ${JSON.stringify(fields[name].options)}`).to.deep.equal(options);
-	// 		let $select = vm.$refs.form.$children[0].$children[0].$children[0].$children[0].$children[1];
-	// 		$select.handleQueryChange("");
-	// 		await waitImmediate();
-	// 		let query = Random.pick(options)
-	// 		$select.handleQueryChange(query.label);
-	// 		await wait(350);
-	// 		expect(fields[name].options[0].label, `select remote search: ${query}`).to.equal(query.label);
-	// 		vm.$set(vm.form.select, "on", {
-	// 			["visible-change"]: () => {
-	// 				vm.handleVisibleChange();
-	// 			},
-	// 			clear: () => {
-	// 				vm.handleClear();
-	// 			},
-	// 		})
-	// 		await waitImmediate();
-	// 		$select.handleQueryChange("empty option");
-	// 		// 让搜索结果为空
-	// 		await wait(350);
-	// 		$select.$el.click()
-	// 		await wait(250);
-	// 		expect(vm.visiblePass, "visible Event faild").to.true
-	// 		expect(fields[name].options, "request remoteMethod('') again when query result empty").to.deep.equal(options);
-	// 		$select.$el.click()
-	// 		await wait(250);
-	// 		$select.handleQueryChange(query.label);
-	// 		await wait(350);
-	// 		$select.hoverIndex = 0;
-	// 		$select.selectOption(0);
-	// 		$select.inputHovering = true;
-	// 		await wait(100);
-	// 		expect(vm.model.select, `select option ${vm.model.select} faild`).to.equal(query.value)
-	// 		$select.$el.querySelector(".el-input__icon.el-icon-circle-close").click();
-	// 		await wait(250);
-	// 		expect(vm.clearPass).to.be.true;
-	// 		expect(fields[name].options, "request remoteMethod('') again when query result empty").to.deep.equal(options);
-			
-	// })
+	it("remote clear and visiable-change event", async () => {
+		let form = pickBy(cloneDeep(baseFormData), (field) => field.type == "select");
+		form.select.on = {
+			["visible-change"]() {
+				vm.handleVisibleChange();
+			},
+			clear() {
+				vm.handleClear();
+			},
+		}
+		vm = createVue({
+			template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+			data() { return { model: {}, form, visiblePass: false, clearPass: false }; },
+			methods: {
+				handleVisibleChange() {
+					this.visiblePass = true
+				},
+				handleClear() {
+					this.clearPass = true
+				}
+			}
+		}, true);
+		let options = userData.reduce((record, item) => {
+			record.push({
+				label: item.username,
+				value: item.id,
+				children: [],
+				icon: false,
+				disabled: false
+			});
+			return record;
+		}, [])
+		await waitImmediate();
+		let selectField = vm.$refs.form.fields.select;
+		expect(selectField.options, `init select remote fetch: ${JSON.stringify(selectField.options)}`).to.deep.equal(options);
+		let selectComp = vm.$refs.form.$children[0].$children[0].$children[0].$children[0].$children[1];
+		selectComp.handleQueryChange("");
+		await wait(100);
+		selectComp.handleQueryChange("empty option");
+		await wait(350);
+		triggerEvent(selectComp.$el, "click")
+		await wait(250);
+		expect(vm.visiblePass, "visible Event faild").to.true
+		expect(selectField.options, "request remoteMethod('') again when query result empty").to.deep.equal(options);
+		await waitImmediate();
+		let query = Random.pick(options)
+		selectComp.handleQueryChange(query.label);
+		await wait(350);
+		expect(selectField.options[0].label, `select remote search: ${query}`).to.equal(query.label);
+		selectComp.hoverIndex = 0;
+		selectComp.selectOption(0);
+		selectComp.inputHovering = true;
+		await wait(100);
+		expect(vm.model.select, `select option ${vm.model.select} faild`).to.equal(query.value)
+		triggerEvent(selectComp.$el.querySelector(".el-input__icon.el-icon-circle-close"), "click");
+		await wait(350);
+		expect(vm.model.select, `select option ${vm.model.select} faild`).to.equal("")
+		expect(vm.clearPass).to.be.true;
+		expect(selectField.options, "request remoteMethod('') again when clear query").to.deep.equal(options);
+	})
 
 	it("allOption", async () => {
 		let form = reduce(pickBy(cloneDeep(baseFormData), (field) => /radio/.test(field.type)),

@@ -243,24 +243,8 @@ export default class ElFormAuto extends Vue {
 				field.props.clearable = field.props.clearable == false ? false : true
 			}
 
-			if (/select|radio|check|cascader/.test(item.type) && item.type != "timeselect" && item.options) {
-				field.options = field.options || []
-				if (item.options instanceof Function) {
-					if (item.options != field.originOption) {
-						this.asyncOptions.push(field)
-						field.originOption = item.options
-					}
-				} else {
-					field.originOption = item.options
-					this.asyncOptions.push(field)
-				}
-				if (item.type == "check" && item.notAll !== false) {
-					this.$set(this.check, name, false);
-				}
-			}
 			// 防止因对select事件赋值导致覆写为select注册的事件
 			if (field.type == "select" && field.remote) {
-				field.remoteParams = {}
 				let self = this;
 				if (item.on) {
 					let originVisibleChangeEvent = item.on["visible-change"] || (() => { })
@@ -275,6 +259,25 @@ export default class ElFormAuto extends Vue {
 						originClearEvent()
 						self.refreshOptions(name)
 					}
+				}
+			}
+
+			if (/select|radio|check|cascader/.test(item.type) && item.type != "timeselect" && item.options) {
+				field.options = field.options || []
+				if (item.options instanceof Function) {
+					if (item.options != field.originOption) {
+						if (field.type == "select") {
+							field.remoteParams = {}
+						}
+						this.asyncOptions.push(field)
+						field.originOption = item.options
+					}
+				} else {
+					field.originOption = item.options
+					this.asyncOptions.push(field)
+				}
+				if (item.type == "check" && item.notAll !== false) {
+					this.$set(this.check, name, false);
 				}
 			}
 			let value = field.value
