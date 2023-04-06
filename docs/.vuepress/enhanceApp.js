@@ -1,6 +1,6 @@
 import "element-ui/lib/theme-chalk/index.css";
 import ElementUI from "element-ui";
-import "../../lib/theme-chalk/index.css";
+import "../../packages/theme-chalk/lib/index.css";
 import ElementUISaaSExtend from "../../packages/index.ts";
 import en from "element-ui/lib/locale/lang/en";
 import saasEN from "../../src/locale/lang/en";

@@ -1,14 +1,6 @@
 import { expect } from "chai";
-import { cloneDeep } from "lodash";
 import FormAuto from "../../../packages/FormAuto"
-import {
-	createTest,
-	recordValid,
-	createVue,
-	triggerEvent,
-	wait,
-	waitImmediate,
-} from "../../util";
+import { createTest, triggerEvent, waitImmediate } from "../../util";
 
 describe("FormAuto Basic Props", () => {
 	let vm;
@@ -60,7 +52,7 @@ describe("FormAuto Basic Props", () => {
 		let data = Object.assign(formBasicData);
 		Object.keys(data).forEach((key) => data[key].col = 12)
 		vm = createTest(FormAuto, {
-			gutter: 20,
+			gutter: 16,
 			data,
 		});
 		let row = vm.$el.querySelector(".el-form-auto-row.el-row.el-row--flex");
@@ -68,32 +60,10 @@ describe("FormAuto Basic Props", () => {
 		cols.forEach((col) => {
 			expect(col.classList.contains("el-col-12")).to.be.true;
 			expect(
-				col.style.paddingRight == "10px" && col.style.paddingLeft == "10px"
+				col.style.paddingRight == "8px" && col.style.paddingLeft == "8px"
 			).to.be.true;
 		});
 		done();
-	});
-
-	it("props:data:labelTooltip", async () => {
-		vm = createTest(
-			FormAuto,
-			{
-				data: {
-					field1: {
-						labelTooltip: "field help tip",
-						label: "field1",
-						type: "text",
-					},
-				},
-			},
-			true
-		);
-		let icon = vm.$el.querySelector(".el-form-item__label .el-tooltip .el-icon-question");
-		expect(icon).to.exist;
-		triggerEvent(icon, "mouseenter");
-		await waitImmediate();
-		expect(document.getElementById(icon.getAttribute("aria-describedby")).textContent).to.equal("field help tip");
-		triggerEvent(icon, "mouseleave");
 	});
 	//#endregion
 

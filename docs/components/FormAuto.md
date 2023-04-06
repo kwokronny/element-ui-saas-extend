@@ -57,7 +57,7 @@ export declare type ElAutoMixinOptions =
 
 1. `options` 标准规范值是 `[{label: "苹果", value: "apple", icon:"el-icon-apple", disabled: false }, ...]` <br/>
 2. `options` 值为 `["苹果", ...]` 文本数组时，`label` 与 `value` 皆为 "苹果"<br/>
-3. `options` 值为 `{apple: "苹果", banana: "香蕉", ...}` 对象时，`label` 为值 `苹果`， `value` 为对应键值 `apple`<br/>
+3. `options` 值为 `{apple: "苹果", ...}` 对象时，`label` 为值 `苹果`， `value` 为对应键值 `apple`<br/>
 4. `options` 值为 `async () => Promise<ElAutoOption>` 的 Promise 函数时，返回值按 1~3 条规则匹配。
 5. `type: "select"` 下 `options` 值为 `(query?,page?) => Promise<ElAutoOption>` 的 Promise 函数时，返回值同样按 1~3 条规则匹配。 `remote: true` 时 query 值提供搜索关键字， `loadScroll:true` 时 page 值提供加载页码
 6. `type: "cascader"` 级联选择框只支持应用标准规范值。
@@ -101,21 +101,23 @@ export declare type ElAutoMixinOptions =
 | v-model         | 表单数据对象               | `object`                                                  | -      | {}     |
 | data            | 表单项配置                 | [Record&lt;name:string,FormAutoField&gt;](#FormAutoField) | -      | {}     |
 | gutter          | &lt;el-row&gt; 属性 gutter | `number`                                                  | -      | 15     |
-| over-collapse   | 超出 设定值 表单项隐藏     | `number` / `boolean`                                      | -      | false  |
+| over-collapse   | 超出 设定值 表单项隐藏     | `number`                                                  | -      | -1     |
 | `[prop:string]` | 继承 el-form 所有 Prop     | `any`                                                     | -      | -      |
 
 ### FormAutoField
 
 | 参数            | 描述                                                                                         | 类型                            | 默认值 |
 | :-------------- | :------------------------------------------------------------------------------------------- | :------------------------------ | :----- |
-| 标签相关设置    |                                                                                              |                                 |        |
+| 表单项相关设置  |                                                                                              |                                 |        |
+| col             | 占用栅格                                                                                     | `number`                        | 24     |
 | label           | 标签名                                                                                       | `string`                        | -      |
 | labelHidden     | 是否隐藏标签                                                                                 | `boolean`                       | false  |
 | labelTooltip    | 表单项提示                                                                                   | `string` / `boolean`            | false  |
 | labelWidth      | 标签宽度                                                                                     | `string`                        | -      |
-| value           | 字段默认值                                                                                   | `any`                           | -      |
+| bindShow        | 绑定显示                                                                                     | `(model)=>boolean`              | -      |
 | 控件相关设置    |                                                                                              |                                 |        |
 | type            | 必填，控件类型                                                                               | [参照 type Enum 表](#type-enum) | -      |
+| value           | 字段默认值                                                                                   | `any`                           | -      |
 | slot            | 自定义动态插槽，设为 true 时，slot 为 name，详情可参考 [自定义动态插槽示例](#自定义动态插槽) | `string` / `boolean`            | false  |
 | component       | 组件名称，type 为 `component` 时有效                                                         | `string`                        | -      |
 | `[prop:string]` | 可直接追加 type 对应组件的 prop                                                              | `any`                           | -      |
@@ -129,11 +131,9 @@ export declare type ElAutoMixinOptions =
 | allOption       | type 为 select/radio/radiobutton 有效，为选项框增加 全部 option                              | `boolean`                       | false  |
 | remote          | 支持接口搜索，type 为 select 有效                                                            | `boolean`                       | false  |
 | notAll          | 不显示全选，type 为 check 有效                                                               | `boolean`                       | false  |
-| 表单相关设置    |                                                                                              |                                 |        |
-| col             | 占用栅格                                                                                     | `number`                        | 24     |
+| 验证规则设置    |                                                                                              |                                 |        |
 | required        | 是否必填                                                                                     | `boolean`                       | false  |
 | ruleType        | 为 async-validator 必填设置另外配置类型                                                      | `string`                        | -      |
-| bindShow        | 绑定显示                                                                                     | `(model)=>boolean`              | -      |
 | addRules        | 追加验证规则                                                                                 | `array`                         | -      |
 
 ### type Enum
@@ -143,8 +143,8 @@ export declare type ElAutoMixinOptions =
 | text          | &lt;el-input type="text"&gt;                | 文本输入框       |
 | password      | &lt;el-input type="password"&gt;            | 密码输入框       |
 | textarea      | &lt;el-input type="textarea"&gt;            | 文本域           |
-| number        | &lt;el-input-number&gt;                     | 计数器           |
-| numberrange   | &lt;el-number-range&gt;                     | 数值范围         |
+| number        | &lt;el-input-number&gt;                     | 计数器           |
+| numberrange   | &lt;el-number-range&gt;                     | 数值范围         |
 | date          | &lt;el-date-picker type="date"&gt;          | 日期选择         |
 | year          | &lt;el-date-picker type="year"&gt;          | 年份选择         |
 | years         | &lt;el-date-picker type="years"&gt;         | 多年份选择       |
@@ -174,7 +174,7 @@ export declare type ElAutoMixinOptions =
 | :--------------- | :----------------------------------------------- | :--------------------------------------------------- |
 | reset()          | 重置表单                                         | -                                                    |
 | refreshOptions() | 刷新选项                                         | `(fieldName: string, clearEcho:boolean=true)=>void`  |
-| validate()       | 对整个表单进行校验的方法                         | `Promise<void> | (valid:boolean)=>void`              |
+| validate()       | 对整个表单进行校验的方法                         | `Promise<void>                                       | (valid:boolean)=>void` |
 | validateField()  | 对整个表单进行校验的方法                         | `(prop:string,callback:(errMsg:string)=>void)=>void` |
 | getModel()       | 获取表单所有参数                                 | `()=>Record<string,any>`                             |
 | setModel()       | 设置表单对应参数                                 | `(model:Record<string,any>)=>void`                   |
@@ -182,11 +182,11 @@ export declare type ElAutoMixinOptions =
 
 ### Slot
 
-| 插槽    | 描述                     |
-| :------ | :----------------------- |
-| -       | 按钮插槽                 |
-| prepend | 表单内首部插槽           |
-| append  | 表单尾部，按钮之前插槽   |
+| 插槽    | 描述                   |
+| :------ | :--------------------- |
+| -       | 按钮插槽               |
+| prepend | 表单内首部插槽         |
+| append  | 表单尾部，按钮之前插槽 |
 
 ### Scope Slot
 

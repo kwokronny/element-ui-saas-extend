@@ -11,6 +11,10 @@ export default {
 					type: "date",
 					value: "2011-06-08"
 				},
+				week: {
+					label: "周",
+					type: "week",
+				},
 				daterange: {
 					label: "日期范围",
 					type: "daterange",

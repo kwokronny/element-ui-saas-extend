@@ -4,7 +4,7 @@
 		<component v-if="fields" :is="inline ? 'span' : 'el-row'" class="el-form-auto-row" type="flex" :gutter="gutter">
 			<!--  @slot 表单内首部插槽-->
 			<template v-for="(item, name, index) in fields">
-				<component :is="inline ? 'span' : 'el-col'" :span="item.col || 24" v-if="(!item.bindShow || item.bindShow(model)) && item.type != 'hidden' && (overCollapse !== -1 || index < overCollapse)" :key="`col_${name}`">
+				<component :is="inline ? 'span' : 'el-col'" :span="item.col || 24" v-if="(!item.bindShow || item.bindShow(model)) && item.type != 'hidden' && (overCollapse == -1 || index < overCollapse)" :key="`col_${name}`">
 					<el-form-item :prop="name" :label-width="item.labelWidth" :data-prop="name">
 						<span slot="label" v-if="!labelHidden && !item.labelHidden"> {{ item.label || "" }} <el-tooltip v-if="item.labelTooltip" :content="item.labelTooltip">
 								<i class="el-icon-question"></i>
@@ -26,7 +26,7 @@
 							<el-number-range v-model="model[name]" v-bind="item.props" v-on="item.on"></el-number-range>
 						</template>
 						<template v-else-if="item.type == 'number'">
-							<el-input-number v-model="model[name]" :readonly="item.props.disabled" v-bind="item.props" v-on="item.on"></el-input-number>
+							<el-input-number v-model="model[name]" v-bind="item.props" v-on="item.on"></el-input-number>
 						</template>
 						<template v-else-if="item.type == 'slider'">
 							<el-slider v-model="model[name]" v-bind="item.props" v-on="item.on"></el-slider>
@@ -113,6 +113,8 @@ const DATE_UNIX = function (value, format) {
 	else if (format === 'unix') return Math.floor(value.getTime() / 1000);
 };
 
+type ElFormAutoStrictField = Omit<ElFormAutoField, "options"> & { options?: ElAutoOption[], props: Record<string, any> }
+
 @Component({
 	name: "ElFormAuto",
 	mixins: [locale, selectScroll],
@@ -142,13 +144,13 @@ export default class ElFormAuto extends Vue {
 		this.$emit("input", this.getModel())
 	}
 
-	fields: Record<string, Omit<ElFormAutoField, "options"> & { options?: ElAutoOption[], props: Record<string, any> }> = {};
+	fields: Record<string, ElFormAutoStrictField> = {};
 	defaultValue: Record<string, any> = {};
 	rules: Record<string, any> = {};
 	generateModel(): void {
 		// this.fields = cloneDeep(this.data) as Record<string, ElFormAutoField>;
 		forEach(cloneDeep(this.data), (item, name) => {
-			let field: Omit<ElFormAutoField, "options"> & { options?: ElAutoOption[], props: Record<string, any> } = this.fields[name] || { props: {}, on: {}, name };
+			let field: ElFormAutoStrictField = this.fields[name] || { props: {}, on: {}, name };
 			// FormItem props
 			let itemProps = ["value", "addRules", "label", "labelHidden", "allOption", "labelTooltip", "labelWidth", "type", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "required", "col", "options", "on"];
 			itemProps.forEach((key: string) => {
@@ -164,10 +166,7 @@ export default class ElFormAuto extends Vue {
 				field.slot = typeof item.slot == "boolean" ? name : item.slot;
 			}
 			// 根据字段 type 设置 model 默认值
-			if (
-				/(check|numberrange|cascader)/g.test(item.type) ||
-				(item.type == "select" && field.props.multiple === true)
-			) {
+			if (/(check|numberrange|cascader)/g.test(item.type) || (item.type == "select" && field.props.multiple === true)) {
 				this.defaultValue[name] = []
 				field.value = Array.isArray(item.value) ? ([] as any[]).concat(item.value) : [];
 			} else if (item.type == "slider" && field.props.range === true) {
@@ -189,7 +188,7 @@ export default class ElFormAuto extends Vue {
 					if (item.type == "datetimerange") {
 						field.props.defaultTime = field.props.defaultTime || ["00:00:00", "23:59:59"]
 					}
-				} else if (/date|week/g.test(field.type)) {
+				} else if (/date/g.test(field.type)) {
 					if (item.type == "daterange" && item.suffixTime) {
 						field.props.valueFormat = field.props.valueFormat || "yyyy-MM-dd HH:mm:ss"
 						field.props.defaultTime = ["00:00:00", "23:59:59"]
@@ -202,154 +201,154 @@ export default class ElFormAuto extends Vue {
 					field.props.valueFormat = field.props.valueFormat || "yyyy-MM";
 				} else if (/year/g.test(item.type)) {
 					field.props.valueFormat = field.props.valueFormat || "yyyy";
+				} else if (/week/g.test(item.type)) {
+					field.props.valueFormat = field.props.valueFormat || "yyyy-WW";
 				}
 				if (/range|dates|years|months/.test(item.type)) {
 					this.defaultValue[name] = null
 				} else {
 					this.defaultValue[name] = ""
 				}
-				if (item.value && item.value.length && item.value.length == 2) {
-					field.value = [].concat(item.value)
-				} else if (item.value) {
-					field.value = item.value;
+				if (Array.isArray(item.value)) {
+					field.value = ([] as any[]).concat(item.value)
 				} else {
-					field.value = this.defaultValue[name];
+					field.value = item.value || this.defaultValue[name];
 				}
+			} else {
+				this.defaultValue[name] = ""
+				field.value = item.value === undefined ? "" : item.value;
+			}
 
-				// 根据字段 type 设置表单占位字符串
-				if (/range/g.test(item.type)) {
-					if (item.type == "numberrange") {
-						field.props.startPlaceholder = item.startPlaceholder || `${this.$t("formauto.min")}${item.label}`;
-						field.props.endPlaceholder = item.endPlaceholder || `${this.$t("formauto.max")}${item.label}`;
-					} else {
-						field.props.startPlaceholder = item.startPlaceholder || `${this.$t("formauto.start")}${item.label}`;
-						field.props.endPlaceholder = item.endPlaceholder || `${this.$t("formauto.end")}${item.label}`;
-					}
-				} if (/date(|time|s)|time|select|week|year|month|cascader/g.test(item.type)) {
-					field.props.placeholder = item.placeholder || `${this.$t("formauto.pleaseSelect")}${item.label}`;
+			// 根据字段 type 设置表单占位字符串
+			if (/range/g.test(item.type)) {
+				if (item.type == "numberrange") {
+					field.props.startPlaceholder = item.startPlaceholder || `${this.$t("formauto.min")}${item.label}`;
+					field.props.endPlaceholder = item.endPlaceholder || `${this.$t("formauto.max")}${item.label}`;
 				} else {
-					field.props.placeholder = item.placeholder || `${this.$t("formauto.pleaseInput")}${item.label}`;
+					field.props.startPlaceholder = item.startPlaceholder || `${this.$t("formauto.start")}${item.label}`;
+					field.props.endPlaceholder = item.endPlaceholder || `${this.$t("formauto.end")}${item.label}`;
 				}
+			} if (/date(|time|s)|time|select|week|year|month|cascader/g.test(item.type)) {
+				field.props.placeholder = item.placeholder || `${this.$t("formauto.pleaseSelect")}${item.label}`;
+			} else {
+				field.props.placeholder = item.placeholder || `${this.$t("formauto.pleaseInput")}${item.label}`;
+			}
 
-				// 为datepicker相关组件设置特殊处理
-				if (this.$ELEMENT && this.$ELEMENT.pickerOptions && /date(?!s)/g.test(item.type)) {
-					let type = /range/g.test(item.type) ? "range" : "date"
-					let pickerOptions = this.$ELEMENT.pickerOptions[type];
-					if (pickerOptions) {
-						field.props.pickerOptions = Object.assign({}, pickerOptions, field.props.pickerOptions);
-					}
+			// 为datepicker相关组件设置特殊处理
+			if (this.$ELEMENT && this.$ELEMENT.pickerOptions && /date(?!s)/g.test(item.type)) {
+				let type = /range/g.test(item.type) ? "range" : "date"
+				let pickerOptions = this.$ELEMENT.pickerOptions[type];
+				if (pickerOptions) {
+					field.props.pickerOptions = Object.assign({}, pickerOptions, field.props.pickerOptions);
 				}
+			}
 
-				if (/text|password|textarea|select|cascader/.test(item.type)) {
-					field.props.clearable = field.props.clearable == false ? false : true
-				}
+			if (/text|password|textarea|select|cascader/.test(item.type)) {
+				field.props.clearable = field.props.clearable == false ? false : true
+			}
 
-				if (/select|radio|check|cascader/.test(item.type) && item.type != "timeselect" && item.options) {
-					// transformOptions(item.options, item.type != 'cascader').then((options) => {
-					// 	field.options = options
-					// 	field.type == "check" && !field.notAll && this.handleCheckedChange(item.name, this.model[item.name])
-					// 	// resolve();
-					// })
-					if (item.options instanceof Function) {
-						if (item.options != field.originOption) {
-							field.options = item.options
-							this.asyncOptions.push(field)
-							field.originOption = item.options
-						}
-					} else {
-						field.options = item.options
+			if (/select|radio|check|cascader/.test(item.type) && item.type != "timeselect" && item.options) {
+				field.options = []
+				if (item.options instanceof Function) {
+					if (item.options != field.originOption) {
 						this.asyncOptions.push(field)
+						field.originOption = item.options
 					}
-					if (item.type == "check" && item.notAll !== false) {
-						this.$set(this.check, name, false);
+				} else {
+					field.originOption = item.options
+					this.asyncOptions.push(field)
+				}
+				if (item.type == "check" && item.notAll !== false) {
+					this.$set(this.check, name, false);
+				}
+			}
+			// 防止因对select事件赋值导致覆写为select注册的事件
+			if (field.type == "select" && field.remote) {
+				let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
+				let originClearEvent = field.on.clear || (() => { })
+				let self = this;
+				field.on["visible-change"] = function (visible) {
+					originVisibleChangeEvent(visible)
+					if (visible == false && field.options && field.options.length == 0) {
+						field.props.remoteMethod.call(item, "")
 					}
 				}
-				if (field.type == "select" && field.remote) {
-					let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
-					let originClearEvent = field.on.clear || (() => { })
-					let self = this;
-					field.on["visible-change"] = function (visible) {
-						originVisibleChangeEvent(visible)
-						if (visible == false && field.options && field.options.length == 0) {
-							field.props.remoteMethod.call(item, "")
-						}
-					}
-					field.on.clear = function () {
-						originClearEvent()
-						self.refreshOptions(name)
-					}
+				field.on.clear = function () {
+					originClearEvent()
+					self.refreshOptions(name)
 				}
-				let value = field.value
-				if (this.model[name] !== undefined) {
-					value = this.model[name];
-				} else if (this.value[name] !== undefined) {
-					value = this.value[name]
-				}
-				this.$set(this.model, name, value);
-				this.fields[name] = field;
-			})
+			}
+			let value = field.value
+			if (this.model[name] !== undefined) {
+				value = this.model[name];
+			} else if (this.value[name] !== undefined) {
+				value = this.value[name]
+			}
+			this.$set(this.model, name, value);
+			this.fields[name] = field;
+		})
 		this.asyncOptionsRequest()
 	}
 
-	asyncOptions: ElFormAutoField[] = [] //统一处理options
+	asyncOptions: ElFormAutoStrictField[] = [] //统一处理options
 	asyncOptionsRequest(): void {
 		if (this.asyncOptions.length) {
-			let asyncList: Promise<void>[] = this.asyncOptions.map((item) => {
+			let asyncList: Promise<void>[] = this.asyncOptions.map((field) => {
 				return new Promise((resolve) => {
-					if (item.remote && item.type == "select" && item.options instanceof Function) {
-						let remoteMethod = item.options;
-						item.props.filterable = true;
-						item.props.remote = true;
-						item.remoteParams = {
+					if (field.remote && field.type == "select" && field.originOption instanceof Function) {
+						let remoteMethod = field.originOption;
+						field.props.filterable = true;
+						field.props.remote = true;
+						field.remoteParams = {
 							query: "",
 							page: 1,
 							loadFinish: false,
 							optionLoading: false,
 						};
-						item.remoteMethod = (query: string) => {
-							if (item.remoteParams.query != query && query !== undefined) {
-								item.remoteParams.query = query;
-								item.remoteParams.page = 1;
-								item.remoteParams.loadFinish = false;
+						field.remoteMethod = (query: string) => {
+							if (field.remoteParams.query != query && query !== undefined) {
+								field.remoteParams.query = query;
+								field.remoteParams.page = 1;
+								field.remoteParams.loadFinish = false;
 							}
-							if (item.remoteParams.page == 1) {
-								item.options = []
+							if (field.remoteParams.page == 1) {
+								field.options = []
 							}
-							if (item.remoteParams.loadFinish) return
-							item.remoteParams.optionLoading = true;
-							remoteMethod(item.remoteParams.query || "", item.remoteParams.page).then((options: ElAutoMixinOptions) => {
+							if (field.remoteParams.loadFinish) return
+							field.remoteParams.optionLoading = true;
+							remoteMethod(field.remoteParams.query || "", field.remoteParams.page).then((options: ElAutoMixinOptions) => {
 								return transformOptions(options)
 							}).then((options: ElAutoOption[]) => {
-								item.remoteParams.optionLoading = false;
-								if (options.length == 0 && item.remoteParams.page > 1) {
-									item.remoteParams.loadFinish = true;
+								field.remoteParams.optionLoading = false;
+								if (options.length == 0 && field.remoteParams.page > 1) {
+									field.remoteParams.loadFinish = true;
 									return;
 								}
-								options = (item.options as ElAutoOption[]).concat(options)
-								item.options = options;
-								item.remoteParams.page = item.remoteParams.page + 1;
+								options = (field.options as ElAutoOption[]).concat(options)
+								field.options = options;
+								field.remoteParams.page = field.remoteParams.page + 1;
 							}).catch(() => {
-								item.remoteParams.optionLoading = false;
+								field.remoteParams.optionLoading = false;
 							});
 						};
-						item.props.remoteMethod = item.remoteMethod;
-						item.props.remoteMethod("");
+						field.props.remoteMethod = field.remoteMethod;
+						field.props.remoteMethod("");
 						resolve();
-					} else if (item.options) {
-						transformOptions(item.options, item.type != 'cascader').then((options) => {
-							item.options = options
-							item.type == "check" && !item.notAll && this.handleCheckedChange(item.name, this.model[item.name])
+					} else if (field.originOption) {
+						transformOptions(field.originOption, field.type != 'cascader').then((options) => {
+							field.options = options
+							field.type == "check" && !field.notAll && this.handleCheckedChange(field.name, this.model[field.name])
 							resolve();
 						})
 					}
 				})
 			})
-			// Promise.all(asyncList).then(() => {
-			// 	this.asyncOptions = []
-			// 	this.$nextTick(function () {
-			// 		this.FormAuto && this.FormAuto.clearValidate()
-			// 	})
-			// })
+			Promise.all(asyncList).then(() => {
+				this.asyncOptions = []
+				this.$nextTick(function () {
+					this.FormAuto && this.FormAuto.clearValidate()
+				})
+			})
 		}
 
 	}
