@@ -1,65 +1,32 @@
 <template>
-	<el-form
-		class="el-form-auto"
-		ref="FormAuto"
-		:model="model"
-		:rules="rules"
-		:validate-on-rule-change="false"
-		:inline="inline"
-		v-bind="$attrs"
-		v-on="$listeners"
-	>
+	<el-form class="el-form-auto" ref="FormAuto" :model="model" :rules="rules" :validate-on-rule-change="false" :inline="inline" v-bind="$attrs" v-on="$listeners">
 		<slot name="prepend"></slot>
-		<component
-			v-if="fields"
-			:is="inline ? 'span' : 'el-row'"
-			class="el-form-auto-row"
-			type="flex"
-			:gutter="gutter"
-		>
+		<component v-if="fields" :is="inline ? 'span' : 'el-row'" class="el-form-auto-row" type="flex" :gutter="gutter">
 			<!--  @slot 表单内首部插槽-->
 			<template v-for="(item, name, index) in fields">
-				<component
-					:is="inline ? 'span' : 'el-col'"
-					:span="item.col || 24"
-					v-if="(!item.bindShow || item.bindShow(model)) && item.type!='hidden' && (!overCollapse || index < overCollapse)"
-					:key="`col_${name}`"
-				>
+				<component :is="inline ? 'span' : 'el-col'" :span="item.col || 24" v-if="(!item.bindShow || item.bindShow(model)) && item.type != 'hidden' && (overCollapse !== -1 || index < overCollapse)" :key="`col_${name}`">
 					<el-form-item :prop="name" :label-width="item.labelWidth" :data-prop="name">
-						<span slot="label" v-if="!labelHidden && !item.labelHidden">
-							{{ item.label || "" }}
-							<el-tooltip v-if="item.labelTooltip" :content="item.labelTooltip">
+						<span slot="label" v-if="!labelHidden && !item.labelHidden"> {{ item.label || "" }} <el-tooltip v-if="item.labelTooltip" :content="item.labelTooltip">
 								<i class="el-icon-question"></i>
 							</el-tooltip>
 						</span>
 						<template v-if="item.slot">
 							<slot :name="item.slot" v-bind:item="item" v-bind:model="model" v-bind:name="name"></slot>
 						</template>
-						<template v-else-if="'component'==item.type">
+						<template v-else-if="'component' == item.type">
 							<component :is="item.component" v-bind="item.props" v-on="item.on"></component>
 						</template>
 						<template v-else-if="'plain' == item.type">
 							<div v-bind="item.props">{{ model[name] }}</div>
 						</template>
 						<template v-else-if="/text|password|textarea/g.test(item.type)">
-							<el-input
-								:name="name"
-								v-model="model[name]"
-								:type="item.type"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-input>
+							<el-input :name="name" v-model="model[name]" :type="item.type" v-bind="item.props" v-on="item.on"></el-input>
 						</template>
-						<template v-else-if="item.type=='numberrange'">
+						<template v-else-if="item.type == 'numberrange'">
 							<el-number-range v-model="model[name]" v-bind="item.props" v-on="item.on"></el-number-range>
 						</template>
 						<template v-else-if="item.type == 'number'">
-							<el-input-number
-								v-model="model[name]"
-								:readonly="item.props.disabled"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-input-number>
+							<el-input-number v-model="model[name]" :readonly="item.props.disabled" v-bind="item.props" v-on="item.on"></el-input-number>
 						</template>
 						<template v-else-if="item.type == 'slider'">
 							<el-slider v-model="model[name]" v-bind="item.props" v-on="item.on"></el-slider>
@@ -71,60 +38,23 @@
 							<el-date-picker v-model="model[name]" :type="item.type" v-bind="item.props" v-on="item.on"></el-date-picker>
 						</template>
 						<template v-else-if="/time(select|range|)/.test(item.type)">
-							<el-time-select
-								v-if="item.type == 'timeselect'"
-								v-model="model[name]"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-time-select>
-							<el-time-picker
-								v-else
-								:is-range="item.type == 'timerange'"
-								v-model="model[name]"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-time-picker>
+							<el-time-select v-if="item.type == 'timeselect'" v-model="model[name]" v-bind="item.props" v-on="item.on"></el-time-select>
+							<el-time-picker v-else :is-range="item.type == 'timerange'" v-model="model[name]" v-bind="item.props" v-on="item.on"></el-time-picker>
 						</template>
 						<template v-else-if="/radio(|button)/.test(item.type)">
 							<el-radio-group v-model="model[name]" v-bind="item.props" v-on="item.on">
-								<component
-									:is="item.type=='radio'?'el-radio':'el-radio-button'"
-									v-if="item.allOption"
-									label
-								>{{$t('formauto.selectAll')}}</component>
-								<component
-									:is="item.type=='radio'?'el-radio':'el-radio-button'"
-									v-for="(option, key) in item.options"
-									:key="`${name}_${key}`"
-									:label="option.value"
-									:disabled="option.disabled"
-								>
+								<component :is="item.type == 'radio' ? 'el-radio' : 'el-radio-button'" v-if="item.allOption" label>{{ $t('formauto.selectAll') }}</component>
+								<component :is="item.type == 'radio' ? 'el-radio' : 'el-radio-button'" v-for="(option, key) in item.options" :key="`${name}_${key}`" :label="option.value" :disabled="option.disabled">
 									<i v-if="option.icon" :class="option.icon"></i>
 									<span>{{ option.label }}</span>
 								</component>
 							</el-radio-group>
 						</template>
 						<template v-else-if="item.type == 'check'">
-							<el-checkbox
-								v-if="!item.notAll"
-								:indeterminate="check[name] == 2"
-								v-model="check[name]"
-								@change="checkAll(name)"
-							>{{$t("formauto.checkAll")}}</el-checkbox>
-							<el-checkbox-group
-								v-model="model[name]"
-								style="display: inline"
-								@change="handleCheckedChange(name,$event)"
-								v-bind="item.props"
-								v-on="item.on"
-							>
+							<el-checkbox v-if="!item.notAll" :indeterminate="check[name] == 2" v-model="check[name]" @change="checkAll(name)">{{ $t("formauto.checkAll") }}</el-checkbox>
+							<el-checkbox-group v-model="model[name]" style="display: inline" @change="handleCheckedChange(name, $event)" v-bind="item.props" v-on="item.on">
 								<template v-if="Array.isArray(item.options)">
-									<el-checkbox
-										v-for="(option, key) in item.options"
-										:key="`${name}_${key}`"
-										:label="option.value"
-										:disabled="option.disabled"
-									>
+									<el-checkbox v-for="(option, key) in item.options" :key="`${name}_${key}`" :label="option.value" :disabled="option.disabled">
 										<i v-if="option.icon" :class="option.icon"></i>
 										<span>{{ option.label }}</span>
 									</el-checkbox>
@@ -132,54 +62,22 @@
 							</el-checkbox-group>
 						</template>
 						<template v-else-if="item.type == 'select'">
-							<el-select
-								v-model="model[name]"
-								v-select-scroll="item.loadScroll && item.props?item.props.remoteMethod:null"
-								v-bind="item.props"
-								v-on="item.on"
-							>
-								<el-option
-									v-if="!item.props.multiple && item.allOption"
-									value
-									:label="$t('formauto.selectAll')"
-								></el-option>
-								<template v-if="Array.isArray(item.options)">
-									<el-option
-										v-for="(option,key) in selectOptions(name)"
-										:key="`${name}_${key}`"
-										:label="option.label"
-										:value="option.value"
-										:disabled="option.disabled"
-									>
+							<el-select v-model="model[name]" v-select-scroll="item.loadScroll && item.props ? item.props.remoteMethod : null" v-bind="item.props" v-on="item.on">
+								<el-option v-if="!item.props.multiple && item.allOption" value :label="$t('formauto.selectAll')"></el-option>
+								<template v-if="item.options && Array.isArray(item.options)">
+									<el-option v-for="(option, key) in selectOptions(name)" :key="`${name}_${key}`" :label="option.label" :value="option.value" :disabled="option.disabled">
 										<i v-if="option.icon" :class="option.icon"></i>
 										<span>{{ option.label }}</span>
 									</el-option>
 								</template>
-								<el-option
-									disabled
-									v-if="item.remoteParams && item.remoteParams.optionLoading"
-									value="el-formauto-option-loading"
-									:label="$t('formauto.selectLoading')"
-								>{{$t('formauto.selectLoading')}}</el-option>
+								<el-option disabled v-if="item.remoteParams && item.remoteParams.optionLoading" value="el-formauto-option-loading" :label="$t('formauto.selectLoading')">{{ $t('formauto.selectLoading') }}</el-option>
 							</el-select>
 						</template>
 						<template v-else-if="item.type == 'cascader'">
-							<el-cascader
-								v-model="model[name]"
-								:options="Array.isArray(item.options)?item.options:[]"
-								v-bind="item.props"
-								v-on="item.on"
-							></el-cascader>
+							<el-cascader v-model="model[name]" :options="Array.isArray(item.options) ? item.options : []" v-bind="item.props" v-on="item.on"></el-cascader>
 						</template>
 						<template v-else-if="item.type == 'rate'">
-							<el-rate
-								v-model="model[name]"
-								:style="{ marginTop: '8px' }"
-								:disabled="item.disabled"
-								show-score
-								v-bind="item.props"
-								v-on="item.on"
-							></el-rate>
+							<el-rate v-model="model[name]" :style="{ marginTop: '8px' }" :disabled="item.disabled" show-score v-bind="item.props" v-on="item.on"></el-rate>
 						</template>
 					</el-form-item>
 				</component>
@@ -223,49 +121,43 @@ export default class ElFormAuto extends Vue {
 	@Ref("FormAuto") readonly FormAuto!: Form;
 	@Prop({ type: Boolean, default: false }) readonly inline!: boolean;
 	@Prop({ type: Boolean, default: false }) readonly labelHidden!: boolean;
-	@Prop({ type: [Number, Boolean], default: false }) readonly overCollapse!: boolean | number;
+	@Prop({ type: [Number], default: -1 }) readonly overCollapse!: number;
 	@Prop(Object) readonly data!: Record<string, ElFormAutoField>;
 	@Prop({ type: Number, default: 15 }) readonly gutter!: number;
 
 	@Watch("data", { immediate: true, deep: true })
-	private onDataChange(data: Record<string, ElFormAutoField>) {
+	onDataChange(data: Record<string, ElFormAutoField>) {
 		data && (this.generateModel(), this.generateRule())
 	}
 
 	@Model("input", { type: Object, default: () => { return {} } }) value!: Record<string, any>;
 	@Watch("value", { deep: true })
-	private onValueChange(value: Record<string, any>, oldValue: Record<string, any>) {
+	onValueChange(value: Record<string, any>, oldValue: Record<string, any>) {
 		this.setModel(value)
 	}
 
-	private model: Record<string, any> = {};
+	model: Record<string, any> = {};
 	@Watch("model", { immediate: true, deep: true })
-	private onModelChange() {
+	onModelChange() {
 		this.$emit("input", this.getModel())
 	}
 
-	private asyncOptions: ElFormAutoField[] = [] //统一处理options
-	private fields: Record<string, ElFormAutoField> = {};
-	private defaultValue: Record<string, any> = {};
-	private rules: Record<string, any> = {};
-	private generateModel(): void {
+	fields: Record<string, Omit<ElFormAutoField, "options"> & { options?: ElAutoOption[], props: Record<string, any> }> = {};
+	defaultValue: Record<string, any> = {};
+	rules: Record<string, any> = {};
+	generateModel(): void {
 		// this.fields = cloneDeep(this.data) as Record<string, ElFormAutoField>;
-		forEach(this.data, (item, name) => {
-			let field: ElFormAutoField;
-			if (!this.fields[name]) {
-				field = cloneDeep(item);
-			} else {
-				field = this.fields[name];
-			}
-			field.name = name;
-			let notProps = ["value", "addRules", "label", "labelHidden", "allOption", "labelTooltip", "labelWidth", "type", "on", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "required", "col", "options"];
-			notProps.forEach((key: string) => {
+		forEach(cloneDeep(this.data), (item, name) => {
+			let field: Omit<ElFormAutoField, "options"> & { options?: ElAutoOption[], props: Record<string, any> } = this.fields[name] || { props: {}, on: {}, name };
+			// FormItem props
+			let itemProps = ["value", "addRules", "label", "labelHidden", "allOption", "labelTooltip", "labelWidth", "type", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "required", "col", "options", "on"];
+			itemProps.forEach((key: string) => {
 				if (item[key] !== undefined && !/on|options/.test(key)) {
 					field[key] = item[key];
 				}
 			})
-			field.on = Object.assign(field.on || {}, item.on)
-			field.props = Object.assign(field.props || {}, omit(item, notProps))
+			field.on = Object.assign(field.on, item.on)
+			field.props = Object.assign(field.props, omit(item, itemProps))
 			// field.type = item.type || "text"
 			// 字段属性 slot 值为布尔值时，动态插槽 name 为字段名
 			if (item.slot) {
@@ -277,12 +169,12 @@ export default class ElFormAuto extends Vue {
 				(item.type == "select" && field.props.multiple === true)
 			) {
 				this.defaultValue[name] = []
-				field.value = item.value || [];
+				field.value = Array.isArray(item.value) ? ([] as any[]).concat(item.value) : [];
 			} else if (item.type == "slider" && field.props.range === true) {
 				let min = field.props.min || 0
 				let max = field.props.max || 100
 				this.defaultValue[name] = [min, max]
-				field.value = item.value || [min, max];
+				field.value = item.value && item.value.length == 2 ? [].concat(item.value) : [min, max];
 			} else if (/rate|number|slider/.test(item.type)) {
 				this.defaultValue[name] = 0
 				field.value = parseInt(item.value) || 0;
@@ -316,83 +208,91 @@ export default class ElFormAuto extends Vue {
 				} else {
 					this.defaultValue[name] = ""
 				}
-				field.value = item.value || this.defaultValue[name];
-			} else {
-				this.defaultValue[name] = ""
-				field.value = item.value === undefined ? "" : item.value;
-			}
-
-			// 根据字段 type 设置表单占位字符串
-			if (/range/g.test(item.type)) {
-				if (item.type == "numberrange") {
-					field.props.startPlaceholder = item.startPlaceholder || `${this.$t("formauto.min")}${item.label}`;
-					field.props.endPlaceholder = item.endPlaceholder || `${this.$t("formauto.max")}${item.label}`;
+				if (item.value && item.value.length && item.value.length == 2) {
+					field.value = [].concat(item.value)
+				} else if (item.value) {
+					field.value = item.value;
 				} else {
-					field.props.startPlaceholder = item.startPlaceholder || `${this.$t("formauto.start")}${item.label}`;
-					field.props.endPlaceholder = item.endPlaceholder || `${this.$t("formauto.end")}${item.label}`;
+					field.value = this.defaultValue[name];
 				}
-			} if (/date(|time|s)|time|select|week|year|month|cascader/g.test(item.type)) {
-				field.props.placeholder = item.placeholder || `${this.$t("formauto.pleaseSelect")}${item.label}`;
-			} else {
-				field.props.placeholder = item.placeholder || `${this.$t("formauto.pleaseInput")}${item.label}`;
-			}
 
-
-			if (this.$ELEMENT && this.$ELEMENT.pickerOptions && /date(?!s)/g.test(item.type)) {
-				let type = /range/g.test(item.type) ? "range" : "date"
-				let pickerOptions = this.$ELEMENT.pickerOptions[type];
-				if (pickerOptions) {
-					field.props.pickerOptions = Object.assign({}, pickerOptions, field.props.pickerOptions);
+				// 根据字段 type 设置表单占位字符串
+				if (/range/g.test(item.type)) {
+					if (item.type == "numberrange") {
+						field.props.startPlaceholder = item.startPlaceholder || `${this.$t("formauto.min")}${item.label}`;
+						field.props.endPlaceholder = item.endPlaceholder || `${this.$t("formauto.max")}${item.label}`;
+					} else {
+						field.props.startPlaceholder = item.startPlaceholder || `${this.$t("formauto.start")}${item.label}`;
+						field.props.endPlaceholder = item.endPlaceholder || `${this.$t("formauto.end")}${item.label}`;
+					}
+				} if (/date(|time|s)|time|select|week|year|month|cascader/g.test(item.type)) {
+					field.props.placeholder = item.placeholder || `${this.$t("formauto.pleaseSelect")}${item.label}`;
+				} else {
+					field.props.placeholder = item.placeholder || `${this.$t("formauto.pleaseInput")}${item.label}`;
 				}
-			}
 
-			if (/text|password|textarea|select|cascader/.test(item.type)) {
-				field.props.clearable = field.props.clearable == false ? false : true
-			}
+				// 为datepicker相关组件设置特殊处理
+				if (this.$ELEMENT && this.$ELEMENT.pickerOptions && /date(?!s)/g.test(item.type)) {
+					let type = /range/g.test(item.type) ? "range" : "date"
+					let pickerOptions = this.$ELEMENT.pickerOptions[type];
+					if (pickerOptions) {
+						field.props.pickerOptions = Object.assign({}, pickerOptions, field.props.pickerOptions);
+					}
+				}
 
-			if (/select|radio|check|cascader/.test(item.type) && item.type != "timeselect") {
-				if (item.options instanceof Function) {
-					if (item.options != field.originOption) {
+				if (/text|password|textarea|select|cascader/.test(item.type)) {
+					field.props.clearable = field.props.clearable == false ? false : true
+				}
+
+				if (/select|radio|check|cascader/.test(item.type) && item.type != "timeselect" && item.options) {
+					// transformOptions(item.options, item.type != 'cascader').then((options) => {
+					// 	field.options = options
+					// 	field.type == "check" && !field.notAll && this.handleCheckedChange(item.name, this.model[item.name])
+					// 	// resolve();
+					// })
+					if (item.options instanceof Function) {
+						if (item.options != field.originOption) {
+							field.options = item.options
+							this.asyncOptions.push(field)
+							field.originOption = item.options
+						}
+					} else {
 						field.options = item.options
 						this.asyncOptions.push(field)
-						field.originOption = item.options
 					}
-				} else {
-					field.options = item.options
-					this.asyncOptions.push(field)
-				}
-				if (item.type == "check" && item.notAll !== false) {
-					this.$set(this.check, name, false);
-				}
-			}
-			if (field.type == "select" && field.remote) {
-				let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
-				let originClearEvent = field.on.clear || (() => { })
-				let self = this;
-				field.on["visible-change"] = function (visible) {
-					originVisibleChangeEvent(visible)
-					if (visible == false && field.options && field.options.length == 0) {
-						field.props.remoteMethod.call(item, "")
+					if (item.type == "check" && item.notAll !== false) {
+						this.$set(this.check, name, false);
 					}
 				}
-				field.on.clear = function () {
-					originClearEvent()
-					self.refreshOptions(name)
+				if (field.type == "select" && field.remote) {
+					let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
+					let originClearEvent = field.on.clear || (() => { })
+					let self = this;
+					field.on["visible-change"] = function (visible) {
+						originVisibleChangeEvent(visible)
+						if (visible == false && field.options && field.options.length == 0) {
+							field.props.remoteMethod.call(item, "")
+						}
+					}
+					field.on.clear = function () {
+						originClearEvent()
+						self.refreshOptions(name)
+					}
 				}
-			}
-			let value = field.value
-			if (this.model[name] !== undefined) {
-				value = this.model[name];
-			} else if (this.value[name] !== undefined) {
-				value = this.value[name]
-			}
-			this.$set(this.model, name, value);
-			this.fields[name] = field;
-		})
+				let value = field.value
+				if (this.model[name] !== undefined) {
+					value = this.model[name];
+				} else if (this.value[name] !== undefined) {
+					value = this.value[name]
+				}
+				this.$set(this.model, name, value);
+				this.fields[name] = field;
+			})
 		this.asyncOptionsRequest()
 	}
 
-	private asyncOptionsRequest(): void {
+	asyncOptions: ElFormAutoField[] = [] //统一处理options
+	asyncOptionsRequest(): void {
 		if (this.asyncOptions.length) {
 			let asyncList: Promise<void>[] = this.asyncOptions.map((item) => {
 				return new Promise((resolve) => {
@@ -444,17 +344,17 @@ export default class ElFormAuto extends Vue {
 					}
 				})
 			})
-			Promise.all(asyncList).then(() => {
-				this.asyncOptions = []
-				this.$nextTick(function () {
-					this.FormAuto && this.FormAuto.clearValidate()
-				})
-			})
+			// Promise.all(asyncList).then(() => {
+			// 	this.asyncOptions = []
+			// 	this.$nextTick(function () {
+			// 		this.FormAuto && this.FormAuto.clearValidate()
+			// 	})
+			// })
 		}
 
 	}
 
-	private generateRule(): void {
+	generateRule(): void {
 		this.rules = {};
 		forEach(this.fields, (item, name) => {
 			this.rules[name] = [];
@@ -488,7 +388,7 @@ export default class ElFormAuto extends Vue {
 		});
 	}
 
-	public getModel(): Record<string, any> {
+	getModel(): Record<string, any> {
 		let value = {}
 		for (let name in this.fields) {
 			let field = this.fields[name]
@@ -520,7 +420,7 @@ export default class ElFormAuto extends Vue {
 		return value
 	}
 
-	public setModel(model: Record<string, any>): void {
+	setModel(model: Record<string, any>): void {
 		for (let name in this.fields) {
 			let field = this.fields[name]
 			if (field) {
@@ -574,7 +474,7 @@ export default class ElFormAuto extends Vue {
 		}
 	}
 
-	public refreshOptions(fieldName: string, clearEcho: boolean = true) {
+	refreshOptions(fieldName: string, clearEcho: boolean = true) {
 		let field = this.fields[fieldName];
 		if (field && field.remoteMethod) {
 			field.remoteParams.query = "refresh";
@@ -583,64 +483,64 @@ export default class ElFormAuto extends Vue {
 		}
 	}
 
-	private echoOptions: Record<string, any> = {}
+	echoOptions: Record<string, ElAutoOption[]> = {}
 
-	private selectEcho(name: string, options: any): any {
+	selectEcho(name: string, options: string | number | ElAutoOption | Array<string | number | ElAutoOption>): string | number | boolean | Array<string | number> {
 		if (!this.echoOptions[name]) {
 			this.echoOptions[name] = []
 		}
-		if (Array.isArray(options) && options.length > 0) {
+		if (Array.isArray(options)) {
 			let echoOptions = this.echoOptions[name];
 			let values: Array<string | number> = []
 			let isChange = options.length != this.model[name].length;
-			for (let i = 0; i < options.length; i++) {
-				if (options[i] && options[i].label && options[i].value) {
-					if (!echoOptions.find((option: Record<string, string>) => option.value == options[i].value)) {
-						echoOptions.push(Object.assign({}, options[i]))
+			options.forEach((echoOption, idx) => {
+				if (typeof echoOption == "object" && echoOption.label && echoOption.value) {
+					if (!echoOptions.find((option: ElAutoOption) => option.value == echoOption.value)) {
+						echoOptions.push(Object.assign({}, echoOption))
 					}
 					isChange = true;
-					values.push(options[i].value);
-				} else {
-					if (options[i] != this.model[name][i]) {
+					values.push(echoOption.value);
+				} else if (typeof echoOption != "object") {
+					if (echoOption != this.model[name][idx]) {
 						isChange = true;
 					}
-					values.push(options[i]);
+					values.push(echoOption);
 				}
-			}
+			})
 			return isChange ? values : false
-		} else if (options && options.label && options.value) {
+		} else if (typeof options == "object" && options.label && options.value) {
 			this.echoOptions[name] = [Object.assign({}, options)];
 			return options.value;
-		} else if (options != this.model[name]) {
+		} else if (typeof options != "object" && options != this.model[name]) {
 			return options
 		} else {
 			return false;
 		}
 	}
 
-	private selectOptions(name: string) {
-		let field: ElFormAutoField = this.fields[name]
+	selectOptions(name: string): ElAutoOption[] {
+		let field = this.fields[name]
 		if (field && Array.isArray(field.options) && field.remote && Array.isArray(this.echoOptions[name])) {
 			let echoOpitons = this.echoOptions[name] || []
 			return uniqBy(echoOpitons.concat(field.options), "value")
 		}
-		return field.options
+		return field.options || []
 	}
 
 	/**
 	 * 获取字段当前所有项（包含回显值）
 	 * @param fieldName [string] 字段名
 	 */
-	public getOptions(fieldName: string): Record<string, any> {
+	getOptions(fieldName: string): Record<string, any> {
 		return keyBy(this.selectOptions(fieldName), "value")
 	}
 
 	// #region 复选框全选相关处理
-	private check: Record<string, boolean | number> = {};
+	check: Record<string, boolean | number> = {};
 	/**
 	 * 复选框 全选
 	 */
-	private checkAll(name: string): void {
+	checkAll(name: string): void {
 		this.model[name] = [];
 		if (this.check[name] === true) {
 			let options = this.fields[name].options as Array<ElAutoOption>;
@@ -655,7 +555,7 @@ export default class ElFormAuto extends Vue {
 	/**
 	 * 复选框组 change 事件
 	 */
-	private handleCheckedChange(name: string, value: string[]): void {
+	handleCheckedChange(name: string, value: string[]): void {
 		if (this.check[name] == undefined || !value) return
 		let checkedCount = value.length || 0;
 		if (Array.isArray(this.fields[name].options)) {
@@ -674,7 +574,7 @@ export default class ElFormAuto extends Vue {
 	 * @public
 	 * 重置表单
 	 */
-	public reset(): void {
+	reset(): void {
 		this.echoOptions = {}
 		if (this.FormAuto) {
 			this.FormAuto.resetFields();
@@ -696,7 +596,7 @@ export default class ElFormAuto extends Vue {
 	 * @public
 	 * 异步验证成功后获取表单所有参数
 	 */
-	public validate(cb?: ValidateCallback): Promise<boolean> | void {
+	validate(cb?: ValidateCallback): Promise<boolean> | void {
 		return cb ? this.FormAuto.validate(cb) : this.FormAuto.validate();
 	}
 
@@ -704,7 +604,7 @@ export default class ElFormAuto extends Vue {
 	 * @public
 	 * 验证单个字段
 	 */
-	public validateField(props: string[] | string, callback?: (errorMessage: string) => void): void {
+	validateField(props: string[] | string, callback?: (errorMessage: string) => void): void {
 		return this.FormAuto && this.FormAuto.validateField(props, callback);
 	}
 
@@ -712,7 +612,7 @@ export default class ElFormAuto extends Vue {
 	 * @public
 	 * 清除验证
 	 */
-	public clearValidate(props?: string[] | string): void {
+	clearValidate(props?: string[] | string): void {
 		return this.FormAuto && this.FormAuto.clearValidate(props);
 	}
 	//#endregion

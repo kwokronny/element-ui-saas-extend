@@ -1,18 +1,8 @@
 import { ElForm } from "element-ui/types/form";
+import { ElAutoOption, ElAutoMixinOptions } from "./saas-extend";
 
-export declare interface ElAutoOption {
-  icon?: string;
-  label: string;
-  type?: "primary" | "warning" | "info" | "danger";
-  value: string | number;
-  disabled?: boolean;
-  children?: ElAutoOption[];
-  props?: Record<string, any>;
-}
-
-export declare type ElAutoMixinOptions =
-  | Record<string | number, string | number>
-  | Array<string | ElAutoOption>;
+export declare interface ElAutoOption extends ElAutoOption { }
+export declare interface ElAutoMixinOptions extends ElAutoMixinOptions { }
 
 export declare type ElFormAutoFieldType =
   | "hidden"
@@ -115,8 +105,8 @@ export declare interface ElFormAutoField {
    * @default false
    */
   options?:
-    | ElAutoMixinOptions
-    | ((query?: string, page?: number = 1) => Promise<ElAutoMixinOptions>);
+  | ElAutoMixinOptions
+  | ((query?: string, page?: number = 1) => Promise<ElAutoMixinOptions>);
   /**
    * type为check时
    * 去除 全选复选框

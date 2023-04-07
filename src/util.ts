@@ -1,6 +1,6 @@
-import omit from "lodash-es/omit";
 import { ElAutoMixinOptions, ElAutoOption } from "types/saas-extend";
 
+// 将不同的options值换成统一格式
 export async function transformOptions(
   options: ElAutoMixinOptions | ((query?: string) => any),
   transition: boolean = true

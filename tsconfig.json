@@ -16,6 +16,9 @@
     "types": ["webpack-env", "mocha", "chai"],
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
+  "vueCompilerOptions": {
+    "target": 2
+  },
   "include": ["docs/.vuepress/**/*.ts", "docs/.vuepress/**/*.vue", "**/*.ts", "**/*.tsx", "**/*.vue"],
   "exclude": ["node_modules"]
 }

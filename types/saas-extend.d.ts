@@ -13,9 +13,22 @@ import { ElFormTable } from "./form-table";
 import { ElMorePopover } from "./more-popover";
 import { ElNumberRange } from "./number-range";
 
-export interface ElAutoMixinOptions extends ElAutoMixinOptions {}
 export interface ElFormAutoField extends ElFormAutoField {}
-export interface ElAutoOption extends ElAutoOption {}
+
+export declare interface ElAutoOption {
+  icon?: string;
+  label: string;
+  type?: "primary" | "warning" | "info" | "danger";
+  value: string | number;
+  disabled?: boolean;
+  children?: ElAutoOption[];
+  props?: Record<string, any>;
+}
+
+export declare type ElAutoMixinOptions =
+  | Record<string | number, string | number>
+  | Array<string | ElAutoOption>;
+
 export class FormAuto extends ElFormAuto {}
 export class FormTable extends ElFormTable {}
 
