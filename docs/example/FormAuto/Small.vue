@@ -18,8 +18,9 @@ export default {
 				daterange: {
 					label: "日期范围",
 					type: "daterange",
+					suffixTime: true,
 					rangeName: ["startDate", "endDate"],
-					defaultTime: ["00:00:00", "23:59:59"]
+					// defaultTime: ["00:00:00", "23:59:59"]
 				},
 				daterangeUnix: {
 					label: "unix日期范围",
@@ -60,6 +61,9 @@ export default {
 			},
 			model: {}
 		};
+	},
+	mounted(){
+		this.model = {daterange:["2023-04-01","2023-04-05"]}
 	}
 };
 </script>

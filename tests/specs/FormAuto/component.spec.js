@@ -1,8 +1,10 @@
 import { expect } from "chai";
 import FormAuto from "../../../packages/FormAuto"
 import { Random } from "mockjs";
-import { createTest, createVue, recordValid, triggerEvent, wait, waitImmediate } from "../../util";
-import { cloneDeep } from "lodash-es";
+import { createTest, createVue, recordValid, triggerClick, triggerEvent, wait, waitImmediate } from "../../util";
+import { pickBy, cloneDeep, forEach, reduce } from "lodash-es";
+import dayjs from "dayjs";
+import { map } from "lodash-es";
 
 describe("FormAuto Props:data relative Component prop", () => {
 	let vm;
@@ -266,5 +268,163 @@ describe("FormAuto Props:data relative Component prop", () => {
 		}
 		// console.log(vm.$refs.form.defaultValue)
 		// expect(recordValid((vm.$refs.form.field), values),vm.$refs.form.field).to.true
+	})
+
+	it("slot", async () => {
+		let value = Random.cword();
+		vm = createVue({
+			template: `<el-form-auto :data="form" v-model="model" ref="form">
+				<template slot="field" slot-scope="{item, model, name}">
+					{{item.label}}:{{model[name]}}
+				</template>
+			</el-form-auto>`,
+			data() {
+				return {
+					model: {},
+					form: {
+						field: {
+							label: "插槽",
+							type: "plain",
+							value,
+							slot: true
+						}
+					},
+				};
+			},
+		}, true);
+
+		let $el = vm.$el.querySelector(`.el-form-item[data-prop='field'] .el-form-item__content`);
+		expect($el.textContent.trim(), "").to.equal(`插槽:${value}`)
+	})
+
+	it("rangeName", async () => {
+		let form = {
+			daterange: {
+				label: "日期范围",
+				type: "daterange",
+				rangeName: ["startD", "endD"]
+			},
+			timerange: {
+				label: "时间范围",
+				type: "daterange",
+				rangeName: ["startT", "endT"]
+			},
+			monthrange: {
+				label: "月份范围",
+				type: "monthrange",
+				rangeName: ["startM", "endM"]
+			},
+			datetimerange: {
+				label: "日期范围",
+				type: "datetimerange",
+				rangeName: ["startDT", "endDT"]
+			},
+			numberrange: {
+				label: "数值范围",
+				type: "numberrange",
+				rangeName: ["startN", "endN"]
+			},
+			slider: {
+				label: "滑块",
+				type: "slider",
+				range: true,
+				rangeName: ["startS", "endS"]
+			}
+		};
+		vm = createVue({
+			template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+			data() {
+				return {
+					model: {},
+					form,
+				};
+			},
+		}, true);
+		let data = {
+			slider: [1, 3],
+			numberrange: [1, 3],
+			daterange: [Random.now('yyyy-MM-01'), Random.now('yyyy-MM-05')],
+			monthrange: [Random.now('yyyy-01'), Random.now('yyyy-03')],
+			datetimerange: [Random.date('yyyy-MM-01 HH:mm:ss'), Random.date('yyyy-MM-08 HH:mm:ss')],
+			timerange: [Random.time('01:mm:ss'), Random.time('08:mm:ss')],
+		}
+		vm.model = cloneDeep(data);
+		await waitImmediate()
+		for (let name in form) {
+			let field = form[name];
+			let [sn, en] = field.rangeName
+			expect(vm.model[sn], `${name}-${sn}:${vm.model[sn]}`).to.equal(data[name][0])
+			expect(vm.model[en], `${name}-${en}:${vm.model[en]}`).to.equal(data[name][1])
+		}
+	})
+
+	it("suffixTime", async () => {
+		vm = createVue({
+			template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+			data() {
+				return {
+					model: {},
+					form: {
+						daterange: {
+							label: "日期范围",
+							type: "daterange",
+							suffixTime: true,
+							rangeName: ["startD", "endD"]
+						}
+					},
+				};
+			},
+		}, true);
+		expect(vm.$refs.form.fields['daterange'].props.defaultTime).to.deep.equal(["00:00:00", "23:59:59"])
+		expect(vm.$refs.form.fields['daterange'].props.valueFormat).to.equal("yyyy-MM-dd HH:mm:ss")
+	})
+
+	it("valueFormat", async () => {
+		let form = reduce(
+			pickBy(cloneDeep(baseFormData), (field, name) => /date(time|)(|range|s)|time(range|)|year(|s)|month(|range|s)|week/.test(name)),
+			(form, field, name) => {
+				field.valueFormat = "unix"
+				form[name] = field
+				return form
+			}, {});
+		vm = createVue({
+			template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+			data() {
+				return {
+					model: {},
+					form,
+				};
+			},
+		}, true);
+		let data = {
+			date: Random.datetime('yyyy-MM-dd 00:00:00'),
+			month: Random.datetime('yyyy-MM-01 00:00:00'),
+			months: [Random.datetime('yyyy-MM-01 00:00:00'), Random.datetime('yyyy-MM-01 00:00:00')],
+			year: Random.datetime('yyyy-01-01 00:00:00'),
+			years: [Random.datetime('yyyy-01-01 00:00:00'), Random.datetime('yyyy-01-01 00:00:00')],
+			// week: Random.date('yyyyw01'),
+			dates: [Random.datetime('yyyy-MM-dd 00:00:00'), Random.datetime('yyyy-MM-dd 00:00:00')],
+			datetime: Random.datetime('yyyy-MM-dd HH:mm:ss'),
+			dateRange: [Random.now('yyyy-MM-01 00:00:00'), Random.now('yyyy-MM-05 00:00:00')],
+			monthRange: [Random.now('yyyy-01-01 00:00:00'), Random.now('yyyy-03-01 00:00:00')],
+			dateTimeRange: [Random.date('yyyy-MM-01 HH:mm:ss'), Random.date('yyyy-MM-08 HH:mm:ss')],
+			time: Random.now('yyyy-MM-dd HH:mm:ss'),
+			timeRange: [Random.now('yyyy-MM-dd 01:mm:ss'), Random.now('yyyy-MM-dd 08:mm:ss')],
+		}
+		vm.model = cloneDeep(data);
+		await waitImmediate()
+		forEach(vm.form, (field, name) => {
+			if (field.rangeName) {
+				let [sn, en] = field.rangeName
+				expect(vm.model[sn], `${name}-${sn}:${vm.model[sn]}`).to.equal(dayjs(data[name][0]).unix())
+				expect(vm.model[en], `${name}-${en}:${vm.model[en]}`).to.equal(dayjs(data[name][1]).unix())
+			} else if (Array.isArray(vm.model[name])) {
+				vm.model[name].map((time, idx) => {
+					expect(time, `${name}-${idx}:${time}${data[name][idx]}`).to.equal(dayjs(data[name][idx]).unix())
+				})
+			} else if (vm.model[name]) {
+				expect(vm.model[name], `${name}:${vm.model[name]}`).to.equal(dayjs(data[name]).unix())
+			}
+		})
 	})
 });

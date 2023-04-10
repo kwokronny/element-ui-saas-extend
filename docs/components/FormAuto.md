@@ -121,10 +121,8 @@ export declare type ElAutoMixinOptions =
 | slot            | 自定义动态插槽，设为 true 时，slot 为 name，详情可参考 [自定义动态插槽示例](#自定义动态插槽) | `string` / `boolean`            | false  |
 | component       | 组件名称，type 为 `component` 时有效                                                         | `string`                        | -      |
 | `[prop:string]` | 可直接追加 type 对应组件的 prop                                                              | `any`                           | -      |
-| disabled        | 是否禁用字段                                                                                 | `boolean`                       | false  |
-| placeholder     | 占位符                                                                                       | `array`                         | -      |
 | on              | 设置 type 对应组件的事件                                                                     | `object`                        | {}     |
-| rangeName       | 日期范围名 type 为 daterange/timerange/datetimerange/numberrange/slider 选填                 | `array<string>`                 | false  |
+| rangeName       | 日期范围名 type 为 daterange/timerange/monthrange/datetimerange/numberrange/slider 选填      | `array<string>`                 | false  |
 | suffixTime      | type 为 daterange 选填，为日期范围增加 00:00:00 - 23:59:59                                   | `boolean`                       | false  |
 | valueFormat     | type 为 日期类控件 选填，格式与 element-ui 一致，增加 `unix` 10 位时间戳格式                 | `string`                        | -      |
 | options         | type 为 check/radio/select 必填，详情可参考 [options 设置](#options-设置)                    | `object` / `array` / `Promise`  | []     |
@@ -136,10 +134,11 @@ export declare type ElAutoMixinOptions =
 | ruleType        | 为 async-validator 必填设置另外配置类型                                                      | `string`                        | -      |
 | addRules        | 追加验证规则                                                                                 | `array`                         | -      |
 
-### type Enum
+### type Enum 
 
 | 值            | 对应组件                                    | 描述             |
 | :------------ | :------------------------------------------ | :--------------- |
+| plain         | &lt;div&gt;                                 | 内容展示         |
 | text          | &lt;el-input type="text"&gt;                | 文本输入框       |
 | password      | &lt;el-input type="password"&gt;            | 密码输入框       |
 | textarea      | &lt;el-input type="textarea"&gt;            | 文本域           |

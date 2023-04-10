@@ -104,7 +104,7 @@ import { ValidateCallback } from "element-ui/types/form";
 import { toDate } from "element-ui/src/utils/date-util.js"
 
 const DATE_UNIX = function (value, format) {
-	if (typeof value == 'number' && `${value}`.length == 10) {
+	if (typeof value == 'number' && `${value}`.length <= 10) {
 		value = Math.floor(value * 1000)
 	}
 	value = toDate(value);
@@ -168,7 +168,7 @@ export default class ElFormAuto extends Vue {
 			// 根据字段 type 设置 model 默认值
 			if (/(check|numberrange|cascader)/g.test(item.type) || (item.type == "select" && field.props.multiple === true)) {
 				this.defaultValue[name] = []
-				field.value = Array.isArray(item.value) ? ([] as any[]).concat(item.value) : [];
+				field.value = Array.isArray(item.value) ? item.value : [];
 			} else if (item.type == "slider" && field.props.range === true) {
 				let min = field.props.min || 0
 				let max = field.props.max || 100
@@ -209,11 +209,7 @@ export default class ElFormAuto extends Vue {
 				} else {
 					this.defaultValue[name] = ""
 				}
-				if (Array.isArray(item.value)) {
-					field.value = ([] as any[]).concat(item.value)
-				} else {
-					field.value = item.value || this.defaultValue[name];
-				}
+				field.value = item.value || this.defaultValue[name];
 			} else {
 				this.defaultValue[name] = ""
 				field.value = item.value === undefined ? "" : item.value;
@@ -397,7 +393,7 @@ export default class ElFormAuto extends Vue {
 					if (this.model[name] && this.model[name].length == 2) {
 						let _value: any[] = cloneDeep(this.model[name]);
 						let [sd, ed] = _value;
-						if (sd && ed && field.valueFormat == "unix" && /date|time|month|week|year/g.test(field.type)) {
+						if (sd && ed && field.valueFormat == "unix" && /date|time|month|year/g.test(field.type)) {
 							sd = DATE_UNIX(sd, "unix");
 							ed = DATE_UNIX(ed, "unix");
 						}
@@ -443,14 +439,14 @@ export default class ElFormAuto extends Vue {
 						}
 					} else if (/(time|date(|time|s)|(month|year)(|s))(?!range|select)$/.test(field.type) && field.valueFormat == "unix") {
 						if (Array.isArray(value)) {
-							let hasChange = false
-							value = value.map((v: string, idx: number) => {
+							let hasChange = !this.model[name] ? true : false
+							!hasChange && (value = value.map((v: string, idx: number) => {
 								let _value = DATE_UNIX(v, "timestamp")
 								if (_value != this.model[name][idx]) {
 									hasChange = true
 								}
 								return _value
-							})
+							}))
 							if (hasChange) {
 								this.model[name] = value
 							}

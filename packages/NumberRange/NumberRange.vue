@@ -1,42 +1,14 @@
 <template>
-	<div
-		class="el-number-range el-range-editor el-input__inner"
-		:class="[
-      inputSize ? `el-range-editor--${ inputSize }` : '',
-      isActive ? 'is-active' : ''
-    ]"
-		@mouseenter="handleMouseEnter"
-		@mouseleave="showClose = false"
-	>
-		<input
-			ref="reference"
-			autocomplete="off"
-			:placeholder="startPlaceholder"
-			v-model="minValue"
-			:readonly="inputDisabled"
-			@focus="handleFocus"
-			@blur="handleBlur"
-			@change="handleInputChange(0)"
-			class="el-range-input"
-		/>
+	<div class="el-number-range el-range-editor el-input__inner" :class="[
+		inputSize ? `el-range-editor--${inputSize}` : '',
+		isActive ? 'is-active' : ''
+	]" @mouseenter="handleMouseEnter" @mouseleave="showClose = false">
+		<input ref="reference" autocomplete="off" :placeholder="startPlaceholder" v-model="minValue" :readonly="inputDisabled" @focus="handleFocus" @blur="handleBlur" @change="handleInputChange(0)" class="el-range-input" />
 		<slot name="range-separator">
 			<span class="el-range-separator">{{ rangeSeparator }}</span>
 		</slot>
-		<input
-			autocomplete="off"
-			:placeholder="endPlaceholder"
-			v-model="maxValue"
-			:readonly="inputDisabled"
-			@focus="handleFocus"
-			@blur="handleBlur"
-			@change="handleInputChange(1)"
-			class="el-range-input"
-		/>
-		<i
-			@click="handleClickClear()"
-			:class="[showClose ? '' + clearIcon : '']"
-			class="el-input__icon el-range__close-icon"
-		></i>
+		<input autocomplete="off" :placeholder="endPlaceholder" v-model="maxValue" :readonly="inputDisabled" @focus="handleFocus" @blur="handleBlur" @change="handleInputChange(1)" class="el-range-input" />
+		<i @click="handleClickClear()" :class="[showClose ? '' + clearIcon : '']" class="el-input__icon el-range__close-icon"></i>
 	</div>
 </template>
 <script lang="ts">
@@ -60,11 +32,11 @@ export default class ElNumberRange extends Vue {
 
 	@Model("input", { type: Array, default: () => [] }) readonly value!: number[]
 
-	private minValue: string = "";
-	private maxValue: string = "";
+	minValue: string = "";
+	maxValue: string = "";
 
 	@Watch("value", { immediate: true })
-	private handleValueChange(value: number[]) {
+	handleValueChange(value: number[]) {
 		this.minValue = value && value[0] !== undefined ? `${value[0]}` : ""
 		this.maxValue = value && value[1] !== undefined ? `${value[1]}` : ""
 	}
@@ -73,7 +45,7 @@ export default class ElNumberRange extends Vue {
 	@Prop(Number) max!: number
 
 	@Emit("input")
-	private handleInputChange(type: number) {
+	handleInputChange(type: number) {
 		if (!isNumber(this.minValue) || !isNumber(this.maxValue)) {
 			this.minValue = this.minValue.replace(/[^0-9-.]/g, "");
 			this.maxValue = this.maxValue.replace(/[^0-9-.]/g, "");
@@ -106,7 +78,7 @@ export default class ElNumberRange extends Vue {
 		return range
 	}
 
-	private mounted() {
+	mounted() {
 		this.$on('fieldReset', this.handleClickClear);
 	}
 
@@ -135,20 +107,20 @@ export default class ElNumberRange extends Vue {
 		return this.size || this._elFormItemSize || (this.$ELEMENT || {}).size;
 	}
 
-	private isActive: boolean = false;
+	isActive: boolean = false;
 
-	public focus(): void {
+	focus(): void {
 		if (this.reference) {
 			this.reference.focus()
 		}
 	}
 
-	private handleFocus() {
+	handleFocus() {
 		this.isActive = true;
 		this.$emit("focus")
 	}
 
-	private handleBlur() {
+	handleBlur() {
 		this.isActive = false;
 		this.dispatch('ElFormItem', 'el.form.blur');
 		this.$emit("blur")
@@ -157,20 +129,20 @@ export default class ElNumberRange extends Vue {
 	@Prop({ type: Boolean, default: true }) clearable!: boolean
 	@Prop({ type: String, default: "el-icon-circle-close" }) clearIcon!: string
 
-	private showClose: boolean = false;
+	showClose: boolean = false;
 
 	get valueIsEmpty(): boolean {
 		return !(this.minValue || this.maxValue);
 	}
 
-	private handleMouseEnter() {
+	handleMouseEnter() {
 		if (this.inputDisabled) return;
 		if (!this.valueIsEmpty && this.clearable) {
 			this.showClose = true;
 		}
 	}
 
-	private handleClickClear() {
+	handleClickClear() {
 		if (this.inputDisabled || this.valueIsEmpty) return;
 		this.showClose = false;
 		this.minValue = ""
