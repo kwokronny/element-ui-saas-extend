@@ -1,10 +1,9 @@
 import { expect } from "chai";
-import FormAuto from "../../../packages/FormAuto"
 import { Random } from "mockjs";
 import { createTest, createVue, recordValid, triggerClick, triggerEvent, wait, waitImmediate } from "../../util";
 import { pickBy, cloneDeep, forEach, reduce } from "lodash-es";
 import dayjs from "dayjs";
-import { map } from "lodash-es";
+import userData from "../../mock/user.json";
 
 describe("FormAuto Props:data relative Component prop", () => {
 	let vm;
@@ -75,7 +74,35 @@ describe("FormAuto Props:data relative Component prop", () => {
 		select: {
 			label: "选择框",
 			type: "select",
-			options: defaultOption,
+			remote: true,
+			options: async (query) => {
+				return userData.reduce((record, item) => {
+					if (item.username.indexOf(query) > -1) {
+						record.push({
+							label: item.username,
+							value: item.id,
+						});
+					}
+					return record;
+				}, []);
+			},
+		},
+		scrollselect: {
+			label: "选择框",
+			type: "select",
+			remote: true,
+			loadScroll: true,
+			options: async (query, page) => {
+				return userData.reduce((record, item) => {
+					if (item.username.indexOf(query) > -1) {
+						record.push({
+							label: item.username,
+							value: item.id + (page - 1) * userData.length,
+						});
+					}
+					return record;
+				}, []);
+			},
 		},
 		number: {
 			label: "数值",
@@ -149,16 +176,17 @@ describe("FormAuto Props:data relative Component prop", () => {
 		radio: {
 			label: "单选框",
 			type: "radio",
-			options: defaultOption,
+			options: async () => defaultOption,
 		},
 		radiobutton: {
 			label: "单选按钮",
 			type: "radiobutton",
-			options: defaultOption,
+			options: cloneDeep(defaultOption),
 		},
 		check: {
 			label: "复选框",
 			type: "check",
+			notAll: true,
 			options: defaultOption,
 		},
 		rate: {
@@ -381,7 +409,7 @@ describe("FormAuto Props:data relative Component prop", () => {
 
 	it("valueFormat", async () => {
 		let form = reduce(
-			pickBy(cloneDeep(baseFormData), (field, name) => /date(time|)(|range|s)|time(range|)|year(|s)|month(|range|s)|week/.test(name)),
+			pickBy(cloneDeep(baseFormData), (field, name) => name != 'timeselect' && /date(time|)(|range|s)|time(range|)|year(|s)|month(|range|s)|week/.test(name)),
 			(form, field, name) => {
 				field.valueFormat = "unix"
 				form[name] = field
@@ -416,15 +444,123 @@ describe("FormAuto Props:data relative Component prop", () => {
 		forEach(vm.form, (field, name) => {
 			if (field.rangeName) {
 				let [sn, en] = field.rangeName
-				expect(vm.model[sn], `${name}-${sn}:${vm.model[sn]}`).to.equal(dayjs(data[name][0]).unix())
-				expect(vm.model[en], `${name}-${en}:${vm.model[en]}`).to.equal(dayjs(data[name][1]).unix())
+				expect(vm.model[sn], `${name}[${sn}]:${vm.model[sn]}`).to.equal(dayjs(data[name][0]).unix())
+				expect(vm.model[en], `${name}[${en}]:${vm.model[en]}`).to.equal(dayjs(data[name][1]).unix())
 			} else if (Array.isArray(vm.model[name])) {
 				vm.model[name].map((time, idx) => {
-					expect(time, `${name}-${idx}:${time}${data[name][idx]}`).to.equal(dayjs(data[name][idx]).unix())
+					expect(time, `${name}[${idx}]:${time}${data[name][idx]}`).to.equal(dayjs(data[name][idx]).unix())
 				})
 			} else if (vm.model[name]) {
 				expect(vm.model[name], `${name}:${vm.model[name]}`).to.equal(dayjs(data[name]).unix())
 			}
 		})
 	})
+
+	it("options", async () => {
+		let form = pickBy(cloneDeep(baseFormData), (field, name) => /check|radio|radiobutton|cascader/.test(name));
+		vm = createVue({
+			template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+			data() {
+				return {
+					model: {},
+					form,
+				};
+			},
+		}, true);
+		await waitImmediate()
+		let fields = vm.$refs.form.fields;
+		for (let name in form) {
+			if (name == 'cascader') {
+				expect(fields[name].options, `${name} options`).to.deep.equal([
+					{ "label": "节点1", "value": 1, "children": [{ "label": "节点4", "value": 4, "children": [{ "label": "节点5", "value": 5 }] }], "disabled": false, "icon": false },
+					{ "label": "节点2", "value": 2, "children": [{ "label": "节点6", "value": 6 }], "disabled": false, "icon": false },
+					{ "label": "节点3", "value": 3, "disabled": false, "icon": false, "children": [] }])
+			} else {
+				expect(fields[name].options, `${name} options ${fields[name].options}`).to.deep.equal([
+					{ label: '选项1', value: 0, disabled: false, icon: false, children: [] },
+					{ label: '带图标选项3', icon: 'el-icon-help', value: 3, disabled: false, children: [] },
+					{ label: '选项禁用2', value: 2, disabled: true, icon: false, children: [] },
+					{ label: '选项2', value: '选项2', disabled: false, icon: false, children: [] }
+				])
+			}
+		}
+	})
+
+
+	it("remote and loadScroll", async () => {
+		let form = pickBy(cloneDeep(baseFormData), (field, name) => name != 'timeselect' && /select/.test(name));
+		vm = createVue({
+			template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+			data() { return { model: {}, form, }; },
+		}, true);
+		await waitImmediate()
+		let fields = vm.$refs.form.fields;
+		let options = userData.reduce((record, item) => {
+			record.push({
+				label: item.username,
+				value: item.id,
+				children: [],
+				icon: false,
+				disabled: false
+			});
+			return record;
+		}, [])
+		for (let name in form) {
+			if (name == "select") {
+				expect(fields[name].options).to.deep.equal(options);
+				let select = vm.$refs.form.$children[0].$children[0].$children[0].$children[0].$children[1];
+				select.handleQueryChange("");
+				await waitImmediate();
+				let query = Random.pick(options).label
+				select.handleQueryChange(query);
+				await wait(350);
+				expect(fields[name].options[0].label, `select remote search: ${query}`).to.equal(query);
+			} else if (name == "scrollselect") {
+				expect(fields[name].options, `init remote fetch: ${JSON.stringify(fields[name].options)}`).to.deep.equal(options);
+				let $formItem = vm.$el.querySelector(".el-form-item[data-prop=scrollselect]");
+				$formItem.querySelector("input").click();
+				let $dropDown = $formItem.querySelector(".el-select-dropdown .el-select-dropdown__wrap");
+				await waitImmediate();
+				$dropDown.scrollTop = $dropDown.clientHeight;
+				triggerEvent($dropDown, "scroll");
+				await wait(550);
+				expect(fields[name].options, `scroll load: ${JSON.stringify(fields[name].options)}`).to.deep.equal([].concat(options, options.map(i => { return Object.assign({}, i, { value: i.value + 10 }) })))
+			}
+		}
+	})
+
+	it("allOption", async () => {
+		let form = reduce(pickBy(cloneDeep(baseFormData), (field) => /radio/.test(field.type)),
+			(form, field, name) => {
+				field.allOption = true
+				form[name] = field
+				return form
+			}, {});
+		vm = createVue({
+			template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+			data() { return { model: { radio: 2, radiobutton: 2 }, form, }; },
+		}, true);
+		await waitImmediate()
+		let $radio = vm.$el.querySelector(`.el-form-item[data-prop='radio'] .el-form-item__content label.el-radio span.el-radio__label`);
+		expect($radio.textContent.trim(), `radio allOption not render`).to.equal("全部")
+		triggerEvent($radio.parentNode, "click")
+		let $radiobtn = vm.$el.querySelector(`.el-form-item[data-prop='radiobutton'] .el-form-item__content label.el-radio-button span.el-radio-button__inner`);
+		expect($radiobtn.textContent.trim(), `radio allOption not render`).to.equal("全部")
+		triggerEvent($radiobtn.parentNode, "click")
+		await waitImmediate()
+		expect(vm.model, `radio click allOption, value should empty string`).to.deep.equal({ radio: '', radiobutton: '' })
+	})
+
+
+	// it("check all option interaction", async () => {
+	// 	let form = pickBy(cloneDeep(baseFormData), (field) => field.type == 'check')
+	// 	vm = createVue({
+	// 		template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+	// 		data() { return { model: {}, form, }; },
+	// 	}, true);
+	// 	await waitImmediate()
+	// 	// let $radio = vm.$el.querySelector(`.el-form-item[data-prop='check'] .el-form-item__content label.el-radio span.el-radio__label`);
+
+	// })
 });
+

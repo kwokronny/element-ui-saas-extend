@@ -43,7 +43,7 @@
 						</template>
 						<template v-else-if="/radio(|button)/.test(item.type)">
 							<el-radio-group v-model="model[name]" v-bind="item.props" v-on="item.on">
-								<component :is="item.type == 'radio' ? 'el-radio' : 'el-radio-button'" v-if="item.allOption" label>{{ $t('formauto.selectAll') }}</component>
+								<component :is="item.type == 'radio' ? 'el-radio' : 'el-radio-button'" v-if="item.props && item.props.allOption" label>{{ $t('formauto.selectAll') }}</component>
 								<component :is="item.type == 'radio' ? 'el-radio' : 'el-radio-button'" v-for="(option, key) in item.options" :key="`${name}_${key}`" :label="option.value" :disabled="option.disabled">
 									<i v-if="option.icon" :class="option.icon"></i>
 									<span>{{ option.label }}</span>
@@ -62,8 +62,8 @@
 							</el-checkbox-group>
 						</template>
 						<template v-else-if="item.type == 'select'">
-							<el-select v-model="model[name]" v-select-scroll="item.loadScroll && item.props ? item.props.remoteMethod : null" v-bind="item.props" v-on="item.on">
-								<el-option v-if="!item.props.multiple && item.allOption" value :label="$t('formauto.selectAll')"></el-option>
+							<el-select v-model="model[name]" v-select-scroll="item.props && item.props.loadScroll ? item.props.remoteMethod : null" v-bind="item.props" v-on="item.on">
+								<el-option v-if="item.props && !item.props.multiple && item.props.allOption" value :label="$t('formauto.selectAll')"></el-option>
 								<template v-if="item.options && Array.isArray(item.options)">
 									<el-option v-for="(option, key) in selectOptions(name)" :key="`${name}_${key}`" :label="option.label" :value="option.value" :disabled="option.disabled">
 										<i v-if="option.icon" :class="option.icon"></i>
@@ -104,7 +104,7 @@ import { ValidateCallback } from "element-ui/types/form";
 import { toDate } from "element-ui/src/utils/date-util.js"
 
 const DATE_UNIX = function (value, format) {
-	if (typeof value == 'number' && `${value}`.length <= 10) {
+	if (typeof value == 'number' && format == 'timestamp') {
 		value = Math.floor(value * 1000)
 	}
 	value = toDate(value);
@@ -152,7 +152,7 @@ export default class ElFormAuto extends Vue {
 		forEach(cloneDeep(this.data), (item, name) => {
 			let field: ElFormAutoStrictField = this.fields[name] || { props: {}, on: {}, name };
 			// FormItem props
-			let itemProps = ["value", "addRules", "label", "labelHidden", "allOption", "labelTooltip", "labelWidth", "type", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "required", "col", "options", "on"];
+			let itemProps = ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "required", "col", "options", "on"];
 			itemProps.forEach((key: string) => {
 				if (item[key] !== undefined && !/on|options/.test(key)) {
 					field[key] = item[key];
@@ -260,6 +260,7 @@ export default class ElFormAuto extends Vue {
 			}
 			// 防止因对select事件赋值导致覆写为select注册的事件
 			if (field.type == "select" && field.remote) {
+				field.remoteParams = {}
 				let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
 				let originClearEvent = field.on.clear || (() => { })
 				let self = this;
@@ -291,8 +292,7 @@ export default class ElFormAuto extends Vue {
 		if (this.asyncOptions.length) {
 			let asyncList: Promise<void>[] = this.asyncOptions.map((field) => {
 				return new Promise((resolve) => {
-					if (field.remote && field.type == "select" && field.originOption instanceof Function) {
-						let remoteMethod = field.originOption;
+					if (field.props.remote && field.type == "select" && field.originOption instanceof Function) {
 						field.props.filterable = true;
 						field.props.remote = true;
 						field.remoteParams = {
@@ -301,7 +301,7 @@ export default class ElFormAuto extends Vue {
 							loadFinish: false,
 							optionLoading: false,
 						};
-						field.remoteMethod = (query: string) => {
+						let remoteMethod = (query: string) => {
 							if (field.remoteParams.query != query && query !== undefined) {
 								field.remoteParams.query = query;
 								field.remoteParams.page = 1;
@@ -312,22 +312,22 @@ export default class ElFormAuto extends Vue {
 							}
 							if (field.remoteParams.loadFinish) return
 							field.remoteParams.optionLoading = true;
-							remoteMethod(field.remoteParams.query || "", field.remoteParams.page).then((options: ElAutoMixinOptions) => {
-								return transformOptions(options)
-							}).then((options: ElAutoOption[]) => {
-								field.remoteParams.optionLoading = false;
-								if (options.length == 0 && field.remoteParams.page > 1) {
-									field.remoteParams.loadFinish = true;
-									return;
-								}
-								options = (field.options as ElAutoOption[]).concat(options)
-								field.options = options;
-								field.remoteParams.page = field.remoteParams.page + 1;
-							}).catch(() => {
-								field.remoteParams.optionLoading = false;
-							});
+							field.originOption(field.remoteParams.query || "", field.remoteParams.page)
+								.then((options: ElAutoMixinOptions) => transformOptions(options))
+								.then((options: ElAutoOption[]) => {
+									field.remoteParams.optionLoading = false;
+									if (options.length == 0 && field.remoteParams.page > 1) {
+										field.remoteParams.loadFinish = true;
+										return;
+									}
+									options = (field.options as ElAutoOption[]).concat(options)
+									field.options = options;
+									field.remoteParams.page = field.remoteParams.page + 1;
+								}).catch(() => {
+									field.remoteParams.optionLoading = false;
+								});
 						};
-						field.props.remoteMethod = field.remoteMethod;
+						field.props.remoteMethod = remoteMethod;
 						field.props.remoteMethod("");
 						resolve();
 					} else if (field.originOption) {

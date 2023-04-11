@@ -1,0 +1,17 @@
+[
+	{
+		"label": "选项1",
+		"value": 0
+	},
+	{
+		"label": "带图标选项3",
+		"icon": "el-icon-help",
+		"value": 3
+	},
+	{
+		"label": "选项禁用2",
+		"value": 2,
+		"disabled": true
+	},
+	"选项2"
+]
