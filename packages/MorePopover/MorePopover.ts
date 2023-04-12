@@ -12,7 +12,7 @@ export default class MorePopover extends Vue {
   @Prop({ type: String, default: "click" }) trigger!: string;
   @Prop({ type: String, default: "" }) popoverClass!: string;
 
-  private render(h: CreateElement) {
+  render(h: CreateElement) {
     // @ts-ignore
     let slots = (this.$slots && this.$slots.default) || [];
     slots = slots.filter((item) => item.context);

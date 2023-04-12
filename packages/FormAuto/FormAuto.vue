@@ -4,7 +4,7 @@
 		<component v-if="fields" :is="inline ? 'span' : 'el-row'" class="el-form-auto-row" type="flex" :gutter="gutter">
 			<!--  @slot 表单内首部插槽-->
 			<template v-for="(item, name, index) in fields">
-				<component :is="inline ? 'span' : 'el-col'" :span="item.col || 24" v-if="(!item.bindShow || item.bindShow(model)) && item.type != 'hidden' && (overCollapse == -1 || index < overCollapse)" :key="`col_${name}`">
+				<component :is="inline ? 'span' : 'el-col'" class="el-form-auto-col" :span="item.col || 24" v-if="(!item.bindShow || item.bindShow(model)) && item.type != 'hidden' && (overCollapse == -1 || index < overCollapse)" :key="`col_${name}`">
 					<el-form-item :prop="name" :label-width="item.labelWidth" :data-prop="name">
 						<span slot="label" v-if="!labelHidden && !item.labelHidden"> {{ item.label || "" }} <el-tooltip v-if="item.labelTooltip" :content="item.labelTooltip">
 								<i class="el-icon-question"></i>
@@ -152,7 +152,7 @@ export default class ElFormAuto extends Vue {
 		forEach(cloneDeep(this.data), (item, name) => {
 			let field: ElFormAutoStrictField = this.fields[name] || { props: {}, on: {}, name };
 			// FormItem props
-			let itemProps = ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "required", "col", "options", "on"];
+			let itemProps = ["value", "addRules", "label", "labelHidden", "labelTooltip", "labelWidth", "type", "slot", "bindShow", "rangeName", "suffixTime", "valueFormat", "notAll", "required", "col", "options", "on", "ruleType"];
 			itemProps.forEach((key: string) => {
 				if (item[key] !== undefined && !/on|options/.test(key)) {
 					field[key] = item[key];
@@ -244,7 +244,7 @@ export default class ElFormAuto extends Vue {
 			}
 
 			if (/select|radio|check|cascader/.test(item.type) && item.type != "timeselect" && item.options) {
-				field.options = []
+				field.options = field.options || []
 				if (item.options instanceof Function) {
 					if (item.options != field.originOption) {
 						this.asyncOptions.push(field)
@@ -261,18 +261,20 @@ export default class ElFormAuto extends Vue {
 			// 防止因对select事件赋值导致覆写为select注册的事件
 			if (field.type == "select" && field.remote) {
 				field.remoteParams = {}
-				let originVisibleChangeEvent = field.on["visible-change"] || (() => { })
-				let originClearEvent = field.on.clear || (() => { })
 				let self = this;
-				field.on["visible-change"] = function (visible) {
-					originVisibleChangeEvent(visible)
-					if (visible == false && field.options && field.options.length == 0) {
-						field.props.remoteMethod.call(item, "")
+				if (item.on) {
+					let originVisibleChangeEvent = item.on["visible-change"] || (() => { })
+					field.on["visible-change"] = function (visible) {
+						originVisibleChangeEvent(visible)
+						if (visible == false && field.options && field.options.length == 0) {
+							field.props.remoteMethod.call(item, "")
+						}
 					}
-				}
-				field.on.clear = function () {
-					originClearEvent()
-					self.refreshOptions(name)
+					let originClearEvent = item.on["clear"] || (() => { })
+					field.on.clear = function () {
+						originClearEvent()
+						self.refreshOptions(name)
+					}
 				}
 			}
 			let value = field.value
@@ -366,9 +368,6 @@ export default class ElFormAuto extends Vue {
 					requiredRule.type = "array";
 				} else if (/slider|rate|number/.test(item.type)) {
 					requiredRule.type = "number"
-				} else if (/select|radio|cascader/.test(item.type)) {
-					requiredRule.type = "string";
-					requiredRule.transform = function (v) { return `${v}` }
 				} else if (item.type == "switch") {
 					requiredRule.type = "boolean"
 				} else {

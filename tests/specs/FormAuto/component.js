@@ -6,7 +6,7 @@ import { baseFormData } from "./mock-data";
 import dayjs from "dayjs";
 import userData from "../../mock/user.json";
 
-describe("FormAuto Props:data relative Component prop", () => {
+export default () => {
 	let vm;
 
 	it("type", async () => {
@@ -15,37 +15,43 @@ describe("FormAuto Props:data relative Component prop", () => {
 			data() { return { model: {}, form: baseFormData, }; },
 		}, true);
 		await waitImmediate()
-		for (let key in baseFormData) {
-			let field = baseFormData[key]
-			if (field.type == "hidden") continue;
-			else {
-				let $el = vm.$el.querySelector(`.el-form-item[data-prop='${key}'] .el-form-item__content`);
-				console.log($el)
-				expect($el, `${key} formItem should render`).to.exist
-				if (field.type == "timeselect") {
-					expect($el.querySelector(".el-date-editor--time-select"), `${field.type} should render`).to.exist
+		for (let name in baseFormData) {
+			let field = baseFormData[name]
+
+			if (field.type == "hidden") {
+				expect(vm.$el.querySelector(`.el-form-item[data-prop='${name}']`)).to.not.exist;
+			} else {
+				let $label = vm.$el.querySelector(`.el-form-item[data-prop='${name}'] .el-form-item__label`);
+				expect($label.textContent.trim(), 'form item:${name} label not equal').to.equal(field.label)
+
+				let $formContent = vm.$el.querySelector(`.el-form-item[data-prop='${name}'] .el-form-item__content`);
+				expect($formContent, `${name} formItem should render`).to.exist
+				if (field.type == "plain") {
+					expect($formContent.querySelector("div").textContent.trim(), `${field.type} should render`).to.equal(field.value)
+				} else if (field.type == "timeselect") {
+					expect($formContent.querySelector(".el-date-editor--time-select"), `${field.type} should render`).to.exist
 				} else if (/date(time|)(|range|s)|time(range|)|year(|s)|month(|range|s)|week/.test(field.type)) {
-					let $comp = $el.querySelector(".el-date-editor")
+					let $comp = $formContent.querySelector(".el-date-editor")
 					expect($comp.classList.contains("el-date-editor--" + field.type), `${field.type} should render`).to.true
+				} else if (field.type == "textarea") {
+					expect($formContent.querySelector(".el-textarea"), `${field.type} should render`).to.exist
 				} else if (/text|password/.test(field.type)) {
-					let $comp = $el.querySelector(".el-input")
-					expect($comp.querySelector("input").getAttribute("type"), `${field.type} should render`).to.equal(field.type)
+					let $comp = $formContent.querySelector(".el-input input")
+					expect($comp.getAttribute("type"), `${field.type} should render`).to.equal(field.type)
 				} else if (/radio(|button)|check/.test(field.type)) {
 					if (/radio/.test(field.type)) {
-						let $comp = $el.querySelector(".el-radio-group")
+						let $comp = $formContent.querySelector(".el-radio-group")
 						expect($comp.querySelector(field.type == 'radio' ? "label.el-radio" : "label.el-radio-button"), `${field.type} should render`).to.exist
 					} else {
-						let $comp = $el.querySelector(".el-checkbox-group")
+						let $comp = $formContent.querySelector(".el-checkbox-group")
 						expect($comp.querySelector("label.el-checkbox"), `${field.type} should render`).to.exist
 					}
 				} else if (/switch|slider|cascader|rate/.test(field.type)) {
-					expect($el.querySelector(".el-" + field.type), `${field.type} should render`).to.exist
-				} else if (field.type == "textarea") {
-					expect($el.querySelector(".el-textarea"), `${field.type} should render`).to.exist
+					expect($formContent.querySelector(".el-" + field.type), `${field.type} should render`).to.exist
 				} else if (field.type == "numberrange") {
-					expect($el.querySelector(".el-number-range"), `${field.type} should render`).to.exist
+					expect($formContent.querySelector(".el-number-range"), `${field.type} should render`).to.exist
 				} else if (field.type == "number") {
-					expect($el.querySelector(".el-input-number"), `${field.type} should render`).to.exist
+					expect($formContent.querySelector(".el-input-number"), `${field.type} should render`).to.exist
 				}
 			}
 		}
@@ -293,15 +299,12 @@ describe("FormAuto Props:data relative Component prop", () => {
 		}
 	})
 
-
 	it("remote and loadScroll", async () => {
 		let form = pickBy(cloneDeep(baseFormData), (field, name) => name != 'timeselect' && /select/.test(name));
 		vm = createVue({
 			template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
-			data() { return { model: {}, form, }; },
+			data() { return { model: {}, form, visiblePass: false,clearPass:false }; },
 		}, true);
-		await waitImmediate()
-		let fields = vm.$refs.form.fields;
 		let options = userData.reduce((record, item) => {
 			record.push({
 				label: item.username,
@@ -313,17 +316,20 @@ describe("FormAuto Props:data relative Component prop", () => {
 			return record;
 		}, [])
 		for (let name in form) {
+			await waitImmediate()
+			let fields = vm.$refs.form.fields;
 			if (name == "select") {
-				expect(fields[name].options).to.deep.equal(options);
-				let select = vm.$refs.form.$children[0].$children[0].$children[0].$children[0].$children[1];
-				select.handleQueryChange("");
+				expect(fields[name].options, `init ${name} remote fetch: ${JSON.stringify(fields[name].options)}`).to.deep.equal(options);
+				let $select = vm.$refs.form.$children[0].$children[0].$children[0].$children[0].$children[1];
+				$select.handleQueryChange("");
 				await waitImmediate();
-				let query = Random.pick(options).label
-				select.handleQueryChange(query);
+				let query = Random.pick(options)
+				$select.handleQueryChange(query.label);
 				await wait(350);
-				expect(fields[name].options[0].label, `select remote search: ${query}`).to.equal(query);
+				expect(fields[name].options[0].label, `select remote search: ${query}`).to.equal(query.label);
 			} else if (name == "scrollselect") {
-				expect(fields[name].options, `init remote fetch: ${JSON.stringify(fields[name].options)}`).to.deep.equal(options);
+				await waitImmediate();
+				expect(fields[name].options, `init ${name} remote fetch: ${JSON.stringify(fields[name].options)}`).to.deep.equal(options);
 				let $formItem = vm.$el.querySelector(".el-form-item[data-prop=scrollselect]");
 				$formItem.querySelector("input").click();
 				let $dropDown = $formItem.querySelector(".el-select-dropdown .el-select-dropdown__wrap");
@@ -335,6 +341,70 @@ describe("FormAuto Props:data relative Component prop", () => {
 			}
 		}
 	})
+
+	// it("remote and loadScroll", async () => {
+	// 	let form = pickBy(cloneDeep(baseFormData), (field) => field.type=="select");
+	// 	vm = createVue({
+	// 		template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+	// 		data() { return { model: {}, form, visiblePass: false,clearPass:false }; },
+	// 		methods: {
+	// 			handleVisibleChange() {
+	// 				this.visiblePass = true
+	// 			},
+	// 			handleClear() {
+	// 				this.clearPass = true
+	// 			}
+	// 		}
+	// 	}, true);
+	// 	let options = userData.reduce((record, item) => {
+	// 		record.push({
+	// 			label: item.username,
+	// 			value: item.id,
+	// 			children: [],
+	// 			icon: false,
+	// 			disabled: false
+	// 		});
+	// 		return record;
+	// 	}, [])
+	// 		expect(fields[name].options, `init ${name} remote fetch: ${JSON.stringify(fields[name].options)}`).to.deep.equal(options);
+	// 		let $select = vm.$refs.form.$children[0].$children[0].$children[0].$children[0].$children[1];
+	// 		$select.handleQueryChange("");
+	// 		await waitImmediate();
+	// 		let query = Random.pick(options)
+	// 		$select.handleQueryChange(query.label);
+	// 		await wait(350);
+	// 		expect(fields[name].options[0].label, `select remote search: ${query}`).to.equal(query.label);
+	// 		vm.$set(vm.form.select, "on", {
+	// 			["visible-change"]: () => {
+	// 				vm.handleVisibleChange();
+	// 			},
+	// 			clear: () => {
+	// 				vm.handleClear();
+	// 			},
+	// 		})
+	// 		await waitImmediate();
+	// 		$select.handleQueryChange("empty option");
+	// 		// 让搜索结果为空
+	// 		await wait(350);
+	// 		$select.$el.click()
+	// 		await wait(250);
+	// 		expect(vm.visiblePass, "visible Event faild").to.true
+	// 		expect(fields[name].options, "request remoteMethod('') again when query result empty").to.deep.equal(options);
+	// 		$select.$el.click()
+	// 		await wait(250);
+	// 		$select.handleQueryChange(query.label);
+	// 		await wait(350);
+	// 		$select.hoverIndex = 0;
+	// 		$select.selectOption(0);
+	// 		$select.inputHovering = true;
+	// 		await wait(100);
+	// 		expect(vm.model.select, `select option ${vm.model.select} faild`).to.equal(query.value)
+	// 		$select.$el.querySelector(".el-input__icon.el-icon-circle-close").click();
+	// 		await wait(250);
+	// 		expect(vm.clearPass).to.be.true;
+	// 		expect(fields[name].options, "request remoteMethod('') again when query result empty").to.deep.equal(options);
+			
+	// })
 
 	it("allOption", async () => {
 		let form = reduce(pickBy(cloneDeep(baseFormData), (field) => /radio/.test(field.type)),
@@ -357,7 +427,6 @@ describe("FormAuto Props:data relative Component prop", () => {
 		await waitImmediate()
 		expect(vm.model, `radio click allOption, value should empty string`).to.deep.equal({ radio: '', radiobutton: '' })
 	})
-
 
 	it("check all option interaction", async () => {
 		let form = pickBy(cloneDeep(baseFormData), (field) => field.type == 'check')
@@ -383,4 +452,5 @@ describe("FormAuto Props:data relative Component prop", () => {
 		vm.form.check.notAll = true;
 		await waitImmediate()
 	})
-});
+
+}

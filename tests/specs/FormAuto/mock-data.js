@@ -21,6 +21,11 @@ export let defaultOption = [
 ];
 
 export let baseFormData = {
+	plain: {
+		label: "文本",
+		type: "plain",
+		value: "文本"
+	},
 	id: {
 		label: "id",
 		type: "hidden",
