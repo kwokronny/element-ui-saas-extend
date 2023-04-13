@@ -244,22 +244,22 @@ export default class ElFormAuto extends Vue {
 			}
 
 			// 防止因对select事件赋值导致覆写为select注册的事件
-			if (field.type == "select" && field.remote) {
+			if (field.type == "select" && field.props.remote) {
 				let self = this;
-				if (item.on) {
-					let originVisibleChangeEvent = item.on["visible-change"] || (() => { })
-					field.on["visible-change"] = function (visible) {
-						originVisibleChangeEvent(visible)
-						if (visible == false && field.options && field.options.length == 0) {
-							field.props.remoteMethod.call(item, "")
-						}
-					}
-					let originClearEvent = item.on["clear"] || (() => { })
-					field.on.clear = function () {
-						originClearEvent()
-						self.refreshOptions(name)
+				// if (item.on) {
+				let originVisibleChangeEvent = item.on && item.on["visible-change"] || (() => { })
+				field.on["visible-change"] = function (visible) {
+					originVisibleChangeEvent(visible)
+					if (visible == false && field.options && field.options.length == 0) {
+						field.props.remoteMethod.call(item, "")
 					}
 				}
+				let originClearEvent = item.on && item.on["clear"] || (() => { })
+				field.on['clear'] = function () {
+					originClearEvent()
+					self.refreshOptions(name)
+				}
+				// }
 			}
 
 			if (/select|radio|check|cascader/.test(item.type) && item.type != "timeselect" && item.options) {
@@ -473,7 +473,7 @@ export default class ElFormAuto extends Vue {
 
 	refreshOptions(fieldName: string, clearEcho: boolean = true) {
 		let field = this.fields[fieldName];
-		if (field && field.remoteMethod) {
+		if (field && field.props && field.props.remoteMethod) {
 			field.remoteParams.query = "refresh";
 			field.props.remoteMethod("");
 			clearEcho && (this.echoOptions[fieldName] = []);
@@ -517,7 +517,7 @@ export default class ElFormAuto extends Vue {
 
 	selectOptions(name: string): ElAutoOption[] {
 		let field = this.fields[name]
-		if (field && Array.isArray(field.options) && field.remote && Array.isArray(this.echoOptions[name])) {
+		if (field && Array.isArray(field.options) && field.props.remote && Array.isArray(this.echoOptions[name])) {
 			let echoOpitons = this.echoOptions[name] || []
 			return uniqBy(echoOpitons.concat(field.options), "value")
 		}

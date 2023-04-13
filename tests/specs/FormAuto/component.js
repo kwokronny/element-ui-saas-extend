@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { Random } from "mockjs";
-import { createTest, createVue, recordValid, triggerClick, triggerEvent, wait, waitImmediate } from "../../util";
-import { pickBy, cloneDeep, forEach, reduce } from "lodash-es";
+import { createVue, triggerEvent, wait, waitImmediate } from "../../util";
+import { pickBy, cloneDeep, forEach, reduce, keyBy } from "lodash-es";
 import { baseFormData } from "./mock-data";
 import dayjs from "dayjs";
 import userData from "../../mock/user.json";
@@ -12,7 +12,7 @@ export default () => {
 	it("type", async () => {
 		vm = createVue({
 			template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
-			data() { return { model: {}, form: baseFormData, }; },
+			data() { return { model: {}, form: baseFormData } },
 		}, true);
 		await waitImmediate()
 		for (let name in baseFormData) {
@@ -57,7 +57,7 @@ export default () => {
 		}
 	});
 
-	it("value", async () => {
+	it("value and method: reset", async () => {
 		let optionValue = [0, 3, 2, "选项2"]
 		let values = {
 			id: { value: 1 },
@@ -107,6 +107,42 @@ export default () => {
 				expect(field.value, `field [${name}] defaultValue shoulde ${values[name].value}, but now is ${field.value}`).to.equal(values[name].value)
 			}
 		}
+		vm.model = {
+			id: 2,
+			switch: true,
+			slider: 9,
+			text: Random.csentence(),
+			password: Random.word(),
+			cascader: 5,
+			radio: Random.pick(optionValue),
+			radiobutton: Random.pick(optionValue),
+			check: [Random.pick(optionValue)],
+			select: Random.pick(optionValue),
+			number: Random.integer(),
+			numberRange: [1, 3],
+			date: Random.date('yyyy-MM-dd'),
+			month: Random.date('yyyy-MM'),
+			months: [Random.date('yyyy-MM'), Random.date('yyyy-MM')],
+			year: Random.date('yyyy'),
+			years: [Random.date('yyyy'), Random.date('yyyy')],
+			week: Random.date('yyyyw01'),
+			dates: [Random.date('yyyy-MM-dd'), Random.date('yyyy-MM-dd')],
+			datetime: Random.datetime('yyyy-MM-dd HH:mm:ss'),
+			dateRange: [Random.now('yyyy-MM-01'), Random.now('yyyy-MM-05')],
+			monthRange: [Random.now('yyyy-01'), Random.now('yyyy-03')],
+			dateTimeRange: [Random.date('yyyy-MM-01 HH:mm:ss'), Random.date('yyyy-MM-08 HH:mm:ss')],
+			time: Random.time('HH:mm:ss'),
+			timeRange: [Random.time('01:mm:ss'), Random.time('08:mm:ss')],
+			rate: Random.integer(0, 5),
+			textarea: Random.cparagraph()
+		}
+		await waitImmediate()
+		vm.$refs.form.reset();
+		await waitImmediate()
+		expect(vm.model, `${vm.model}`).to.deep.equal(reduce(values, (model, field, name) => {
+			model[name] = field.value
+			return model
+		}, {}))
 		// console.log(vm.$refs.form.defaultValue)
 		// expect(recordValid((vm.$refs.form.field), values),vm.$refs.form.field).to.true
 	})
@@ -282,6 +318,12 @@ export default () => {
 		}, true);
 		await waitImmediate()
 		let fields = vm.$refs.form.fields;
+		let transOptions = [
+			{ label: '选项1', value: 0, disabled: false, icon: false, children: [] },
+			{ label: '带图标选项3', icon: 'el-icon-help', value: 3, disabled: false, children: [] },
+			{ label: '选项禁用2', value: 2, disabled: true, icon: false, children: [] },
+			{ label: '选项2', value: '选项2', disabled: false, icon: false, children: [] }
+		];
 		for (let name in form) {
 			if (name == 'cascader') {
 				expect(fields[name].options, `${name} options`).to.deep.equal([
@@ -289,14 +331,10 @@ export default () => {
 					{ "label": "节点2", "value": 2, "children": [{ "label": "节点6", "value": 6 }], "disabled": false, "icon": false },
 					{ "label": "节点3", "value": 3, "disabled": false, "icon": false, "children": [] }])
 			} else {
-				expect(fields[name].options, `${name} options ${fields[name].options}`).to.deep.equal([
-					{ label: '选项1', value: 0, disabled: false, icon: false, children: [] },
-					{ label: '带图标选项3', icon: 'el-icon-help', value: 3, disabled: false, children: [] },
-					{ label: '选项禁用2', value: 2, disabled: true, icon: false, children: [] },
-					{ label: '选项2', value: '选项2', disabled: false, icon: false, children: [] }
-				])
+				expect(fields[name].options, `${name} options ${fields[name].options}`).to.deep.equal(transOptions)
 			}
 		}
+		expect(vm.$refs.form.getOptions("radio")).to.deep.equal(keyBy(transOptions, "value"))
 	})
 
 	it("remote and loadScroll", async () => {
@@ -340,6 +378,62 @@ export default () => {
 				expect(fields[name].options, `scroll load: ${JSON.stringify(fields[name].options)}`).to.deep.equal([].concat(options, options.map(i => { return Object.assign({}, i, { value: i.value + 10 }) })))
 			}
 		}
+	})
+
+	it("select refreshOptions", async () => {
+		vm = createVue({
+			template: `<el-form-auto :data="form" v-model="model" ref="form"></el-form-auto>`,
+			data() {
+				return {
+					model: {},
+					form: {
+						username: {
+							type: "hidden",
+							value: ""
+						},
+						select: {
+							label: "选择",
+							type: "select",
+							remote: true,
+							options: this.getOptions
+						}
+					}
+				};
+			},
+			methods: {
+				async getOptions() {
+					let query = this.model.username || ""
+					return userData.reduce((record, item) => {
+						if (item.username.indexOf(query) > -1) {
+							record.push({
+								label: item.username,
+								value: item.id,
+							});
+						}
+						return record;
+					}, []);
+				},
+			}
+		}, true);
+		let options = userData.reduce((record, item) => {
+			record.push({
+				label: item.username,
+				value: item.id,
+				children: [],
+				icon: false,
+				disabled: false
+			});
+			return record;
+		}, [])
+		await waitImmediate()
+		let selectField = vm.$refs.form.fields.select;
+		expect(selectField.options, `init select remote fetch: ${JSON.stringify(selectField.options)}`).to.deep.equal(options);
+		let query = Random.pick(options)
+		vm.model.username = query.label
+		await waitImmediate()
+		vm.$refs.form.refreshOptions("select")
+		await waitImmediate()
+		expect(selectField.options[0].label, `select remote search: ${query.label}`).to.equal(query.label);
 	})
 
 	it("remote clear and visiable-change event", async () => {
@@ -390,7 +484,7 @@ export default () => {
 		let query = Random.pick(options)
 		selectComp.handleQueryChange(query.label);
 		await wait(350);
-		expect(selectField.options[0].label, `select remote search: ${query}`).to.equal(query.label);
+		expect(selectField.options[0].label, `select remote search: ${query.label}`).to.equal(query.label);
 		selectComp.hoverIndex = 0;
 		selectComp.selectOption(0);
 		selectComp.inputHovering = true;
@@ -449,5 +543,4 @@ export default () => {
 		vm.form.check.notAll = true;
 		await waitImmediate()
 	})
-
 }

@@ -82,4 +82,6 @@ export default () => {
 		expect($slot.textContent.trim()).to.equal(`input_${rtext}_text`);
 	});
 
+	// refreshOptions
+// 
 }
