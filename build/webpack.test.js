@@ -3,6 +3,7 @@ const VueLoaderPlugin = require("vue-loader/lib/plugin");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 
 const webpackConfig = {
+  devtool: 'inline-source-map', // 推荐使用inline-source-map
   mode: "development",
   entry: {
     app: ["./packages/index.ts"],
@@ -48,6 +49,9 @@ const webpackConfig = {
         test: /\.ts?$/,
         exclude: /node_modules/,
         use: [
+          {
+            loader: "istanbul-instrumenter-loader",
+          },
           {
             loader: "babel-loader",
             options: {
